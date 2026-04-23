@@ -1,0 +1,217 @@
+/* ============================================
+   SISTEMA GAZA-SYSCOM - ESTILOS PRINCIPALES
+   ============================================
+   
+   Importación ordenada de todos los módulos de estilos
+   
+   Orden de importación:
+   1. Variables globales
+   2. Estilos base y reset
+   3. Componentes reutilizables
+   4. Utilidades y helpers
+*/
+
+/* 1. Variables Globales */
+@import './variables.css';
+
+/* 2. Estilos Base */
+@import './base.css';
+
+/* 3. Componentes */
+@import './components.css';
+
+/* 4. Utilidades */
+@import './utilities.css';
+
+/* ============================================
+   ESTILOS ESPECÍFICOS DE BOOTSTRAP OVERRIDE
+   ============================================ */
+
+/* Bootstrap Cards Override */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+  font-weight: var(--font-weight-semibold);
+  border-bottom: none;
+}
+
+.card-body {
+  padding: var(--spacing-lg);
+}
+
+/* Bootstrap Buttons Override */
+.btn {
+  border-radius: var(--border-radius-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-base);
+  padding: var(--spacing-sm) var(--spacing-lg);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-success {
+  background: var(--success);
+  border: none;
+}
+
+.btn-success:hover {
+  background: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-warning {
+  background: var(--warning);
+  border: none;
+  color: var(--text-white);
+}
+
+.btn-danger {
+  background: var(--danger);
+  border: none;
+}
+
+/* Bootstrap Forms Override */
+.form-control,
+.form-select {
+  border-radius: var(--border-radius-sm);
+  border: 2px solid var(--border-color);
+  transition: all var(--transition-fast);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+}
+
+.form-label {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Bootstrap Badges Override */
+.badge {
+  border-radius: var(--border-radius-full);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Bootstrap Tables Override */
+.table {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.table thead th {
+  background: var(--bg-light);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 2px solid var(--border-color);
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.table tbody tr:hover {
+  background: var(--bg-light);
+}
+
+/* Bootstrap Navbar Override */
+.navbar {
+  box-shadow: var(--shadow-md);
+}
+
+.navbar-brand {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+}
+
+/* Bootstrap Modal Override */
+.modal-content {
+  border-radius: var(--border-radius-lg);
+  border: none;
+  box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  border-bottom: none;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color);
+}
+
+/* Bootstrap Alerts Override */
+.alert {
+  border-radius: var(--border-radius-sm);
+  border-left: 4px solid;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 991px) {
+  :root {
+    --font-size-3xl: 1.75rem;
+    --font-size-2xl: 1.375rem;
+    --spacing-xl: 1.5rem;
+    --spacing-2xl: 2.5rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  :root {
+    --font-size-3xl: 1.5rem;
+    --font-size-2xl: 1.25rem;
+    --spacing-xl: 1.25rem;
+    --spacing-2xl: 2rem;
+  }
+  
+  .page-header-custom {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}

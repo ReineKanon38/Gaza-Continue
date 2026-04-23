@@ -1,0 +1,99 @@
+/* ============================================
+   VARIABLES GLOBALES - SISTEMA GAZA-SYSCOM
+   ============================================ */
+
+:root {
+  /* Colores Primarios - Identidad de Marca (Mejorado con Mayor Contraste) */
+  --primary-dark: #0f1929;
+  --primary-blue: #1565c0;
+  --primary-orange: #ff6b35;
+  --primary-orange-hover: #e85a24;
+  
+  /* Colores Secundarios - Acentos Premium */
+  --secondary-accent: #00bcd4;
+  --secondary-accent-dark: #00838f;
+  
+  /* Colores de Fondo */
+  --bg-light: #f8f9fa;
+  --bg-lighter: #e3f2fd;
+  --bg-white: #ffffff;
+  --bg-card: #ffffff;
+  --bg-dark: #0f1929;
+  
+  /* Colores de Texto */
+  --text-primary: #0f1929;
+  --text-secondary: #546e7a;
+  --text-muted: #90a4ae;
+  --text-white: #ffffff;
+  --text-light: #eceff1;
+  
+  /* Colores de Estado */
+  --success: #2e7d32;
+  --success-light: #e8f5e9;
+  --warning: #f57f17;
+  --warning-light: #fff3e0;
+  --danger: #c62828;
+  --danger-light: #ffebee;
+  --info: #0277bd;
+  --info-light: #e1f5fe;
+  
+  /* Bordes y Sombras */
+  --border-radius: 10px;
+  --border-radius-sm: 8px;
+  --border-radius-lg: 15px;
+  --border-radius-full: 50px;
+  
+  --border-color: #cfd8dc;
+  --border-color-dark: #90a4ae;
+  
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.18);
+  --shadow-xl: 0 10px 28px rgba(0, 0, 0, 0.22);
+  
+  /* Gradientes Mejorados */
+  --gradient-primary: linear-gradient(135deg, #0f1929 0%, #1565c0 100%);
+  --gradient-orange: linear-gradient(135deg, #ff6b35 0%, #e85a24 100%);
+  --gradient-cyan: linear-gradient(135deg, #00bcd4 0%, #00838f 100%);
+  --gradient-bg: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
+  --gradient-card: linear-gradient(90deg, #fff3e0 0%, #ffffff 100%);
+  --gradient-dark: linear-gradient(135deg, #0f1929 0%, #1a3a52 100%);
+  
+  /* Espaciado */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Tipografía */
+  --font-family: 'Poppins', sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  /* Transiciones */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Z-index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}

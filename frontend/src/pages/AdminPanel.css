@@ -1,0 +1,109 @@
+/* ============================================
+   PANEL DE ADMINISTRADOR - ESTILOS ESPECÍFICOS
+   ============================================ */
+
+.admin-panel {
+  min-height: 100vh;
+  background: var(--gradient-bg);
+}
+
+.admin-header {
+  background: var(--bg-white);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-header h2 {
+  margin: 0;
+  color: var(--primary-dark);
+  font-weight: var(--font-weight-bold);
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-sidebar .nav-link {
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--text-secondary);
+  transition: all var(--transition-base);
+  border-left: 3px solid transparent;
+  display: flex;
+  align-items: center;
+}
+
+.admin-sidebar .nav-link:hover {
+  background: var(--bg-light);
+  color: var(--primary-orange);
+  border-left-color: var(--primary-orange);
+}
+
+.admin-sidebar .nav-link.active {
+  background: var(--gradient-card);
+  color: var(--primary-orange);
+  border-left-color: var(--primary-orange);
+  font-weight: var(--font-weight-semibold);
+}
+
+.stat-card {
+  border-radius: var(--border-radius);
+  border: none;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-card h3 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin: var(--spacing-sm) 0;
+  color: var(--primary-dark);
+}
+
+.stat-card p {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.admin-panel .card {
+  border-radius: var(--border-radius);
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+.admin-panel .card-header {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.admin-panel .table {
+  margin-bottom: 0;
+}
+
+.admin-panel .table thead th {
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-panel .table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.admin-panel .table tbody tr:hover {
+  background: var(--bg-light);
+}

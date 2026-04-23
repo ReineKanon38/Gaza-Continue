@@ -1,0 +1,267 @@
+/* ============================================
+   COMPONENTES REUTILIZABLES - ESTILOS
+   ============================================ */
+
+/* Cards */
+.card-custom {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+  overflow: hidden;
+}
+
+.card-custom:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--primary-orange);
+}
+
+.card-custom-header {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(15, 25, 41, 0.3);
+}
+
+/* Botones */
+.btn-primary-custom {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-sm);
+  font-weight: var(--font-weight-semibold);
+  border: 2px solid transparent;
+  transition: all var(--transition-base);
+  letter-spacing: 0.5px;
+}
+
+.btn-primary-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-orange);
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+}
+
+.btn-primary-custom:active {
+  transform: translateY(0);
+}
+
+.btn-orange-custom {
+  background: var(--gradient-orange);
+  color: var(--text-white);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-sm);
+  font-weight: var(--font-weight-bold);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all var(--transition-base);
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.btn-orange-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 107, 53, 0.4);
+  background: linear-gradient(135deg, #ff5722 0%, #e85a24 100%);
+}
+
+.btn-orange-custom:active {
+  transform: translateY(0);
+}
+
+/* Botón Secundario con Acento Cyan */
+.btn-secondary-custom {
+  background: var(--gradient-cyan);
+  color: var(--text-white);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-sm);
+  font-weight: var(--font-weight-semibold);
+  border: 2px solid transparent;
+  transition: all var(--transition-base);
+  letter-spacing: 0.5px;
+}
+
+.btn-secondary-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 188, 212, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Badges */
+.badge-custom {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.badge-success {
+  background: var(--success);
+  color: var(--text-white);
+  box-shadow: 0 2px 6px rgba(46, 125, 50, 0.3);
+}
+
+.badge-warning {
+  background: var(--warning);
+  color: var(--text-white);
+  box-shadow: 0 2px 6px rgba(245, 127, 23, 0.3);
+}
+
+.badge-danger {
+  background: var(--danger);
+  color: var(--text-white);
+  box-shadow: 0 2px 6px rgba(198, 40, 40, 0.3);
+}
+
+.badge-info {
+  background: var(--info);
+  color: var(--text-white);
+  box-shadow: 0 2px 6px rgba(2, 119, 189, 0.3);
+}
+
+/* Inputs personalizados */
+.input-custom {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--border-color-dark);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+  background: var(--bg-white);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-normal);
+}
+
+.input-custom:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+  outline: none;
+}
+
+.input-custom::placeholder {
+  color: var(--text-muted);
+}
+
+.input-custom:disabled {
+  background: var(--bg-light);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Contenedor de página */
+.page-container {
+  min-height: 100vh;
+  background: var(--gradient-bg);
+  padding: var(--spacing-xl) 0;
+}
+
+/* Header de página */
+.page-header-custom {
+  background: var(--bg-white);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-xl);
+  border-left: 5px solid var(--primary-blue);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.page-header-icon {
+  font-size: var(--font-size-3xl);
+  color: var(--primary-blue);
+}
+
+.page-header-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Skeleton loaders */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: var(--border-radius-sm);
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Alert boxes */
+.alert-custom {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  border-left: 4px solid;
+  margin-bottom: var(--spacing-md);
+}
+
+.alert-success {
+  background: var(--success-light);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.alert-warning {
+  background: var(--warning-light);
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.alert-danger {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.alert-info {
+  background: var(--info-light);
+  border-color: var(--info);
+  color: var(--info);
+}
+
+/* Dividers */
+.divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: var(--spacing-xl) 0;
+}
+
+/* Empty states */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  background: var(--bg-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state-text {
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+}

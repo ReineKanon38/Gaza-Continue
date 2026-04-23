@@ -1,0 +1,453 @@
+/* ==================================================
+   1. NAVBAR – FORMAL, CORPORATIVA
+   ================================================== */
+.navbar {
+    background: #020617 !important;
+    border-bottom: 2px solid #00d4ff;
+    padding: 0.6rem 2rem !important;
+    z-index: 3000;
+}
+
+.navbar-nav .nav-link,
+.navbar-nav .nav-item,
+.navbar-nav span,
+.navbar-nav svg,
+.dropdown-toggle {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ==================================================
+   2. HERO / BANNER
+   ================================================== */
+.promo-banner-container {
+    padding: 1.5rem;
+}
+
+.promo-banner-wrapper {
+    position: relative;
+    height: 400px;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    align-items: center;
+    padding: 0 5%;
+}
+
+.banner-bg-static {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000');
+    background-size: cover;
+    background-position: center;
+}
+
+.banner-overlay-tech {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(2, 6, 23, 0.92) 0%,
+        rgba(2, 6, 23, 0.35) 100%
+    );
+}
+
+.banner-content-premium {
+    position: relative;
+    z-index: 5;
+    max-width: 720px;
+    color: #ffffff;
+}
+
+.main-headline {
+    font-weight: 800;
+    font-size: 3.2rem;
+    line-height: 1.1;
+    margin-bottom: 1.4rem;
+}
+
+.text-cyan-bright {
+    color: #00d4ff;
+}
+
+.explore-btn {
+    background: #ffffff !important;
+    color: #020617 !important;
+    border-radius: 999px;
+    padding: 0.75rem 2.4rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.explore-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(255, 255, 255, 0.25);
+}
+
+/* ==================================================
+   3. ENCABEZADO DE CATÁLOGO – LIMPIO Y PROFESIONAL
+   ================================================== */
+.premium-page-header {
+    border-radius: 18px;
+    padding: 1.8rem 2.2rem;
+    margin: 2.2rem 0 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border: 1px solid rgba(229, 231, 235, 0.3);
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.06);
+    transition: all 0.3s ease;
+    min-height: 250px;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: rgba(2, 6, 23, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
+
+.premium-page-header h2,
+.premium-page-header .fw-bold {
+    font-size: 1.9rem !important;
+    font-weight: 800 !important;
+    margin: 0;
+    letter-spacing: -0.4px;
+    position: relative;
+    z-index: 2;
+}
+
+.premium-page-header p,
+.premium-page-header .text-muted {
+    font-size: 0.95rem !important;
+    font-weight: 500;
+    margin: 4px 0 0;
+    position: relative;
+    z-index: 2;
+}
+
+.premium-page-header p::before {
+    content: "CATÁLOGO";
+    background: rgba(241, 245, 249, 0.9);
+    color: #020617;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-right: 8px;
+    letter-spacing: 0.8px;
+}
+
+.badge-premium-tag {
+    background: rgba(0, 212, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+    color: #020617 !important;
+    font-weight: 700 !important;
+    padding: 0.4rem 0.8rem !important;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 2;
+}
+
+/* ==================================================
+   4. GRID DE CATEGORÍAS – PREMIUM PROFESIONAL
+   ================================================== */
+.category-scroll-wrapper {
+    display: grid;
+    /* Ajuste de minmax para que las 11 categorías quepan mejor */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    padding: 1.5rem 0 3rem;
+}
+
+.category-glass-card {
+    position: relative;
+    height: 140px; /* Altura ajustada para las nuevas categorías */
+    background: linear-gradient(
+        180deg,
+        #ffffff 0%,
+        #f8fafc 100%
+    );
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.05);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 10px; /* Padding interno para que el texto no toque los bordes */
+}
+
+.category-glass-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    width: 60%;
+    height: 3px;
+    background: transparent;
+    border-radius: 999px;
+    transition: background 0.25s ease;
+}
+
+.category-glass-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(2, 6, 23, 0.14);
+}
+
+.category-glass-card:hover::after {
+    background: #00d4ff;
+}
+
+.cat-icon-box {
+    font-size: 2.2rem; /* Tamaño de icono optimizado */
+    margin-bottom: 8px;
+    color: #020617;
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+.category-glass-card:hover .cat-icon-box {
+    color: #00d4ff;
+    transform: scale(1.05);
+}
+
+.category-glass-card span {
+    color: #020617;
+    font-weight: 700;
+    font-size: 0.68rem; /* Fuente ligeramente más pequeña para nombres largos */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    max-width: 90%;
+    line-height: 1.2;
+}
+
+.category-glass-card.active {
+    border: 2px solid #00d4ff;
+    background: linear-gradient(
+        180deg,
+        #ffffff 0%,
+        #eefaff 100%
+    );
+    box-shadow: 0 16px 36px rgba(0, 212, 255, 0.25);
+}
+
+.category-glass-card.active::after {
+    background: #00d4ff;
+}
+
+.category-glass-card.active .cat-icon-box {
+    color: #00d4ff;
+}
+
+.category-glass-card.active span {
+    font-weight: 800;
+}
+
+/* ==================================================
+   5. DROPDOWN – ICONOS NEGROS FORZADOS
+   ================================================== */
+.dropdown-menu {
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.15);
+    padding: 0.8rem;
+}
+
+.dropdown-menu .dropdown-item {
+    font-weight: 700;
+    color: #020617 !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background: #f1f5f9;
+}
+
+/* ICONOS NEGRO ABSOLUTO */
+.dropdown-menu .dropdown-item i,
+.dropdown-menu .dropdown-item svg {
+    color: #000000 !important;
+    fill: #000000 !important;
+    filter: brightness(0) !important;
+}
+
+.dropdown-menu .dropdown-item:hover i,
+.dropdown-menu .dropdown-item:hover svg {
+    color: #000000 !important;
+    fill: #000000 !important;
+}
+
+/* ==================================================
+   6. FILTROS Y BUSCADOR (ESTILO MODERNO)
+   ================================================== */
+.filter-row-custom {
+    background: #ffffff;
+    border-radius: 15px;
+    border: 1px solid #e5e7eb;
+}
+
+.search-group-modern {
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.search-group-modern:focus-within {
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+/* ==================================================
+   MODAL DE CATEGORÍA CON IMAGEN
+   ================================================== */
+.category-image-modal .modal-content {
+    background: transparent;
+    border: none;
+    border-radius: 1.5rem;
+    overflow: hidden;
+}
+
+.category-modal-content {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    background: #000;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.category-image-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.category-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.category-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.9) 100%
+    );
+    padding: 3rem 2rem 2rem;
+    color: #ffffff;
+    text-align: center;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.category-info-overlay h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.3px;
+    color: #00d4ff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.category-info-overlay p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.btn-close-modal {
+    background: #00d4ff !important;
+    color: #020617 !important;
+    border: none;
+    border-radius: 999px;
+    padding: 0.7rem 2.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-close-modal:hover {
+    background: #00b8d4 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+}
+
+.category-image-modal .modal-header .btn-close {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.category-image-modal .modal-header .btn-close:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive para mobile */
+@media (max-width: 768px) {
+    .category-modal-content {
+        min-height: 300px;
+    }
+
+    .category-info-overlay {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .category-info-overlay h2 {
+        font-size: 1.6rem;
+    }
+
+    .category-info-overlay p {
+        font-size: 0.9rem;
+    }
+
+    .btn-close-modal {
+        padding: 0.6rem 1.8rem;
+        font-size: 0.8rem;
+    }
+}

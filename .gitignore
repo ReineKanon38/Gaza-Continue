@@ -1,0 +1,4 @@
+# Avoid generated dependency artifacts in tracked dependency folders
+backend/node_modules/.vite/
+backend/node_modules/cors/CONTRIBUTING.md
+backend/node_modules/cors/HISTORY.md

@@ -1,0 +1,82 @@
+.super-page-shell {
+  min-height: 100vh;
+  background: linear-gradient(145deg, #f5f8fe 0%, #eef4ff 100%);
+}
+
+.super-hero {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(255, 107, 53, 0.2), transparent 38%),
+    linear-gradient(135deg, #0f172a 0%, #1f4f88 100%);
+  padding: 2.2rem 0;
+}
+
+.super-hero-content {
+  color: #e2e8f0;
+}
+
+.super-tag {
+  background: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-bottom: 0.8rem;
+}
+
+.super-hero h1 {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+  color: #ffffff;
+}
+
+.super-hero p {
+  max-width: 740px;
+  margin-top: 0.8rem;
+  margin-bottom: 0.5rem;
+  color: #cdd9ea;
+}
+
+.super-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+.super-kpis span {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.super-filters {
+  background: #ffffff;
+  border: 1px solid #d8e1ef;
+  border-radius: 12px;
+  padding: 0.85rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.super-empty {
+  border: 1px dashed #bdcce0;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  color: #3a5168;
+  background: #f9fbff;
+}
+
+.load-more-btn {
+  background: linear-gradient(135deg, #0f172a 0%, #1565c0 100%) !important;
+  border: none !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  padding: 0.7rem 1.4rem !important;
+}
+
+@media (max-width: 991px) {
+  .super-hero {
+    padding: 1.7rem 0;
+  }
+}

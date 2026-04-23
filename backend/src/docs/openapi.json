@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SYSCOM-GAZA API",
+    "version": "1.0.0",
+    "description": "API básica para autenticación, productos y órdenes"
+  },
+  "servers": [
+    { "url": "http://localhost:5000/api" }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Registrar usuario",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object","properties": {"name": {"type": "string"},"email": {"type": "string"},"password": {"type": "string"}},"required": ["name","email","password"]}}}},
+        "responses": {"201": {"description": "Usuario creado"}, "400": {"description": "Validación fallida"}}
+      }
+    },
+    "/auth/login": {
+      "post": {"summary": "Login", "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object","properties": {"email": {"type": "string"},"password": {"type": "string"}},"required": ["email","password"]}}}},"responses": {"200": {"description": "OK"},"401": {"description": "Credenciales inválidas"}}}
+    },
+    "/products": {
+      "get": {"summary": "Listar productos", "parameters": [
+        {"in": "query","name": "search","schema": {"type": "string"}},
+        {"in": "query","name": "category","schema": {"type": "string"}}
+      ], "responses": {"200": {"description": "Lista de productos"}}},
+      "post": {"summary": "Crear producto","security": [{"bearerAuth": []}],"requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object","properties": {"name": {"type": "string"},"price": {"type": "number"}},"required": ["name","price"]}}}},"responses": {"201": {"description": "Creado"},"400": {"description": "Error validación"}}}
+    },
+    "/orders": {
+      "get": {"summary": "Órdenes del usuario","security": [{"bearerAuth": []}],"responses": {"200": {"description": "OK"}}},
+      "post": {"summary": "Crear orden","security": [{"bearerAuth": []}],"requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object","properties": {"products": {"type": "array","items": {"type": "object","properties": {"productId": {"type": "string"},"quantity": {"type": "integer"}},"required": ["productId","quantity"]}},"shippingAddress": {"type": "string"}},"required": ["products"]}}}},"responses": {"201": {"description": "Creada"},"400": {"description": "Validación"}}}
+    },
+    "/orders/{id}/status": {
+      "put": {"summary": "Actualizar estado orden","security": [{"bearerAuth": []}],"parameters": [{"in": "path","name": "id","required": true,"schema": {"type": "string"}}],"requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object","properties": {"status": {"type": "string"}},"required": ["status"]}}}},"responses": {"200": {"description": "Actualizada"},"403": {"description": "Sin permiso"}}}
+    },
+    "/orders/admin/all": {
+      "get": {"summary": "Todas las órdenes (admin)","security": [{"bearerAuth": []}],"responses": {"200": {"description": "OK"},"403": {"description": "Sin permiso"}}}
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {"type": "http","scheme": "bearer","bearerFormat": "JWT"}
+    }
+  },
+  "security": []
+}
