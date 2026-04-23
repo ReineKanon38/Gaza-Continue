@@ -24,7 +24,7 @@ async function requestJson(url, options = {}) {
 
 export const paymentService = {
   createPaymentSession: async ({ amount, items, orderId, provider }) => {
-    return requestJson('/api/payment/create-payment-intent', {
+    return requestJson('/api/payment/create-session', {
       method: 'POST',
       body: JSON.stringify({ amount, items, orderId, provider }),
     });
@@ -41,14 +41,5 @@ export const paymentService = {
     return requestJson('/api/payment/methods', {
       method: 'GET',
     });
-  },
-
-  // Backward compatibility wrappers
-  createPaymentIntent: async (amount, items, orderId, provider) => {
-    return paymentService.createPaymentSession({ amount, items, orderId, provider });
-  },
-
-  confirmPayment: async (paymentSessionId, provider) => {
-    return paymentService.confirmPaymentSession({ paymentSessionId, provider });
   }
 };

@@ -1,10 +1,10 @@
 import express from 'express';
-import { createPaymentIntent, confirmPayment, getPaymentMethods } from '../controllers/paymentController.js';
+import { createPaymentSession, confirmPayment, getPaymentMethods } from '../controllers/paymentController.js';
 
 const router = express.Router();
 
 // Rutas de pago (acceso público para checkout)
-router.post('/create-payment-intent', createPaymentIntent);
+router.post('/create-session', createPaymentSession);
 router.post('/confirm-payment', confirmPayment);
 router.get('/methods', getPaymentMethods);
 

@@ -29,13 +29,13 @@ const getAllowedProviders = () => PAYMENT_METHODS.map((method) => method.provide
 
 const buildPaymentReference = () => `PAY-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
-export const createPaymentIntent = async (req, res) => {
+export const createPaymentSession = async (req, res) => {
   try {
     const { amount, currency = 'mxn', orderId, items, provider } = req.body;
     const selectedProvider = String(provider || '').toLowerCase();
     const allowedProviders = getAllowedProviders();
 
-    logger.debug('[payment] createPaymentIntent payload', {
+    logger.debug('[payment] createPaymentSession payload', {
       amount,
       currency,
       orderId,
@@ -77,7 +77,7 @@ export const createPaymentIntent = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Error creando payment intent', { message: error.message });
+    logger.error('Error creando sesion de pago', { message: error.message });
     return sendError(res, {
       status: 500,
       message: 'Error al procesar el pago',

@@ -42,6 +42,5 @@ La documentacion historica (planes, reportes, auditorias y fases anteriores) se 
 
 ## 5) Estado funcional actual
 
-- Flujo Stripe descontinuado.
 - Flujo bancario con validacion manual habilitado.
 - Panel admin preparado para aprobar/rechazar pago y continuar orden.
