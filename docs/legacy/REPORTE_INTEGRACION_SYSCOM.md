@@ -17,8 +17,8 @@ Configurar e integrar la API de SYSCOM para consultar productos desde el catálo
 - **Variables agregadas:**
   ```env
   SYSCOM_API_URL=https://developers.syscom.mx/api/v1
-  SYSCOM_CLIENT_ID=D7tZm3JSQdIjidzABsITb0iN78e8Qm06
-  SYSCOM_API_KEY=EP2ZGOC0TYz5gHtuspxmY7E9IXa5zDqMOWbqEeJh
+  SYSCOM_CLIENT_ID=<CONFIGURAR_EN_ENTORNO_LOCAL>
+  SYSCOM_API_KEY=<CONFIGURAR_EN_ENTORNO_LOCAL>
   ```
 
 ### 2. **Mejora del Cliente SYSCOM** 
@@ -59,9 +59,9 @@ await import('./server.js');
 ### 4. **Preparación de Usuarios de Prueba**
 - **Script creado:** `backend/scripts/updatePasswords.js`
 - **Usuarios actualizados:**
-  - ✅ Rotsen Leon (rotsenleon38@gmail.com) → `Rotsen2026!`
-  - ✅ Wilberth (wilberth@syscom-gaza.com) → `Wilberth2026!`
-  - ✅ Brandon (brandon@syscom-gaza.com) → `Brandon2026!`
+  - ✅ Rotsen Leon (rotsenleon38@gmail.com) → Password actualizado (oculto)
+  - ✅ Wilberth (wilberth@syscom-gaza.com) → Password actualizado (oculto)
+  - ✅ Brandon (brandon@syscom-gaza.com) → Password actualizado (oculto)
 - **Tipo:** Todos admin
 - **Total en DB:** 15 usuarios (6 admins)
 
@@ -168,7 +168,7 @@ cd backend
 # Login
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"rotsenleon38@gmail.com","password":"Rotsen2026!"}'
+  -d '{"email":"rotsenleon38@gmail.com","password":"TU_PASSWORD"}'
 
 # Buscar en SYSCOM (con token del login)
 curl http://localhost:5000/api/syscom/search?query=mouse \
@@ -196,8 +196,8 @@ Ver detalles en `SYSCOM_TESTING_GUIDE.md`
 
 ## 🔐 Credenciales Configuradas
 
-- **SYSCOM_CLIENT_ID:** D7tZm3JSQdIjidzABsITb0iN78e8Qm06
-- **SYSCOM_API_KEY:** EP2ZGOC0TYz5gHtuspxmY7E9IXa5zDqMOWbqEeJh
+- **SYSCOM_CLIENT_ID:** CONFIGURADO VIA VARIABLES DE ENTORNO
+- **SYSCOM_API_KEY:** CONFIGURADO VIA VARIABLES DE ENTORNO
 - **Base URL:** https://developers.syscom.mx/api/v1
 
 ---

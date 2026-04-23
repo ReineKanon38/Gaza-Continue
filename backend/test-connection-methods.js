@@ -3,9 +3,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const password = '06qILX4lnvCzMJOI';
-const username = 'rotsenleon38_db_user';
-const database = 'syscom-gaza';
+const password = process.env.MONGO_TEST_PASSWORD;
+const username = process.env.MONGO_TEST_USERNAME;
+const database = process.env.MONGO_TEST_DATABASE || 'syscom-gaza';
+
+if (!username || !password) {
+    console.error('❌ Faltan variables MONGO_TEST_USERNAME y MONGO_TEST_PASSWORD en tu entorno local.');
+    process.exit(1);
+}
 
 const connectionStrings = [
     {
@@ -56,7 +61,7 @@ async function runTests() {
         if (success) {
             console.log(`\n✅ ¡SOLUCIÓN ENCONTRADA!`);
             console.log(`\n📝 Actualiza tu .env con esta URI:`);
-            console.log(`MONGODB_URI=${config.uri}`);
+            console.log(`MONGODB_URI=${config.uri.replace(password, '<PASSWORD>')}`);
             process.exit(0);
         }
         await new Promise(resolve => setTimeout(resolve, 1000));

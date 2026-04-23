@@ -5,15 +5,15 @@
 **Backend**: ✅ Corriendo en http://localhost:5000  
 **Frontend**: ✅ Corriendo en http://localhost:5173  
 **SYSCOM**: ✅ Credenciales configuradas  
-**Usuario Admin**: ✅ Creado (`admin@syscom.com` / `Admin123!`)
+**Usuario Admin**: ✅ Creado (usar credenciales locales de desarrollo)
 
 ---
 
 ## 🔐 Credenciales Configuradas
 
 ```dotenv
-SYSCOM_CLIENT_ID=D7tZm3JSQdIjidzABsITb0iN78e8Qm06
-SYSCOM_API_KEY=EP2ZGOC0TYz5gHtuspxmY7E9IXa5zDqMOWbqEeJh
+SYSCOM_CLIENT_ID=<CONFIGURAR_EN_ENTORNO_LOCAL>
+SYSCOM_API_KEY=<CONFIGURAR_EN_ENTORNO_LOCAL>
 ```
 
 ---
@@ -24,8 +24,8 @@ SYSCOM_API_KEY=EP2ZGOC0TYz5gHtuspxmY7E9IXa5zDqMOWbqEeJh
 
 1. **Abrir** http://localhost:5173
 2. **Login** con:
-   - Email: `admin@syscom.com`
-   - Password: `Admin123!`
+  - Email: tu email admin local
+  - Password: tu password admin local
 3. **Navegar** al panel de administración
 4. **Buscar** productos (si hay una sección de SYSCOM)
 
@@ -41,8 +41,8 @@ POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@syscom.com",
-  "password": "Admin123!"
+  "email": "TU_EMAIL_ADMIN",
+  "password": "TU_PASSWORD_ADMIN"
 }
 ```
 
@@ -53,7 +53,7 @@ Content-Type: application/json
   "user": {
     "id": "...",
     "name": "Admin SYSCOM",
-    "email": "admin@syscom.com",
+    "email": "TU_EMAIL_ADMIN",
     "role": "admin"
   }
 }
@@ -87,7 +87,7 @@ Authorization: Bearer TU_TOKEN_AQUI
 # 1. Login
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@syscom.com","password":"Admin123!"}'
+  -d '{"email":"TU_EMAIL_ADMIN","password":"TU_PASSWORD_ADMIN"}'
 
 # 2. Copiar el token de la respuesta
 
@@ -230,6 +230,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 - Usar la cuenta `admin@syscom.com` que ya tiene rol admin
 - O actualizar tu usuario a admin en la BD
 
+Nota: evita documentar passwords reales en repositorios.
+
 ---
 
 ## 📊 Estado de Implementación
@@ -239,7 +241,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 | Backend SYSCOM Client | ✅ | OAuth2 + fallback implementado |
 | Autenticación JWT | ✅ | Login/register funcionando |
 | Endpoints SYSCOM | ✅ | 8 endpoints disponibles |
-| Usuario Admin | ✅ | admin@syscom.com creado |
+| Usuario Admin | ✅ | cuenta admin local creada |
 | Credenciales SYSCOM | ✅ | Configuradas en .env |
 | Frontend | ✅ | Corriendo en localhost:5173 |
 | Documentación | ✅ | Este archivo |
