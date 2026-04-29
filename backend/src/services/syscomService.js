@@ -2,7 +2,12 @@ import syscomClient from '../utils/syscomClient.js';
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import SyscomHealthSnapshot from '../models/SyscomHealthSnapshot.js';
-import { mapSyscomCategoryToPlatform, PLATFORM_CATEGORIES } from '../config/categoryMapping.js';
+import {
+  mapSyscomCategoryToPlatform,
+  PLATFORM_CATEGORIES,
+  isBlockedPlatformCategory,
+  isBlockedSyscomCategoryName
+} from '../config/categoryMapping.js';
 import { convertUSDtoMXN } from '../config/currency.js';
 import { logger } from '../utils/logger.js';
 
@@ -240,6 +245,38 @@ class SyscomService {
     return 0;
   }
 
+  getPrimarySyscomCategoryName(syscomProduct = {}) {
+    if (Array.isArray(syscomProduct.categorias) && syscomProduct.categorias.length > 0) {
+      const specificCategory =
+        syscomProduct.categorias.find((cat) => cat?.nivel === 3) ||
+        syscomProduct.categorias.find((cat) => cat?.nivel === 2) ||
+        syscomProduct.categorias[0];
+
+      if (typeof specificCategory === 'string') {
+        return specificCategory;
+      }
+
+      return specificCategory?.nombre || specificCategory?.name || null;
+    }
+
+    return syscomProduct.categoria || syscomProduct.category || null;
+  }
+
+  isAllowedSyscomProduct(syscomProduct = {}) {
+    const rawCategoryName = this.getPrimarySyscomCategoryName(syscomProduct);
+
+    if (isBlockedSyscomCategoryName(rawCategoryName)) {
+      return false;
+    }
+
+    const mappedCategory = mapSyscomCategoryToPlatform(rawCategoryName);
+    if (!mappedCategory) {
+      return false;
+    }
+
+    return !isBlockedPlatformCategory(mappedCategory);
+  }
+
   /**
    * Transformar producto de SYSCOM a nuestro schema
    */
@@ -251,16 +288,7 @@ class SyscomService {
     const priceMXN = convertUSDtoMXN(priceUSD);
 
     // Obtener categoría(s) de SYSCOM
-    let syscomCategoryName = null;
-    if (syscomProduct.categorias && syscomProduct.categorias.length > 0) {
-      // Usar la categoría de nivel más bajo (más específica)
-      const specificCategory = syscomProduct.categorias.find(cat => cat.nivel === 3) || 
-                              syscomProduct.categorias.find(cat => cat.nivel === 2) ||
-                              syscomProduct.categorias[0];
-      syscomCategoryName = specificCategory.nombre || specificCategory;
-    } else if (syscomProduct.categoria) {
-      syscomCategoryName = syscomProduct.categoria;
-    }
+    const syscomCategoryName = this.getPrimarySyscomCategoryName(syscomProduct);
 
     // Mapear a categoría de la plataforma
     const platformCategory = mapSyscomCategoryToPlatform(syscomCategoryName);
@@ -349,10 +377,23 @@ class SyscomService {
     }
 
     const pagination = result.pagination || result.data?.paginas || {};
+    const resultProducts = Array.isArray(result.data?.productos)
+      ? result.data.productos
+      : (Array.isArray(result.data) ? result.data : []);
+    const filteredProducts = resultProducts.filter((product) => this.isAllowedSyscomProduct(product));
+
+    const filteredData = Array.isArray(result.data)
+      ? filteredProducts
+      : {
+          ...(result.data || {}),
+          ...(Array.isArray(result.data?.productos) ? { productos: filteredProducts } : {})
+        };
+
+    const inferredTotal = filteredProducts.length;
     const responsePayload = {
       success: true,
-      data: result.data,
-      total: Number(pagination.total || 0),
+      data: filteredData,
+      total: Number(pagination.total || pagination.total_registros || inferredTotal || 0),
       page: Number(pagination.pagina_actual || searchParams?.page || searchParams?.pagina || 1),
       pagination,
       source: 'syscom'
@@ -371,7 +412,7 @@ class SyscomService {
 
   /**
    * Sincronizar/importar producto desde SYSCOM
-   * Solo sincroniza productos que pertenezcan a las 8 categorías configuradas
+   * Solo sincroniza productos que pertenezcan a categorías permitidas.
    */
   async syncProduct(syscomProductId) {
     if (!syscomClient.isConfigured()) {
@@ -390,10 +431,12 @@ class SyscomService {
     // Transformar el producto (incluye mapeo de categoría)
     const productData = this.transformSyscomProduct(syscomProduct);
 
-    // Validar que el producto pertenezca a una de las 8 categorías válidas
-    const validCategories = Object.values(PLATFORM_CATEGORIES);
-    if (!validCategories.includes(productData.category)) {
-      throw new Error(`Producto rechazado: categoría "${productData.category}" no está en las 8 categorías configuradas`);
+    // Validar que el producto pertenezca a una categoría permitida.
+    const validCategories = Object.values(PLATFORM_CATEGORIES)
+      .filter((category) => !isBlockedPlatformCategory(category));
+
+    if (!productData.category || !validCategories.includes(productData.category)) {
+      throw new Error(`Producto rechazado: categoría no permitida (${productData.category || 'sin-mapeo'})`);
     }
 
     // Verificar si ya existe en nuestra DB
@@ -672,9 +715,21 @@ class SyscomService {
       };
     }
 
+    const baseProducts = Array.isArray(result.data?.productos)
+      ? result.data.productos
+      : (Array.isArray(result.data) ? result.data : []);
+    const filteredProducts = baseProducts.filter((product) => this.isAllowedSyscomProduct(product));
+
+    const filteredData = Array.isArray(result.data)
+      ? filteredProducts
+      : {
+          ...(result.data || {}),
+          ...(Array.isArray(result.data?.productos) ? { productos: filteredProducts } : {})
+        };
+
     const responsePayload = {
       success: true,
-      data: result.data,
+      data: filteredData,
       pagination: result.pagination,
       source: 'syscom'
     };
@@ -773,14 +828,25 @@ class SyscomService {
     }
 
     const result = await syscomClient.getCategories();
-    this.trackMetric('categories', {
-      success: !!result.success,
-      source: 'syscom',
-      latencyMs: Date.now() - startTime,
-      error: result.error
+    const sourceCategories = Array.isArray(result?.data) ? result.data : [];
+    const filteredCategories = sourceCategories.filter((categoryItem) => {
+      const categoryName = categoryItem?.nombre || categoryItem?.name || categoryItem;
+      return !isBlockedSyscomCategoryName(categoryName);
     });
 
-    return result;
+    const response = {
+      ...result,
+      data: Array.isArray(result?.data) ? filteredCategories : result?.data
+    };
+
+    this.trackMetric('categories', {
+      success: !!response.success,
+      source: 'syscom',
+      latencyMs: Date.now() - startTime,
+      error: response.error
+    });
+
+    return response;
   }
 
   /**
@@ -943,9 +1009,8 @@ class SyscomService {
     logger.info('Paso 1: Obteniendo IDs de productos de Super Precio');
     
     // 1. Obtener IDs de productos de Súper Precio usando múltiples búsquedas
-    // Términos específicos para las 8 categorías configuradas:
-    // - Videovigilancia, Control de acceso, Energía, Detección de fuego,
-    // - Automatización e intrusión, Radiocomunicación, Redes, IoT/GPS/Telemetría
+    // Términos específicos para categorías activas permitidas
+    // (sin radiocomunicación/incendios por decisión operativa).
     const searchTerms = [
       // Videovigilancia
       'camara', 'dvr', 'nvr', 'cctv', 'vigilancia',
@@ -953,12 +1018,8 @@ class SyscomService {
       'acceso', 'biometrico', 'cerradura', 'lector',
       // Energía
       'fuente', 'bateria', 'ups', 'energia',
-      // Detección de fuego
-      'fuego', 'humo', 'incendio', 'detector',
       // Automatización e intrusión
       'alarma', 'sensor', 'intrusion', 'domotica',
-      // Radiocomunicación
-      'radio', 'walkie', 'comunicacion',
       // Redes
       'switch', 'router', 'red', 'poe',
       // IoT / GPS / Telemetría

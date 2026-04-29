@@ -15,6 +15,31 @@ export const PLATFORM_CATEGORIES = {
   IOT_GPS: 'iot-gps'
 };
 
+// Categorias descartadas temporalmente por negocio/proveedor.
+export const BLOCKED_PLATFORM_CATEGORIES = new Set([
+  PLATFORM_CATEGORIES.DETECCION_FUEGO,
+  PLATFORM_CATEGORIES.RADIOCOMUNICACION
+]);
+
+export function isBlockedPlatformCategory(categorySlug) {
+  return BLOCKED_PLATFORM_CATEGORIES.has(categorySlug);
+}
+
+export function isBlockedSyscomCategoryName(syscomCategory = '') {
+  const value = String(syscomCategory || '').toLowerCase();
+  if (!value) return false;
+
+  return (
+    value.includes('radio') ||
+    value.includes('walkie') ||
+    value.includes('handy') ||
+    value.includes('radiocom') ||
+    value.includes('fuego') ||
+    value.includes('humo') ||
+    value.includes('incendio')
+  );
+}
+
 /**
  * Mapeo de categorías SYSCOM → Plataforma
  * Las claves son expresiones regulares que se buscan en el nombre de categoría de SYSCOM
@@ -163,6 +188,10 @@ export const SYSCOM_TO_PLATFORM_MAPPING = {
 export function mapSyscomCategoryToPlatform(syscomCategory) {
   if (!syscomCategory) {
     return PLATFORM_CATEGORIES.VIDEOVIGILANCIA; // Default para productos sin categoría
+  }
+
+  if (isBlockedSyscomCategoryName(syscomCategory)) {
+    return null;
   }
 
   // Buscar coincidencia exacta primero

@@ -109,6 +109,13 @@ class SyscomClient {
             const category = params.categoria || params.category;
             const page = params.pagina || params.page;
             const limit = params.limite || params.limit;
+
+            // La API de SYSCOM requiere al menos un filtro: busqueda, marca o categoria.
+            // Si no llega ninguno, usamos un término por defecto para evitar 422.
+            const hasAnyFilter = Boolean(query || brand || category);
+            if (!hasAnyFilter) {
+                queryParams.busqueda = process.env.SYSCOM_DEFAULT_QUERY || 'camara';
+            }
             
             // Si hay query, agregarla
             if (query) {

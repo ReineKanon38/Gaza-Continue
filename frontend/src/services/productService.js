@@ -165,14 +165,32 @@ export const getSuperPrecioProducts = async (params = {}) => {
 };
 
 const flattenSyscomCategories = (rawCategories) => {
-  if (!Array.isArray(rawCategories)) return [];
+  const rootList = Array.isArray(rawCategories)
+    ? rawCategories
+    : (Array.isArray(rawCategories?.categorias)
+      ? rawCategories.categorias
+      : (Array.isArray(rawCategories?.data)
+        ? rawCategories.data
+        : (Array.isArray(rawCategories?.items) ? rawCategories.items : [])));
+
+  if (!Array.isArray(rootList) || rootList.length === 0) return [];
 
   const results = [];
   const visit = (node) => {
     if (!node) return;
 
-    const id = node.id ?? node.category_id ?? node.categoria_id ?? node.value;
-    const name = node.nombre ?? node.name ?? node.descripcion ?? node.label;
+    const id =
+      node.id ??
+      node.category_id ??
+      node.categoria_id ??
+      node.id_categoria ??
+      node.value;
+    const name =
+      node.nombre ??
+      node.name ??
+      node.descripcion ??
+      node.label ??
+      node.categoria;
 
     if (id !== undefined && id !== null && name) {
       results.push({
@@ -182,13 +200,19 @@ const flattenSyscomCategories = (rawCategories) => {
       });
     }
 
-    const children = node.subcategorias || node.children || node.categorias || [];
+    const children =
+      node.subcategorias ||
+      node.children ||
+      node.categorias ||
+      node.subCategories ||
+      node.childCategories ||
+      [];
     if (Array.isArray(children)) {
       children.forEach(visit);
     }
   };
 
-  rawCategories.forEach(visit);
+  rootList.forEach(visit);
 
   const seen = new Set();
   return results.filter((item) => {
@@ -200,10 +224,18 @@ const flattenSyscomCategories = (rawCategories) => {
 
 export const getSyscomCategories = async () => {
   const data = await requestJson('/api/syscom/categories');
-  const categories = flattenSyscomCategories(data?.data || []);
+  const raw =
+    data?.data ??
+    data?.categorias ??
+    data?.result ??
+    [];
+  const blockedCategoryRegex = /(radio|walkie|handy|radiocom|fuego|humo|incendio)/i;
+  const categories = flattenSyscomCategories(raw).filter(
+    (item) => !blockedCategoryRegex.test(String(item?.name || ''))
+  );
   return {
     categories,
-    raw: data?.data || []
+    raw
   };
 };
 

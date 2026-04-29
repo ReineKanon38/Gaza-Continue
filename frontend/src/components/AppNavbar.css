@@ -90,7 +90,7 @@
   border-radius: var(--border-radius);
   border: 1px solid #d3dcea;
   box-shadow: var(--shadow-xl);
-  min-width: 260px;
+  min-width: 680px;
   padding: 0.45rem;
   animation: slideDown 0.2s ease;
 }
@@ -114,6 +114,109 @@
 .categories-dropdown .dropdown-item.active {
   background: #e8f2ff;
   color: #0f172a;
+}
+
+.syscom-mega-menu {
+  padding: 0.4rem;
+}
+
+.syscom-mega-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.syscom-mega-title {
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 0.96rem;
+}
+
+.syscom-mega-search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: #f8fbff;
+  border: 1px solid #d8e3ef;
+  border-radius: 10px;
+  padding: 0.42rem 0.6rem;
+  margin-bottom: 0.6rem;
+  color: #1d4ed8;
+}
+
+.syscom-mega-search input {
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.syscom-all-products-item {
+  margin-bottom: 0.55rem;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.syscom-mega-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.syscom-mega-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 370px;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.syscom-mega-item {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.46rem 0.55rem;
+  text-align: left;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  transition: all var(--transition-fast);
+}
+
+.syscom-mega-item span {
+  font-weight: 800;
+  font-size: 0.89rem;
+  line-height: 1.2;
+}
+
+.syscom-mega-item small {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.syscom-mega-item:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  transform: translateY(-1px);
+}
+
+.syscom-mega-item.active {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.syscom-empty-state {
+  color: #64748b;
+  font-weight: 700;
+  padding: 0.6rem 0.25rem 0.2rem;
 }
 
 @keyframes slideDown {
@@ -143,6 +246,11 @@
 
   .categories-dropdown .dropdown-menu {
     width: 100%;
+    min-width: 320px;
+  }
+
+  .syscom-mega-grid {
+    grid-template-columns: 1fr;
   }
 }
 

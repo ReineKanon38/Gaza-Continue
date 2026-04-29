@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Navbar, Nav, Container, Image, Badge, NavDropdown } from 'react-bootstrap';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { BsPersonCircle, BsShop, BsCart, BsGrid3X3Gap, BsStars } from 'react-icons/bs';
+import { BsPersonCircle, BsShop, BsCart, BsGrid3X3Gap, BsStars, BsSearch } from 'react-icons/bs';
 // Importación de los nuevos iconos de Feather Icons
 import { 
     FiLogOut, FiSettings
@@ -18,7 +18,27 @@ const { totalItems } = useCartHelpers();
 const { user, logout, isAdmin } = useAuth();
 const [searchParams] = useSearchParams();
 const [categories, setCategories] = useState([]);
+const [menuQuery, setMenuQuery] = useState('');
 const currentCategory = searchParams.get('syscomCategory');
+
+const visibleCategories = useMemo(() => {
+    const normalized = String(menuQuery || '').trim().toLowerCase();
+
+    const sorted = [...categories].sort((a, b) => {
+        const levelA = Number(a?.level || 0);
+        const levelB = Number(b?.level || 0);
+        if (levelA !== levelB) return levelA - levelB;
+        return String(a?.name || '').localeCompare(String(b?.name || ''), 'es', { sensitivity: 'base' });
+    });
+
+    if (!normalized) return sorted;
+
+    return sorted.filter((cat) => String(cat?.name || '').toLowerCase().includes(normalized));
+}, [categories, menuQuery]);
+
+const splitIndex = Math.ceil(visibleCategories.length / 2);
+const leftColumnCategories = visibleCategories.slice(0, splitIndex);
+const rightColumnCategories = visibleCategories.slice(splitIndex);
 
 useEffect(() => {
     const loadCategories = async () => {
@@ -40,6 +60,7 @@ const handleLogout = () => {
 
 const handleCategoryClick = (categoryValue) => {
     navigate(`/catalog?syscomCategory=${categoryValue}`);
+    setMenuQuery('');
 };
 
 return (
@@ -78,20 +99,62 @@ return (
                 id="categories-dropdown"
                 className="categories-dropdown"
             >
-                <NavDropdown.Item onClick={() => navigate('/catalog')}>
-                    <BsShop className="me-2" />
-                    Todos los Productos
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                {categories.map((cat) => (
-                    <NavDropdown.Item 
-                        key={cat.id}
-                        onClick={() => handleCategoryClick(cat.id)}
-                        className={currentCategory === cat.id ? 'active' : ''}
-                    >
-                        {cat.name}
+                <div className="syscom-mega-menu">
+                    <div className="syscom-mega-header">
+                        <div className="syscom-mega-title">Categorías de productos</div>
+                        <Badge bg="info">{visibleCategories.length}</Badge>
+                    </div>
+
+                    <div className="syscom-mega-search">
+                        <BsSearch />
+                        <input
+                            type="text"
+                            value={menuQuery}
+                            onChange={(e) => setMenuQuery(e.target.value)}
+                            placeholder="Buscar categoría..."
+                            aria-label="Buscar categoría"
+                        />
+                    </div>
+
+                    <NavDropdown.Item onClick={() => navigate('/catalog')} className="syscom-all-products-item">
+                        <BsShop className="me-2" />
+                        Todos los Productos
                     </NavDropdown.Item>
-                ))}
+
+                    <div className="syscom-mega-grid">
+                        <div className="syscom-mega-column">
+                            {leftColumnCategories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    type="button"
+                                    className={`syscom-mega-item ${currentCategory === cat.id ? 'active' : ''}`}
+                                    onClick={() => handleCategoryClick(cat.id)}
+                                >
+                                    <span>{cat.name}</span>
+                                    <small>Nivel {cat.level || 0}</small>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="syscom-mega-column">
+                            {rightColumnCategories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    type="button"
+                                    className={`syscom-mega-item ${currentCategory === cat.id ? 'active' : ''}`}
+                                    onClick={() => handleCategoryClick(cat.id)}
+                                >
+                                    <span>{cat.name}</span>
+                                    <small>Nivel {cat.level || 0}</small>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {visibleCategories.length === 0 && (
+                        <div className="syscom-empty-state">No hay categorías que coincidan con la búsqueda.</div>
+                    )}
+                </div>
             </NavDropdown>
             
             {/* Link al catálogo */}
