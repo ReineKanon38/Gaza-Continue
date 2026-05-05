@@ -46,6 +46,11 @@ export const getOrderById = async (orderId) => {
   return requestJson(`/api/orders/${orderId}`);
 };
 
+export const getOrderTracking = async (orderId) => {
+  const data = await requestJson(`/api/orders/${orderId}/tracking`);
+  return data?.data || null;
+};
+
 export const updateOrderStatus = async (orderId, status, options = {}) => {
   return requestJson(`/api/orders/${orderId}/status`, {
     method: 'PUT',
@@ -76,6 +81,7 @@ export default {
   createOrder,
   getAllOrders,
   getOrderById,
+  getOrderTracking,
   updateOrderStatus,
   approveOrderPayment,
   rejectOrderPayment,

@@ -23,10 +23,13 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/reset" element={<Reset />} />
 
+      <Route element={<ProtectedRoute requiredRole="admin" />}>
+        <Route path="/admin" element={<AdminPanel />} />
+      </Route>
+
       {/* --- Rutas Protegidas --- */}
       {/* Usamos el guardián. Solo se puede acceder si 'userLoggedIn' es 'true' */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/admin" element={<AdminPanel />} />
         <Route path="/catalog" element={<Catalog />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />

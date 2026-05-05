@@ -4,6 +4,7 @@ import {
   createOrder, 
   getUserOrders, 
   getOrderById, 
+  getOrderTracking,
   updateOrderStatus, 
   getAllOrders,
   updateOrder,
@@ -36,6 +37,9 @@ router.get("/", getUserOrders);
 
 // GET /api/orders/:id - Obtener orden específica por ID
 router.get("/:id", getOrderById);
+
+// GET /api/orders/:id/tracking - Obtener rastreo de orden
+router.get('/:id/tracking', getOrderTracking);
 
 // Rutas de ADMIN
 // GET /api/orders/admin/all - Obtener todas las órdenes (solo admin)

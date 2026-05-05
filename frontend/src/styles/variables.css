@@ -26,6 +26,18 @@
   --text-muted: #90a4ae;
   --text-white: #ffffff;
   --text-light: #eceff1;
+  --text-strong: #0b1220;
+  --text-soft: #475569;
+
+  /* Superficies de alto contraste */
+  --surface-0: #ffffff;
+  --surface-1: #f8fbff;
+  --surface-2: #edf3fb;
+  --surface-dark-1: #0b1930;
+  --surface-dark-2: #102845;
+
+  /* Focus / accesibilidad */
+  --focus-ring: rgba(0, 188, 212, 0.38);
   
   /* Colores de Estado */
   --success: #2e7d32;
@@ -45,6 +57,7 @@
   
   --border-color: #cfd8dc;
   --border-color-dark: #90a4ae;
+  --border-strong: #94a3b8;
   
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.1);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.15);

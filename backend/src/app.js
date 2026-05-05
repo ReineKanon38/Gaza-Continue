@@ -12,6 +12,7 @@ import seedRoutes from './routes/seed.js';
 import syscomRoutes from './routes/syscom.js';
 import paymentRoutes from './routes/payment.js';
 import configRoutes from './routes/config.js';
+import addressRoutes from './routes/address.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import swaggerUi from 'swagger-ui-express';
 
@@ -44,6 +45,7 @@ app.use('/api/seed', seedRoutes);
 app.use('/api/syscom', syscomRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/address', addressRoutes);
 
 try {
   const specPath = path.resolve('./src/docs/openapi.json');

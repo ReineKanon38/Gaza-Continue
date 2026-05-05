@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { Form, Row, Col, Card } from 'react-bootstrap';
 import { BsGeoAlt } from 'react-icons/bs';
 
-const AddressForm = ({ address, onChange, errors = {} }) => {
+const AddressForm = ({
+  address,
+  onChange,
+  errors = {},
+  zipLookupLoading = false,
+  zipLookupError = '',
+  zipLookupSuccess = false,
+  autoCompleteOptions = { neighborhoods: [] }
+}) => {
   const [isFocused, setIsFocused] = useState({});
 
   const handleChange = (field, value) => {
@@ -19,15 +27,6 @@ const AddressForm = ({ address, onChange, errors = {} }) => {
   const handleBlur = (field) => {
     setIsFocused({ ...isFocused, [field]: false });
   };
-
-  const estados = [
-    'Aguascalientes', 'Baja California', 'Baja California Sur', 'Campeche',
-    'Chiapas', 'Chihuahua', 'Ciudad de México', 'Coahuila', 'Colima',
-    'Durango', 'Estado de México', 'Guanajuato', 'Guerrero', 'Hidalgo',
-    'Jalisco', 'Michoacán', 'Morelos', 'Nayarit', 'Nuevo León', 'Oaxaca',
-    'Puebla', 'Querétaro', 'Quintana Roo', 'San Luis Potosí', 'Sinaloa',
-    'Sonora', 'Tabasco', 'Tamaulipas', 'Tlaxcala', 'Veracruz', 'Yucatán', 'Zacatecas'
-  ];
 
   return (
     <Card className="mb-4 shadow-sm">
@@ -62,11 +61,11 @@ const AddressForm = ({ address, onChange, errors = {} }) => {
           <Col md={4} className="mb-3">
             <Form.Group>
               <Form.Label className="fw-semibold">
-                Número <span className="text-danger">*</span>
+                Número (opcional)
               </Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Ej: 123"
+                placeholder="Ej: 123 o S/N"
                 value={address.number || ''}
                 onChange={(e) => handleChange('number', e.target.value)}
                 onFocus={() => handleFocus('number')}
@@ -87,16 +86,34 @@ const AddressForm = ({ address, onChange, errors = {} }) => {
               <Form.Label className="fw-semibold">
                 Colonia <span className="text-danger">*</span>
               </Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Ej: Centro"
-                value={address.neighborhood || ''}
-                onChange={(e) => handleChange('neighborhood', e.target.value)}
-                onFocus={() => handleFocus('neighborhood')}
-                onBlur={() => handleBlur('neighborhood')}
-                isInvalid={!!errors.neighborhood}
-                className="form-control-lg"
-              />
+              {(autoCompleteOptions?.neighborhoods || []).length > 0 ? (
+                <Form.Select
+                  value={address.neighborhood || ''}
+                  onChange={(e) => handleChange('neighborhood', e.target.value)}
+                  onFocus={() => handleFocus('neighborhood')}
+                  onBlur={() => handleBlur('neighborhood')}
+                  isInvalid={!!errors.neighborhood}
+                  className="form-control-lg"
+                  disabled={zipLookupLoading}
+                >
+                  <option value="">Selecciona una colonia</option>
+                  {(autoCompleteOptions?.neighborhoods || []).map((neighborhood) => (
+                    <option key={neighborhood} value={neighborhood}>{neighborhood}</option>
+                  ))}
+                </Form.Select>
+              ) : (
+                <Form.Control
+                  type="text"
+                  placeholder="Ej: Centro"
+                  value={address.neighborhood || ''}
+                  onChange={(e) => handleChange('neighborhood', e.target.value)}
+                  onFocus={() => handleFocus('neighborhood')}
+                  onBlur={() => handleBlur('neighborhood')}
+                  isInvalid={!!errors.neighborhood}
+                  className="form-control-lg"
+                  disabled={zipLookupLoading}
+                />
+              )}
               <Form.Control.Feedback type="invalid">
                 {errors.neighborhood}
               </Form.Control.Feedback>
@@ -125,8 +142,9 @@ const AddressForm = ({ address, onChange, errors = {} }) => {
                 {errors.zipCode}
               </Form.Control.Feedback>
               <Form.Text className="text-muted">
-                5 dígitos
+                {zipLookupLoading ? 'Consultando CP...' : '5 dígitos'}
               </Form.Text>
+              {zipLookupError && <Form.Text className="text-danger d-block">{zipLookupError}</Form.Text>}
             </Form.Group>
           </Col>
         </Row>
@@ -135,44 +153,80 @@ const AddressForm = ({ address, onChange, errors = {} }) => {
           <Col md={6} className="mb-3">
             <Form.Group>
               <Form.Label className="fw-semibold">
-                Ciudad <span className="text-danger">*</span>
+                Municipio <span className="text-danger">*</span>
               </Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Ej: Guadalajara"
-                value={address.city || ''}
-                onChange={(e) => handleChange('city', e.target.value)}
-                onFocus={() => handleFocus('city')}
-                onBlur={() => handleBlur('city')}
-                isInvalid={!!errors.city}
+                placeholder="Se autocompleta con CP"
+                value={address.municipality || ''}
+                onChange={(e) => handleChange('municipality', e.target.value)}
+                onFocus={() => handleFocus('municipality')}
+                onBlur={() => handleBlur('municipality')}
+                isInvalid={!!errors.municipality}
                 className="form-control-lg"
+                readOnly={zipLookupLoading || zipLookupSuccess}
               />
               <Form.Control.Feedback type="invalid">
-                {errors.city}
+                {errors.municipality}
               </Form.Control.Feedback>
             </Form.Group>
           </Col>
           <Col md={6} className="mb-3">
             <Form.Group>
               <Form.Label className="fw-semibold">
+                Ciudad <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Se autocompleta con CP"
+                value={address.city || ''}
+                onChange={(e) => handleChange('city', e.target.value)}
+                onFocus={() => handleFocus('city')}
+                onBlur={() => handleBlur('city')}
+                isInvalid={!!errors.city}
+                className="form-control-lg"
+                readOnly={zipLookupLoading || zipLookupSuccess}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.city}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col md={6} className="mb-3">
+            <Form.Group>
+              <Form.Label className="fw-semibold">
                 Estado <span className="text-danger">*</span>
               </Form.Label>
-              <Form.Select
+              <Form.Control
+                type="text"
+                placeholder="Se autocompleta con CP"
                 value={address.state || ''}
                 onChange={(e) => handleChange('state', e.target.value)}
                 onFocus={() => handleFocus('state')}
                 onBlur={() => handleBlur('state')}
                 isInvalid={!!errors.state}
                 className="form-control-lg"
-              >
-                <option value="">Selecciona un estado</option>
-                {estados.map(estado => (
-                  <option key={estado} value={estado}>{estado}</option>
-                ))}
-              </Form.Select>
+                readOnly={zipLookupLoading || zipLookupSuccess}
+              />
               <Form.Control.Feedback type="invalid">
                 {errors.state}
               </Form.Control.Feedback>
+            </Form.Group>
+          </Col>
+          <Col md={6} className="mb-3">
+            <Form.Group>
+              <Form.Label className="fw-semibold">Localidad</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Se autocompleta con CP"
+                value={address.locality || ''}
+                onChange={(e) => handleChange('locality', e.target.value)}
+                className="form-control-lg"
+                readOnly={zipLookupLoading || zipLookupSuccess}
+              />
             </Form.Group>
           </Col>
         </Row>

@@ -180,18 +180,14 @@
 .category-glass-card {
     position: relative;
     height: 140px; /* Altura ajustada para las nuevas categorías */
-    background: linear-gradient(
-        180deg,
-        #ffffff 0%,
-        #f8fafc 100%
-    );
+    background: linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
     border-radius: 22px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.05);
+    border: 1px solid #cbd8ea;
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.08);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     text-decoration: none;
     cursor: pointer;
@@ -221,9 +217,13 @@
 }
 
 .cat-icon-box {
-    font-size: 2.2rem; /* Tamaño de icono optimizado */
+    font-size: 2.05rem; /* Tamaño de icono optimizado */
     margin-bottom: 8px;
-    color: #020617;
+    color: #0b2442;
+    background: #eaf2ff;
+    border: 1px solid #c6d7ef;
+    border-radius: 10px;
+    padding: 4px 10px;
     transition: color 0.25s ease, transform 0.25s ease;
 }
 
@@ -233,9 +233,9 @@
 }
 
 .category-glass-card span {
-    color: #020617;
-    font-weight: 700;
-    font-size: 0.68rem; /* Fuente ligeramente más pequeña para nombres largos */
+    color: #0b1220;
+    font-weight: 800;
+    font-size: 0.76rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: center;
@@ -247,10 +247,10 @@
     border: 2px solid #00d4ff;
     background: linear-gradient(
         180deg,
-        #ffffff 0%,
-        #eefaff 100%
+        #fbfeff 0%,
+        #dff5ff 100%
     );
-    box-shadow: 0 16px 36px rgba(0, 212, 255, 0.25);
+    box-shadow: 0 16px 36px rgba(0, 212, 255, 0.32);
 }
 
 .category-glass-card.active::after {
@@ -266,16 +266,16 @@
 }
 
 /* ==================================================
-   5. DROPDOWN – ICONOS NEGROS FORZADOS
+   5. DROPDOWN (SOLO CONTROLES INTERNOS DE CATÁLOGO)
    ================================================== */
-.dropdown-menu {
+.catalog-page-wrapper .filter-row-custom .dropdown-menu {
     border-radius: 16px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 20px 40px rgba(2, 6, 23, 0.15);
     padding: 0.8rem;
 }
 
-.dropdown-menu .dropdown-item {
+.catalog-page-wrapper .filter-row-custom .dropdown-item {
     font-weight: 700;
     color: #020617 !important;
     display: flex;
@@ -285,20 +285,19 @@
     border-radius: 10px;
 }
 
-.dropdown-menu .dropdown-item:hover {
+.catalog-page-wrapper .filter-row-custom .dropdown-item:hover {
     background: #f1f5f9;
 }
 
-/* ICONOS NEGRO ABSOLUTO */
-.dropdown-menu .dropdown-item i,
-.dropdown-menu .dropdown-item svg {
+.catalog-page-wrapper .filter-row-custom .dropdown-item i,
+.catalog-page-wrapper .filter-row-custom .dropdown-item svg {
     color: #000000 !important;
     fill: #000000 !important;
     filter: brightness(0) !important;
 }
 
-.dropdown-menu .dropdown-item:hover i,
-.dropdown-menu .dropdown-item:hover svg {
+.catalog-page-wrapper .filter-row-custom .dropdown-item:hover i,
+.catalog-page-wrapper .filter-row-custom .dropdown-item:hover svg {
     color: #000000 !important;
     fill: #000000 !important;
 }
@@ -309,7 +308,8 @@
 .filter-row-custom {
     background: #ffffff;
     border-radius: 15px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #cfdcee;
+    box-shadow: 0 6px 18px rgba(9, 20, 40, 0.06);
 }
 
 .search-group-modern {

@@ -52,19 +52,19 @@
 
 .super-filters {
   background: #ffffff;
-  border: 1px solid #d8e1ef;
+  border: 1px solid #c8d7eb;
   border-radius: 12px;
   padding: 0.85rem;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
 }
 
 .super-empty {
-  border: 1px dashed #bdcce0;
+  border: 1px dashed #9db4d1;
   border-radius: 12px;
   padding: 1rem;
   text-align: center;
-  color: #3a5168;
-  background: #f9fbff;
+  color: #23364f;
+  background: #f4f8ff;
 }
 
 .load-more-btn {

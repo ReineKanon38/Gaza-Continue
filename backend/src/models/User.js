@@ -1,12 +1,28 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs"; // Importante: asegúrate de tener instalado bcryptjs
 
+const savedShippingAddressSchema = new mongoose.Schema({
+  street: { type: String, trim: true },
+  number: { type: String, trim: true },
+  neighborhood: { type: String, trim: true },
+  locality: { type: String, trim: true },
+  city: { type: String, trim: true },
+  state: { type: String, trim: true },
+  zipCode: { type: String, trim: true },
+  country: { type: String, default: "México", trim: true },
+  additionalInfo: { type: String, trim: true }
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["user", "admin"], default: "user" },
-  isBlocked: { type: Boolean, default: false }
+  isBlocked: { type: Boolean, default: false },
+  savedShippingAddress: {
+    type: savedShippingAddressSchema,
+    default: () => ({ country: "México" })
+  }
 }, { timestamps: true });
 
 // 🔒 MÉTODO PARA COMPARAR CONTRASEÑAS (Esto arregla tu error)

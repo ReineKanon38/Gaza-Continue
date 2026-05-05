@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { BsCartPlusFill } from 'react-icons/bs';
 import { useCartHelpers } from '../hooks/useCartHooks';
+import ProductDetailModal from './ProductDetailModal';
 
 function ProductCard({ product }) {
   const { addToCart, isInCart, getItemQuantity } = useCartHelpers();
+  const [showDetail, setShowDetail] = useState(false);
 
     if (!product) {
         return null;
@@ -119,6 +122,19 @@ function ProductCard({ product }) {
                     )}
         </div>
         <Button 
+              variant="outline-dark"
+              onClick={() => setShowDetail(true)}
+              className="w-100 d-flex align-items-center justify-content-center mb-2"
+              style={{ 
+                borderRadius: '0.5rem',
+                padding: '0.6rem',
+                fontSize: '0.95rem',
+                fontWeight: '600'
+              }}
+        >
+              Ver informacion
+        </Button>
+        <Button 
                     onClick={() => addToCart(product, 1)}
                     className="btn-custom-primary w-100 d-flex align-items-center justify-content-center"
                     disabled={!product.active || isOutOfStock}
@@ -137,6 +153,11 @@ function ProductCard({ product }) {
                             : 'Agregar al Carrito'}
         </Button>
             </Card.Body>
+      <ProductDetailModal
+        show={showDetail}
+        onHide={() => setShowDetail(false)}
+        product={product}
+      />
     </Card>
     );
 }

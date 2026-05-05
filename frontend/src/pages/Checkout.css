@@ -219,16 +219,18 @@
 
 /* Mejorar apariencia de los checkboxes de método de pago */
 .form-check {
-  border: 2px solid #dee2e6;
+  border: 2px solid #bfcde0;
   border-radius: 0.5rem;
   padding: 1rem;
   margin-bottom: 0.5rem;
   transition: all 0.2s ease;
+  background: #ffffff;
 }
 
 .form-check:has(input:checked) {
-  border-color: #0d6efd;
-  background-color: #e7f1ff;
+  border-color: #0ea5b7;
+  background-color: #e8fbff;
+  box-shadow: 0 0 0 2px rgba(14, 165, 183, 0.16);
 }
 
 .form-check-input {

@@ -9,10 +9,41 @@ const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
+const sanitizeUser = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  isBlocked: user.isBlocked,
+  savedShippingAddress: user.savedShippingAddress
+});
+
 export const registerUser = async (req, res) => {
   try {
-    const { name, nombre, email, password } = req.body;
+    const { name, nombre, email, password, role, adminRegistrationKey } = req.body;
     const userName = name || nombre;
+
+    const requestedRole = role === 'admin' ? 'admin' : 'user';
+    let canCreateAdmin = false;
+
+    if (requestedRole === 'admin') {
+      const configuredAdminKey = String(process.env.ADMIN_REGISTRATION_KEY || '').trim();
+
+      if (configuredAdminKey) {
+        canCreateAdmin = adminRegistrationKey === configuredAdminKey;
+      } else {
+        // Modo temporal: sin clave configurada, solo permitir bootstrap del primer admin.
+        const adminCount = await User.countDocuments({ role: 'admin' });
+        canCreateAdmin = adminCount === 0;
+      }
+    }
+
+    if (requestedRole === 'admin' && !canCreateAdmin) {
+      return sendError(res, {
+        status: 403,
+        message: 'No autorizado para registrar cuentas de administrador. Si no hay clave configurada, solo se permite un primer admin temporal.'
+      });
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -23,6 +54,7 @@ export const registerUser = async (req, res) => {
       name: userName,
       email,
       password,
+      role: canCreateAdmin ? 'admin' : 'user'
     });
 
     if (!user) {
@@ -33,12 +65,8 @@ export const registerUser = async (req, res) => {
       status: 201,
       message: 'Usuario registrado correctamente',
       token: generateToken(user._id),
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      }
+      user: sanitizeUser(user),
+      bootstrapAdmin: requestedRole === 'admin' && canCreateAdmin && !String(process.env.ADMIN_REGISTRATION_KEY || '').trim()
     });
   } catch (error) {
     logger.error('Error en registro de usuario', { message: error.message });
@@ -61,13 +89,7 @@ export const loginUser = async (req, res) => {
               status: 200,
               message: 'Sesion iniciada correctamente',
               token: generateToken(user._id),
-              user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                isBlocked: user.isBlocked,
-              }
+              user: sanitizeUser(user)
             });
         } else {
             return sendError(res, { status: 401, message: 'Email o contraseña incorrectos' });
@@ -80,12 +102,96 @@ export const loginUser = async (req, res) => {
 
 // @desc    Obtener perfil del usuario
 export const getUserProfile = async (req, res) => {
-  return sendSuccess(res, { message: 'Perfil de usuario obtenido' });
+  try {
+    const user = await User.findById(req.user?.sub).select('-password');
+    if (!user) {
+      return sendError(res, { status: 404, message: 'Usuario no encontrado' });
+    }
+
+    return sendSuccess(res, {
+      message: 'Perfil de usuario obtenido',
+      data: sanitizeUser(user)
+    });
+  } catch (error) {
+    logger.error('Error obteniendo perfil', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
 };
 
 // @desc    Actualizar perfil
 export const updateProfile = async (req, res) => {
-  return sendSuccess(res, { message: 'Perfil actualizado' });
+  try {
+    const user = await User.findById(req.user?.sub);
+    if (!user) {
+      return sendError(res, { status: 404, message: 'Usuario no encontrado' });
+    }
+
+    const { name, currentPassword, newPassword } = req.body;
+
+    if (name) {
+      user.name = name;
+    }
+
+    if (newPassword) {
+      const isCurrentValid = await user.matchPassword(currentPassword || '');
+      if (!isCurrentValid) {
+        return sendError(res, { status: 401, message: 'La contraseña actual es incorrecta' });
+      }
+      user.password = newPassword;
+    }
+
+    await user.save();
+
+    return sendSuccess(res, {
+      message: 'Perfil actualizado',
+      data: sanitizeUser(user)
+    });
+  } catch (error) {
+    logger.error('Error actualizando perfil', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
+};
+
+export const getSavedShippingAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user?.sub).select('savedShippingAddress');
+    if (!user) {
+      return sendError(res, { status: 404, message: 'Usuario no encontrado' });
+    }
+
+    return sendSuccess(res, {
+      message: 'Direccion guardada obtenida',
+      data: user.savedShippingAddress || null
+    });
+  } catch (error) {
+    logger.error('Error obteniendo direccion guardada', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
+};
+
+export const updateSavedShippingAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user?.sub);
+    if (!user) {
+      return sendError(res, { status: 404, message: 'Usuario no encontrado' });
+    }
+
+    user.savedShippingAddress = {
+      ...user.savedShippingAddress,
+      ...req.body,
+      country: req.body?.country || user.savedShippingAddress?.country || 'México'
+    };
+
+    await user.save();
+
+    return sendSuccess(res, {
+      message: 'Direccion guardada actualizada',
+      data: user.savedShippingAddress
+    });
+  } catch (error) {
+    logger.error('Error actualizando direccion guardada', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
 };
 
 // @desc    Solicitar restablecimiento de contraseña

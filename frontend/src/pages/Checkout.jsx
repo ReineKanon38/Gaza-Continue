@@ -7,7 +7,11 @@ import AddressForm from '../components/AddressForm';
 import { useCartHelpers } from '../hooks/useCartHooks';
 import { paymentService } from '../services/paymentService';
 import orderService from '../services/orderService';
+import addressService from '../services/addressService';
+import authService from '../services/authService';
 import './Checkout.css'; 
+
+const CHECKOUT_ADDRESS_STORAGE_KEY = 'gaza-checkout-address';
 
 function Checkout() {
   const navigate = useNavigate();
@@ -19,6 +23,10 @@ function Checkout() {
 
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [zipLookupLoading, setZipLookupLoading] = useState(false);
+  const [zipLookupError, setZipLookupError] = useState('');
+  const [zipLookupSuccess, setZipLookupSuccess] = useState(false);
+  const [autoCompleteOptions, setAutoCompleteOptions] = useState({ neighborhoods: [] });
   const [shippingCost, setShippingCost] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState('');
@@ -30,6 +38,76 @@ function Checkout() {
       setShippingCost(totalPrice >= 2500 ? 0 : 185);
     }
   }, [address.zipCode, totalPrice]);
+
+  useEffect(() => {
+    const hydrateAddress = async () => {
+      const localAddress = localStorage.getItem(CHECKOUT_ADDRESS_STORAGE_KEY);
+      if (localAddress) {
+        try {
+          setAddress((prev) => ({ ...prev, ...JSON.parse(localAddress) }));
+        } catch {
+          localStorage.removeItem(CHECKOUT_ADDRESS_STORAGE_KEY);
+        }
+      }
+
+      try {
+        const saved = await authService.getSavedShippingAddress();
+        if (saved?.zipCode) {
+          setAddress((prev) => ({ ...prev, ...saved }));
+        }
+      } catch {
+        // No bloquear checkout por falla de perfil
+      }
+    };
+
+    hydrateAddress();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(CHECKOUT_ADDRESS_STORAGE_KEY, JSON.stringify(address));
+  }, [address]);
+
+  useEffect(() => {
+    const fetchZipDetails = async () => {
+      const zip = String(address.zipCode || '');
+      if (!/^\d{5}$/.test(zip)) {
+        setZipLookupError('');
+        setZipLookupSuccess(false);
+        setAutoCompleteOptions({ neighborhoods: [] });
+        return;
+      }
+
+      try {
+        setZipLookupLoading(true);
+        setZipLookupError('');
+        setZipLookupSuccess(false);
+        const info = await addressService.lookupZipCode(zip);
+
+        setAutoCompleteOptions({
+          neighborhoods: info?.neighborhoods || []
+        });
+
+        setAddress((prev) => ({
+          ...prev,
+          state: info?.state || prev.state,
+          city: info?.city || prev.city,
+          municipality: info?.municipality || prev.municipality,
+          locality: info?.locality || prev.locality,
+          neighborhood: info?.neighborhoods?.includes(prev.neighborhood)
+            ? prev.neighborhood
+            : (info?.neighborhoods?.[0] || prev.neighborhood)
+        }));
+        setZipLookupSuccess(true);
+      } catch (error) {
+        setZipLookupError(error.message || 'No se pudo autocompletar el CP');
+        setZipLookupSuccess(false);
+      } finally {
+        setZipLookupLoading(false);
+      }
+    };
+
+    fetchZipDetails();
+  }, [address.zipCode]);
 
   useEffect(() => {
     const loadPaymentMethods = async () => {
@@ -55,8 +133,6 @@ function Checkout() {
   const isAddressValid = () => {
     return [
       address.street,
-      address.number,
-      address.neighborhood,
       address.city,
       address.state,
       address.zipCode
@@ -95,7 +171,12 @@ function Checkout() {
           productId: item.product?._id || item._id,
           quantity: item.quantity
         })),
-        shippingAddress: address,
+        shippingAddress: {
+          ...address,
+          number: address.number || 'S/N',
+          neighborhood: address.neighborhood || autoCompleteOptions?.neighborhoods?.[0] || 'N/D',
+          country: address.country || 'México'
+        },
         paymentInfo: {
           method: 'bank_transfer',
           cardHolder: `${selectedProvider.toUpperCase()} - VALIDACION MANUAL`
@@ -103,6 +184,7 @@ function Checkout() {
       };
 
       await orderService.createOrder(orderData);
+      await authService.updateSavedShippingAddress(address);
       clearCart();
       setOrderSuccess(true);
     } catch (error) {
@@ -150,7 +232,15 @@ function Checkout() {
           {/* Columna de Formularios */}
           <Col lg={7} xl={8} className="checkout-forms-col">
             <div className="form-section-container">
-              <AddressForm address={address} onChange={setAddress} errors={{}} />
+              <AddressForm
+                address={address}
+                onChange={setAddress}
+                errors={{}}
+                zipLookupLoading={zipLookupLoading}
+                zipLookupError={zipLookupError}
+                zipLookupSuccess={zipLookupSuccess}
+                autoCompleteOptions={autoCompleteOptions}
+              />
             </div>
             
             <div className="form-section-container mt-4">

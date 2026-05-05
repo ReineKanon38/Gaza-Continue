@@ -5,7 +5,9 @@ const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'ID inválido');
 export const registerSchema = z.object({
   name: z.string().min(1, 'Nombre requerido'),
   email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Min 6 caracteres')
+  password: z.string().min(6, 'Min 6 caracteres'),
+  role: z.enum(['user', 'admin']).optional(),
+  adminRegistrationKey: z.string().optional()
 });
 
 export const loginSchema = z.object({
@@ -26,6 +28,18 @@ export const updateProfileSchema = z.object({
   return true;
 }, { message: 'currentPassword requerido si cambias contraseña', path: ['currentPassword'] });
 
+export const shippingAddressSchema = z.object({
+  street: z.string().min(1, 'Calle requerida'),
+  number: z.string().min(1, 'Número inválido').optional(),
+  neighborhood: z.string().min(1, 'Colonia inválida').optional(),
+  locality: z.string().min(1, 'Localidad requerida').optional(),
+  city: z.string().min(1, 'Ciudad requerida'),
+  state: z.string().min(1, 'Estado requerido'),
+  zipCode: z.string().regex(/^\d{5}$/, 'Código postal inválido (5 dígitos)'),
+  country: z.string().optional(),
+  additionalInfo: z.string().optional()
+});
+
 export const createProductSchema = z.object({
   name: z.string().min(1, 'Nombre requerido'),
   price: z.number().nonnegative('Precio debe ser >= 0'),
@@ -43,9 +57,11 @@ export const createOrderSchema = z.object({
   })).min(1, 'Debe incluir al menos un producto'),
   shippingAddress: z.object({
     street: z.string().min(1, 'Calle requerida'),
-    number: z.string().min(1, 'Número requerido'),
-    neighborhood: z.string().min(1, 'Colonia requerida'),
+    number: z.string().min(1, 'Número inválido').optional(),
+    neighborhood: z.string().min(1, 'Colonia inválida').optional(),
+    locality: z.string().min(1, 'Localidad requerida').optional(),
     city: z.string().min(1, 'Ciudad requerida'),
+    municipality: z.string().min(1, 'Municipio requerido').optional(),
     state: z.string().min(1, 'Estado requerido'),
     zipCode: z.string().regex(/^\d{5}$/, 'Código postal inválido (5 dígitos)'),
     country: z.string().optional(),
@@ -76,9 +92,11 @@ export const updateOrderSchema = z.object({
   notes: z.string().optional(),
   shippingAddress: z.object({
     street: z.string().min(1, 'Calle requerida'),
-    number: z.string().min(1, 'Número requerido'),
-    neighborhood: z.string().min(1, 'Colonia requerida'),
+    number: z.string().min(1, 'Número inválido').optional(),
+    neighborhood: z.string().min(1, 'Colonia inválida').optional(),
+    locality: z.string().min(1, 'Localidad requerida').optional(),
     city: z.string().min(1, 'Ciudad requerida'),
+    municipality: z.string().min(1, 'Municipio requerido').optional(),
     state: z.string().min(1, 'Estado requerido'),
     zipCode: z.string().regex(/^\d{5}$/, 'Código postal inválido (5 dígitos)'),
     country: z.string().optional(),

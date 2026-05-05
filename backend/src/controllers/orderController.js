@@ -17,6 +17,44 @@ const canTransitionOrderStatus = (currentStatus, nextStatus) => {
   return ORDER_STATUS_TRANSITIONS[currentStatus]?.includes(nextStatus) || false;
 };
 
+const getTrackingStageByOrderStatus = (order) => {
+  if (order.status === 'cancelled') return 'cancelled';
+  if (order.status === 'completed') return 'delivered';
+  if (order.status === 'processing' && order.trackingNumber) return 'in_transit';
+  if (order.status === 'processing') return 'intermediary_processing';
+  return 'supplier_received';
+};
+
+const trackingStageLabel = {
+  supplier_received: 'Proveedor recibió el pedido',
+  intermediary_processing: 'GAZA está preparando tu pedido',
+  in_transit: 'Tu pedido va en camino',
+  delivered: 'Pedido entregado',
+  cancelled: 'Pedido cancelado'
+};
+
+const updateOrderTrackingStage = (order) => {
+  const nextStage = getTrackingStageByOrderStatus(order);
+  const currentStage = order.fulfillmentTracking?.stage;
+
+  if (nextStage !== currentStage) {
+    order.fulfillmentTracking = {
+      supplier: order.fulfillmentTracking?.supplier || order.supplierName || 'SYSCOM',
+      intermediary: order.fulfillmentTracking?.intermediary || order.intermediaryName || 'GAZA',
+      finalCustomer: order.fulfillmentTracking?.finalCustomer || order.customerName,
+      stage: nextStage,
+      history: [
+        ...(order.fulfillmentTracking?.history || []),
+        {
+          stage: nextStage,
+          message: trackingStageLabel[nextStage] || 'Actualizacion de estado de pedido',
+          timestamp: new Date()
+        }
+      ]
+    };
+  }
+};
+
 // Crear una nueva orden
 export const createOrder = async (req, res) => {
   try {
@@ -30,9 +68,16 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    if (!shippingAddress || !shippingAddress.street || !shippingAddress.number || !shippingAddress.neighborhood || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
+    if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
       return sendError(res, { status: 400, message: 'Direccion de envio incompleta' });
     }
+
+    const normalizedShippingAddress = {
+      ...shippingAddress,
+      number: shippingAddress.number || 'S/N',
+      neighborhood: shippingAddress.neighborhood || 'N/D',
+      country: shippingAddress.country || 'México'
+    };
 
     if (!paymentInfo || !paymentInfo.method) {
       return sendError(res, { status: 400, message: 'Informacion de pago requerida' });
@@ -80,10 +125,13 @@ export const createOrder = async (req, res) => {
       user: userId,
       customerName: user.name,
       customerEmail: user.email,
+      orderBrand: 'GAZA',
+      supplierName: 'SYSCOM',
+      intermediaryName: 'GAZA',
       products: orderItems,
       total,
       subtotal: total,
-      shippingAddress,
+      shippingAddress: normalizedShippingAddress,
       paymentInfo: {
         ...paymentInfo,
         method: paymentInfo.method,
@@ -92,8 +140,26 @@ export const createOrder = async (req, res) => {
         cardHolder: paymentInfo.cardHolder || user.name || 'Cliente'
       },
       paymentStatus: requiresManualPaymentValidation ? 'pending_validation' : 'approved',
-      status: 'pending'
+      status: 'pending',
+      fulfillmentTracking: {
+        supplier: 'SYSCOM',
+        intermediary: 'GAZA',
+        finalCustomer: user.name,
+        stage: 'supplier_received',
+        history: [{
+          stage: 'supplier_received',
+          message: 'Proveedor recibió el pedido para procesamiento',
+          timestamp: new Date()
+        }]
+      }
     });
+
+    user.savedShippingAddress = {
+      ...user.savedShippingAddress,
+      ...normalizedShippingAddress,
+      country: normalizedShippingAddress.country || user.savedShippingAddress?.country || 'México'
+    };
+    await user.save();
 
     for (const item of products) {
       await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
@@ -236,6 +302,7 @@ export const updateOrderStatus = async (req, res) => {
     if (notes) {
       order.notes = notes;
     }
+    updateOrderTrackingStage(order);
     await order.save();
 
     const updatedOrder = await Order.findById(id).populate('products.product', 'name price');
@@ -392,6 +459,8 @@ export const updateOrder = async (req, res) => {
       order.shippingAddress = { ...order.shippingAddress, ...shippingAddress };
     }
 
+    updateOrderTrackingStage(order);
+
     await order.save();
 
     const updatedOrder = await Order.findById(id)
@@ -529,6 +598,8 @@ export const approveOrderPayment = async (req, res) => {
       order.status = 'processing';
     }
 
+    updateOrderTrackingStage(order);
+
     await order.save();
 
     const updatedOrder = await Order.findById(id)
@@ -590,6 +661,8 @@ export const rejectOrderPayment = async (req, res) => {
       order.status = 'cancelled';
     }
 
+    updateOrderTrackingStage(order);
+
     await order.save();
 
     const updatedOrder = await Order.findById(id).populate('products.product', 'name price');
@@ -603,6 +676,55 @@ export const rejectOrderPayment = async (req, res) => {
     return sendError(res, {
       status: 500,
       message: 'Error al rechazar pago de la orden',
+      error: err.message
+    });
+  }
+};
+
+export const getOrderTracking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.sub;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return sendError(res, { status: 400, message: 'ID de orden invalido' });
+    }
+
+    const filter = req.user.role === 'admin' ? { _id: id } : { _id: id, user: userId };
+    const order = await Order.findOne(filter).select(
+      'orderId orderBrand supplierName intermediaryName status paymentStatus trackingNumber customerName fulfillmentTracking createdAt updatedAt'
+    );
+
+    if (!order) {
+      return sendError(res, { status: 404, message: 'Orden no encontrada' });
+    }
+
+    return sendSuccess(res, {
+      data: {
+        orderId: order.orderId,
+        orderBrand: order.orderBrand || 'GAZA',
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        trackingNumber: order.trackingNumber || null,
+        mapping: {
+          supplier: order.supplierName || 'SYSCOM',
+          intermediary: order.intermediaryName || 'GAZA',
+          finalCustomer: order.customerName
+        },
+        fulfillmentTracking: order.fulfillmentTracking || {
+          supplier: order.supplierName || 'SYSCOM',
+          intermediary: order.intermediaryName || 'GAZA',
+          finalCustomer: order.customerName,
+          stage: getTrackingStageByOrderStatus(order),
+          history: []
+        }
+      }
+    });
+  } catch (err) {
+    logger.error('Error obteniendo rastreo de orden', { message: err.message });
+    return sendError(res, {
+      status: 500,
+      message: 'Error al obtener rastreo de la orden',
       error: err.message
     });
   }

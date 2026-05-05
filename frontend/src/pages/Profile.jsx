@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Alert, Badge, Spinner } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
 import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare } from 'react-icons/bs';
+import orderService from '../services/orderService';
 
 function Profile() {
     // Estados para los datos del usuario
@@ -19,6 +20,10 @@ function Profile() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [orders, setOrders] = useState([]);
+    const [selectedTracking, setSelectedTracking] = useState(null);
+    const [trackingError, setTrackingError] = useState('');
+    const [loadingOrders, setLoadingOrders] = useState(true);
 
     // Cargar datos del usuario al montar el componente
     useEffect(() => {
@@ -39,6 +44,41 @@ function Profile() {
             }
         }
     }, []);
+
+    useEffect(() => {
+        const loadOrders = async () => {
+            try {
+                setLoadingOrders(true);
+                const response = await orderService.getUserOrders();
+                const list = response?.orders || [];
+                setOrders(list);
+
+                if (list.length > 0) {
+                    const firstOrderId = list[0]?._id;
+                    if (firstOrderId) {
+                        const tracking = await orderService.getOrderTracking(firstOrderId);
+                        setSelectedTracking(tracking);
+                    }
+                }
+            } catch (err) {
+                setTrackingError(err.message || 'No se pudo cargar el rastreo de tus pedidos.');
+            } finally {
+                setLoadingOrders(false);
+            }
+        };
+
+        loadOrders();
+    }, []);
+
+    const handleSelectOrderTracking = async (orderId) => {
+        try {
+            setTrackingError('');
+            const tracking = await orderService.getOrderTracking(orderId);
+            setSelectedTracking(tracking);
+        } catch (err) {
+            setTrackingError(err.message || 'No se pudo obtener el rastreo del pedido seleccionado.');
+        }
+    };
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
@@ -329,6 +369,66 @@ function Profile() {
                                     )}
                                 </Form>
                                 
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+
+                <Row className="justify-content-center mt-4">
+                    <Col md={8} lg={6}>
+                        <Card className="shadow-sm border-0">
+                            <Card.Header as="h5" className="fw-bold">Rastreo de Paquetes</Card.Header>
+                            <Card.Body>
+                                {trackingError && <Alert variant="warning">{trackingError}</Alert>}
+
+                                {loadingOrders ? (
+                                    <div className="text-center py-3">
+                                        <Spinner animation="border" size="sm" />
+                                        <span className="ms-2">Cargando pedidos...</span>
+                                    </div>
+                                ) : orders.length === 0 ? (
+                                    <Alert variant="info" className="mb-0">Aun no tienes pedidos registrados.</Alert>
+                                ) : (
+                                    <>
+                                        <div className="d-flex gap-2 flex-wrap mb-3">
+                                            {orders.slice(0, 6).map((order) => (
+                                                <Button
+                                                    key={order._id}
+                                                    size="sm"
+                                                    variant={selectedTracking?.orderId === order.orderId ? 'primary' : 'outline-secondary'}
+                                                    onClick={() => handleSelectOrderTracking(order._id)}
+                                                >
+                                                    {order.orderId}
+                                                </Button>
+                                            ))}
+                                        </div>
+
+                                        {selectedTracking && (
+                                            <div className="border rounded p-3 bg-light">
+                                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                                    <strong>{selectedTracking.orderId}</strong>
+                                                    <Badge bg="dark">{selectedTracking.orderBrand || 'GAZA'}</Badge>
+                                                </div>
+                                                <p className="mb-1"><strong>Estado:</strong> {selectedTracking.status}</p>
+                                                <p className="mb-1"><strong>Rastreo:</strong> {selectedTracking.trackingNumber || 'Pendiente de asignar'}</p>
+                                                <p className="mb-1"><strong>Proveedor:</strong> {selectedTracking.mapping?.supplier || 'SYSCOM'}</p>
+                                                <p className="mb-1"><strong>Intermediario:</strong> {selectedTracking.mapping?.intermediary || 'GAZA'}</p>
+                                                <p className="mb-3"><strong>Cliente final:</strong> {selectedTracking.mapping?.finalCustomer || userData.name}</p>
+
+                                                <div>
+                                                    <strong>Historial:</strong>
+                                                    <ul className="mb-0 mt-2 ps-3">
+                                                        {(selectedTracking.fulfillmentTracking?.history || []).slice(-5).reverse().map((entry, idx) => (
+                                                            <li key={`${entry.stage}-${idx}`}>
+                                                                {entry.message || entry.stage}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </Card.Body>
                         </Card>
                     </Col>
