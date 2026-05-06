@@ -5,9 +5,7 @@ const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'ID inválido');
 export const registerSchema = z.object({
   name: z.string().min(1, 'Nombre requerido'),
   email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Min 6 caracteres'),
-  role: z.enum(['user', 'admin']).optional(),
-  adminRegistrationKey: z.string().optional()
+  password: z.string().min(6, 'Min 6 caracteres')
 });
 
 export const loginSchema = z.object({
