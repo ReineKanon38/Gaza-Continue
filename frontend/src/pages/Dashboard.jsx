@@ -110,9 +110,9 @@ function Dashboard() {
                 recentOrdersResponse,
                 productsResponse
             ] = await Promise.all([
-                fetch(`${apiUrl}/api/stats/dashboard`, { headers }),
-                fetch(`${apiUrl}/api/stats/recent-orders?limit=5`, { headers }),
-                fetch(`${apiUrl}/api/products?limit=4`, { headers })
+                fetch(`${apiUrl}/stats/dashboard`, { headers }),
+                fetch(`${apiUrl}/stats/recent-orders?limit=5`, { headers }),
+                fetch(`${apiUrl}/products?limit=4`, { headers })
             ]);
 
             // Procesar respuesta de estadísticas

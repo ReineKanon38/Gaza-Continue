@@ -44,7 +44,7 @@ function Reset() {
                 setEmail('');
             } else {
                 // Con backend: hacer petición real
-                const response = await fetch(`${apiUrl}/api/auth/reset-password`, {
+                const response = await fetch(`${apiUrl}/auth/reset-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })

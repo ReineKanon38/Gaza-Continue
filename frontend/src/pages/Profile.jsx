@@ -158,7 +158,7 @@ function Profile() {
                     updateData.newPassword = editData.newPassword;
                 }
 
-                const response = await fetch(`${apiUrl}/api/auth/update-profile`, {
+                const response = await fetch(`${apiUrl}/auth/update-profile`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
