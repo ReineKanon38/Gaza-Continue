@@ -72,7 +72,8 @@ const cartReducer = (state, action) => {
     case CART_ACTIONS.CLEAR_CART:
         return {
             ...state,
-            items: []
+            items: [],
+            _skipPersist: action.payload?.skipPersist || false
         };
     
     case CART_ACTIONS.LOAD_CART:
@@ -182,6 +183,9 @@ export const CartProvider = ({ children }) => {
   
     // Guardar en localStorage cuando cambie el carrito
     useEffect(() => {
+        // No sobreescribir si el vaciado fue temporal (sin intención de borrar)
+        if (cart._skipPersist) return;
+
         // Crear objeto completo del carrito para persistir
         const cartData = {
             items: cart.items,
@@ -195,12 +199,12 @@ export const CartProvider = ({ children }) => {
         } catch (error) {
             console.error('Error guardando carrito en localStorage:', error);
         }
-    }, [cart.items, cart.discount, cart.shipping]);
+    }, [cart.items, cart.discount, cart.shipping, cart._skipPersist]);
     
     // Limpiar carrito cuando sea necesario (ej: logout)
     const clearStoredCart = () => {
         localStorage.removeItem(STORAGE_KEY);
-        dispatch({ type: CART_ACTIONS.CLEAR_CART });
+        dispatch({ type: CART_ACTIONS.CLEAR_CART, payload: { skipPersist: false } });
         dispatch({ type: CART_ACTIONS.REMOVE_DISCOUNT });
         dispatch({ type: CART_ACTIONS.SET_SHIPPING, payload: { method: null, cost: 0 } });
     };

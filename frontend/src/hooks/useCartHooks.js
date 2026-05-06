@@ -101,7 +101,7 @@ export const useCartHelpers = () => {
     };
   
     const clearCart = () => {
-        dispatch({ type: CART_ACTIONS.CLEAR_CART });
+        dispatch({ type: CART_ACTIONS.CLEAR_CART, payload: { skipPersist: true } });
     };
     
     // Funciones helper avanzadas
