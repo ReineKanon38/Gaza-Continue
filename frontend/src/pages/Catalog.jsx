@@ -7,6 +7,53 @@ import { BsGrid3X3Gap, BsSearch, BsCurrencyDollar, BsListUl } from 'react-icons/
 import productService from '../services/productService';
 import './Catalog.css';
 
+const categoryImages = {
+  "Videovigilancia": "https://videoloft.com/wp-content/uploads/2020/12/Hikvision-cloud-storage-video-surveillance.png",
+  "Video vigilancia": "https://videoloft.com/wp-content/uploads/2020/12/Hikvision-cloud-storage-video-surveillance.png",
+  "Redes e IT": "https://s1.significados.com/foto/redes-og.jpg?class=ogImageWide",
+  "IoT / GPS / Telemática": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjT7CYnLPsfEymnXnqjPbp4wFkqqy3Wfjujg&s",
+  "IOT / GPS / TELEMÁTICA Y SEÑALIZACIÓN AUDIOVISUAL": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjT7CYnLPsfEymnXnqjPbp4wFkqqy3Wfjujg&s",
+  "Energía": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRAEUXLdthi07u5uL2FnKyOef1UXExRKJc2A&s",
+  "Energia y herramientas": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRAEUXLdthi07u5uL2FnKyOef1UXExRKJc2A&s",
+  "ENERGÍA / HERRAMIENTAS": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRAEUXLdthi07u5uL2FnKyOef1UXExRKJc2A&s",
+  "Automatización e intrusión": "https://www.tecnoseguro.com/media/k2/items/cache/fcade637289b660479a7120e9cf412b6_XL.jpg",
+  "AUTOMATIZACIÓN E INTRUSIÓN": "https://www.tecnoseguro.com/media/k2/items/cache/fcade637289b660479a7120e9cf412b6_XL.jpg",
+  "Control de acceso": "https://ita.tech/wp-content/uploads/2024/03/tipos-de-control-de-acceso-jpg-1.webp",
+  "CONTROL DE ACCESO": "https://ita.tech/wp-content/uploads/2024/03/tipos-de-control-de-acceso-jpg-1.webp",
+  "Marketing": "https://marketing4ecommerce.mx/wp-content/uploads/2023/07/e-marketing-emarketing.jpg",
+  "Cableado e infraestructura": "https://i0.wp.com/intercompras.com/blog/wp-content/uploads/2025/12/Cat5e-Cat6-o-Fibra-optica-Guia-de-Infraestructura.webp?fit=1472%2C832&ssl=1",
+  "Cableado estructurado": "https://i0.wp.com/intercompras.com/blog/wp-content/uploads/2025/12/Cat5e-Cat6-o-Fibra-optica-Guia-de-Infraestructura.webp?fit=1472%2C832&ssl=1",
+  "CABLEADO ESTRUCTURADO": "https://i0.wp.com/intercompras.com/blog/wp-content/uploads/2025/12/Cat5e-Cat6-o-Fibra-optica-Guia-de-Infraestructura.webp?fit=1472%2C832&ssl=1",
+  "Audio y video profesional": "https://produccionesarlex.com/wp-content/uploads/2023/09/audio-e-iluminacion-para-eventos-1.jpg",
+  "Industria / BMS/ Robots": "https://www.ayaatech.com/wp-content/uploads/2025/08/sd.webp"
+};
+
+const removeAccents = (str) => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
+};
+
+const getCategoryImage = (categoryName) => {
+    if (!categoryName) return null;
+    const normalized = removeAccents(categoryName.trim().toLowerCase());
+    
+    // Exact normalized match
+    for (const [key, value] of Object.entries(categoryImages)) {
+        const normalizedKey = removeAccents(key.trim().toLowerCase());
+        if (normalized === normalizedKey) {
+            return value;
+        }
+    }
+
+    // Partial normalized match
+    for (const [key, value] of Object.entries(categoryImages)) {
+        const normalizedKey = removeAccents(key.trim().toLowerCase());
+        if (normalized.includes(normalizedKey) || normalizedKey.includes(normalized)) {
+            return value;
+        }
+    }
+    return null;
+};
+
 function Catalog() {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -204,16 +251,25 @@ function Catalog() {
                                 <span>Todos</span>
                             </div>
 
-                            {!isLoadingCategories && categories.map((cat) => (
-                              <div
-                                key={cat.id}
-                                className={`category-glass-card ${syscomCategoryFilter === cat.id ? 'active' : ''}`}
-                                onClick={() => handleCategoryChange(cat.id)}
-                              >
-                                <div className="cat-icon-box">#{cat.level || '-'}</div>
-                                <span>{cat.name}</span>
-                              </div>
-                            ))}
+                            {!isLoadingCategories && categories.map((cat) => {
+                              const imgUrl = getCategoryImage(cat.name);
+                              return (
+                                <div
+                                  key={cat.id}
+                                  className={`category-glass-card ${syscomCategoryFilter === cat.id ? 'active' : ''}`}
+                                  onClick={() => handleCategoryChange(cat.id)}
+                                >
+                                  <div className={`cat-icon-box ${imgUrl ? 'with-image' : ''}`}>
+                                    {imgUrl ? (
+                                        <img src={imgUrl} alt={cat.name} />
+                                    ) : (
+                                        `#${cat.level || '-'}`
+                                    )}
+                                  </div>
+                                  <span>{cat.name}</span>
+                                </div>
+                              );
+                            })}
                         </div>
                         
                         <Row className="mb-4 g-3 align-items-center filter-row-custom shadow-sm p-3 mx-0">

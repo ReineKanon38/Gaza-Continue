@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import Reset from './pages/Reset';
 import AdminPanel from './pages/AdminPanel';
 import SuperPrecio from './pages/SuperPrecio';
+import ProductDetailPage from './pages/ProductDetailPage';
 // --- 1. IMPORTAR EL GUARDIÁN ---
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -34,6 +35,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/product/:productId" element={<ProductDetailPage />} />
         <Route path="/catalogo" element={<Dashboard />} />
         <Route path="/super-precio" element={<SuperPrecio />} />
         {/* Si tuvieras más rutas de admin, irían aquí dentro.
