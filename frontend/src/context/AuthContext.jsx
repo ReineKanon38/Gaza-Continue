@@ -22,17 +22,28 @@ export const AuthProvider = ({ children }) => {
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        const exp = JSON.parse(atob(storedToken.split('.')[1])).exp;
-        if (exp * 1000 > Date.now()) {
+        const payloadBase64Url = storedToken.split('.')[1];
+        const payloadBase64 = payloadBase64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const padLength = (4 - (payloadBase64.length % 4)) % 4;
+        const paddedBase64 = payloadBase64 + '='.repeat(padLength);
+        
+        const payloadData = JSON.parse(atob(paddedBase64));
+        const exp = payloadData.exp;
+        
+        if (!exp || exp * 1000 > Date.now()) {
           setToken(storedToken);
           setUser(parsedUser);
         } else {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
         }
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+      } catch (e) {
+        console.error('Error decoding token:', e);
+        // If there's an error decoding but we have token/user, 
+        // we can optimistically set them and let the backend reject if invalid
+        setToken(storedToken);
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
       }
     }
     setLoading(false);
