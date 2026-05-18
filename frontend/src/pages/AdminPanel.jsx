@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Table, Button, Badge, Nav, Alert, Modal, Form } from 'react-bootstrap';
 import { FiUsers, FiShoppingCart, FiPackage, FiBarChart2, FiSettings, FiTrendingUp, FiDollarSign, FiCheck, FiX, FiEye, FiEdit, FiTrash2, FiPlus, FiDownload } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
@@ -111,6 +111,46 @@ export default function AdminPanel() {
   const [selectedInventoryIds, setSelectedInventoryIds] = useState([]);
   const [isInventoryLoading, setIsInventoryLoading] = useState(false);
 
+  const buildOrderFilters = useCallback((paymentFilter = selectedPaymentFilter, orderStatusFilter = selectedOrderStatusFilter) => {
+    const query = {};
+    if (paymentFilter !== 'all') {
+      query.paymentStatus = paymentFilter;
+    }
+    if (orderStatusFilter !== 'all') {
+      query.status = orderStatusFilter;
+    }
+    return query;
+  }, [selectedPaymentFilter, selectedOrderStatusFilter]);
+
+  const loadOrders = useCallback(async (paymentFilter = selectedPaymentFilter, orderStatusFilter = selectedOrderStatusFilter) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const query = buildOrderFilters(paymentFilter, orderStatusFilter);
+      const orders = await orderService.getAllOrders(query);
+      setAllOrders(orders.orders || orders.data || []);
+    } catch (error) {
+      console.error('Error cargando órdenes:', error);
+    }
+  }, [buildOrderFilters, selectedPaymentFilter, selectedOrderStatusFilter]);
+
+  const loadSyscomHealthHistory = useCallback(async (minutes = selectedSyscomHistoryMinutes) => {
+    try {
+      setIsLoadingSyscomHealthHistory(true);
+      const data = await syscomAdminService.getHealthHistory({
+        minutes,
+        limit: 120
+      });
+      setSyscomHealthHistory(data || { points: [] });
+    } catch (error) {
+      console.error('Error cargando historico de SYSCOM:', error);
+      setSyscomHealthHistory({ points: [] });
+    } finally {
+      setIsLoadingSyscomHealthHistory(false);
+    }
+  }, [selectedSyscomHistoryMinutes]);
+
   useEffect(() => {
     if (authLoading) {
       return;
@@ -133,14 +173,14 @@ export default function AdminPanel() {
     loadSystemConfig();
     loadInventory();
     loadSyscomHealth();
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, loadOrders]);
 
   useEffect(() => {
     if (activeTab === 'reports') {
       loadSyscomHealth();
       loadSyscomHealthHistory(selectedSyscomHistoryMinutes);
     }
-  }, [activeTab, selectedSyscomHistoryMinutes]);
+  }, [activeTab, selectedSyscomHistoryMinutes, loadSyscomHealthHistory]);
 
   const loadCategories = async () => {
     try {
@@ -254,30 +294,6 @@ export default function AdminPanel() {
       });
     } catch (error) {
       console.error('Error cargando resumen de pagos:', error);
-    }
-  };
-
-  const buildOrderFilters = (paymentFilter = selectedPaymentFilter, orderStatusFilter = selectedOrderStatusFilter) => {
-    const query = {};
-    if (paymentFilter !== 'all') {
-      query.paymentStatus = paymentFilter;
-    }
-    if (orderStatusFilter !== 'all') {
-      query.status = orderStatusFilter;
-    }
-    return query;
-  };
-
-  const loadOrders = async (paymentFilter = selectedPaymentFilter, orderStatusFilter = selectedOrderStatusFilter) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const query = buildOrderFilters(paymentFilter, orderStatusFilter);
-      const orders = await orderService.getAllOrders(query);
-      setAllOrders(orders.orders || orders.data || []);
-    } catch (error) {
-      console.error('Error cargando órdenes:', error);
     }
   };
 
@@ -427,22 +443,6 @@ export default function AdminPanel() {
       setSyscomHealth(null);
     } finally {
       setIsLoadingSyscomHealth(false);
-    }
-  };
-
-  const loadSyscomHealthHistory = async (minutes = selectedSyscomHistoryMinutes) => {
-    try {
-      setIsLoadingSyscomHealthHistory(true);
-      const data = await syscomAdminService.getHealthHistory({
-        minutes,
-        limit: 120
-      });
-      setSyscomHealthHistory(data || { points: [] });
-    } catch (error) {
-      console.error('Error cargando historico de SYSCOM:', error);
-      setSyscomHealthHistory({ points: [] });
-    } finally {
-      setIsLoadingSyscomHealthHistory(false);
     }
   };
 

@@ -6,6 +6,71 @@ import ProductCard from '../components/ProductCard';
 import productService from '../services/productService';
 import './SuperPrecio.css';
 
+function getNumericPrice(fields = []) {
+  for (const field of fields) {
+    const numeric = Number(field);
+    if (Number.isFinite(numeric) && numeric > 0) {
+      return numeric;
+    }
+  }
+  return 0;
+}
+
+function normalizeProduct(product) {
+  const syscomId = String(product.producto_id || product.id || product.syscomId || product._id || '');
+  const stock = Number(product.stock || product.existencia || 0);
+  const price = getNumericPrice([
+    product.precio_descuento_mxn,
+    product.precios?.precio_descuento_mxn,
+    product.precio_mxn,
+    product.precio_descuento,
+    product.precio,
+    product.precios?.precio_descuento,
+    product.precios?.precio_lista,
+    product.precios?.precio_1,
+    product.price
+  ]);
+  const listPrice = getNumericPrice([
+    product.precio_lista_mxn,
+    product.precios?.precio_lista_mxn,
+    product.precio_mxn,
+    product.precio,
+    product.precio_lista,
+    product.precios?.precio_lista,
+    product.precios?.precio_1,
+    product.listPrice,
+    price
+  ]);
+  const discountPercentage = listPrice > price && price > 0
+    ? Math.round(((listPrice - price) / listPrice) * 100)
+    : 0;
+
+  const categoryRaw = product.categoria || product.category || '';
+  const categoriesArray = Array.isArray(product.categorias) ? product.categorias : [];
+  const deepestCategory = categoriesArray.find((item) => item?.nivel === 3) || categoriesArray[categoriesArray.length - 1];
+  const categoryName =
+    (typeof deepestCategory === 'string' ? deepestCategory : deepestCategory?.nombre) ||
+    categoryRaw ||
+    'Sin categoría';
+
+  return {
+    _id: product._id || `syscom-${syscomId}`,
+    syscomId,
+    name: product.nombre || product.titulo || product.name || 'Producto sin nombre',
+    description: product.descripcion || product.detalle || product.description || '',
+    image: product.imagen || product.image || product.img_portada || '',
+    price,
+    listPrice,
+    discountPercentage,
+    stock,
+    brand: product.marca || product.brand || 'Sin marca',
+    categoryName,
+    categoryKey: String(categoryName).toLowerCase(),
+    active: stock > 0,
+    isSuperPrecio: true
+  };
+}
+
 function SuperPrecio() {
   const [products, setProducts] = useState([]);
   const [visibleProducts, setVisibleProducts] = useState([]);
@@ -18,71 +83,6 @@ function SuperPrecio() {
   const [priceMax, setPriceMax] = useState('');
 
   const pageSize = 30;
-
-  const getNumericPrice = (product, fields = []) => {
-    for (const field of fields) {
-      const numeric = Number(field);
-      if (Number.isFinite(numeric) && numeric > 0) {
-        return numeric;
-      }
-    }
-    return 0;
-  };
-
-  const normalizeProduct = (product) => {
-    const syscomId = String(product.producto_id || product.id || product.syscomId || product._id || '');
-    const stock = Number(product.stock || product.existencia || 0);
-    const price = getNumericPrice(product, [
-      product.precio_descuento_mxn,
-      product.precios?.precio_descuento_mxn,
-      product.precio_mxn,
-      product.precio_descuento,
-      product.precio,
-      product.precios?.precio_descuento,
-      product.precios?.precio_lista,
-      product.precios?.precio_1,
-      product.price
-    ]);
-    const listPrice = getNumericPrice(product, [
-      product.precio_lista_mxn,
-      product.precios?.precio_lista_mxn,
-      product.precio_mxn,
-      product.precio,
-      product.precio_lista,
-      product.precios?.precio_lista,
-      product.precios?.precio_1,
-      product.listPrice,
-      price
-    ]);
-    const discountPercentage = listPrice > price && price > 0
-      ? Math.round(((listPrice - price) / listPrice) * 100)
-      : 0;
-
-    const categoryRaw = product.categoria || product.category || '';
-    const categoriesArray = Array.isArray(product.categorias) ? product.categorias : [];
-    const deepestCategory = categoriesArray.find((item) => item?.nivel === 3) || categoriesArray[categoriesArray.length - 1];
-    const categoryName =
-      (typeof deepestCategory === 'string' ? deepestCategory : deepestCategory?.nombre) ||
-      categoryRaw ||
-      'Sin categoría';
-
-    return {
-      _id: product._id || `syscom-${syscomId}`,
-      syscomId,
-      name: product.titulo || product.nombre || product.name || 'Producto SYSCOM',
-      description: product.descripcion || product.description || '',
-      image: product.imagen || product.image || product.img_portada || '',
-      price,
-      listPrice,
-      discountPercentage,
-      stock,
-      brand: product.marca || product.brand || 'SYSCOM',
-      categoryName,
-      categoryKey: String(categoryName).toLowerCase(),
-      active: stock > 0,
-      isSuperPrecio: true
-    };
-  };
 
   const loadProducts = useCallback(async (page, append = false) => {
     try {

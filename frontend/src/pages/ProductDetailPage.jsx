@@ -77,7 +77,7 @@ function ProductDetailPage() {
   const generalDescriptionSource = productDescription || additionalDescription;
   const descriptionHighlights = generalDescriptionSource
     ? generalDescriptionSource
-        .split(/[\r\n\.]+/)
+        .split(/[\r\n.]+/)
         .map((item) => item.trim())
         .filter(Boolean)
         .slice(0, 5)
