@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Alert, Badge, Spinner } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
-import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare } from 'react-icons/bs';
+import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare, BsTruck } from 'react-icons/bs';
 import orderService from '../services/orderService';
 
 function Profile() {
@@ -158,7 +159,7 @@ function Profile() {
                     updateData.newPassword = editData.newPassword;
                 }
 
-                const response = await fetch(`${apiUrl}/api/auth/update-profile`, {
+                const response = await fetch(`${apiUrl}/auth/update-profile`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -392,14 +393,22 @@ function Profile() {
                                     <>
                                         <div className="d-flex gap-2 flex-wrap mb-3">
                                             {orders.slice(0, 6).map((order) => (
-                                                <Button
-                                                    key={order._id}
-                                                    size="sm"
-                                                    variant={selectedTracking?.orderId === order.orderId ? 'primary' : 'outline-secondary'}
-                                                    onClick={() => handleSelectOrderTracking(order._id)}
-                                                >
-                                                    {order.orderId}
-                                                </Button>
+                                                <div key={order._id} className="d-flex gap-1">
+                                                    <Button
+                                                        size="sm"
+                                                        variant={selectedTracking?.orderId === order.orderId ? 'primary' : 'outline-secondary'}
+                                                        onClick={() => handleSelectOrderTracking(order._id)}
+                                                    >
+                                                        {order.orderId}
+                                                    </Button>
+                                                    <Link
+                                                        to={`/orders/${order._id}`}
+                                                        className="btn btn-sm btn-outline-primary"
+                                                        title="Ver rastreo detallado"
+                                                    >
+                                                        <BsTruck />
+                                                    </Link>
+                                                </div>
                                             ))}
                                         </div>
 

@@ -790,10 +790,10 @@ export default function AdminPanel() {
       };
 
       const [statsResponse, ordersResponse, categorySalesResponse, monthlySalesResponse] = await Promise.all([
-        fetch(`${apiUrl}/api/stats/dashboard`, { headers }),
-        fetch(`${apiUrl}/api/stats/recent-orders?limit=5`, { headers }),
-        fetch(`${apiUrl}/api/stats/sales-by-category`, { headers }),
-        fetch(`${apiUrl}/api/stats/sales-by-month`, { headers })
+        fetch(`${apiUrl}/stats/dashboard`, { headers }),
+        fetch(`${apiUrl}/stats/recent-orders?limit=5`, { headers }),
+        fetch(`${apiUrl}/stats/sales-by-category`, { headers }),
+        fetch(`${apiUrl}/stats/sales-by-month`, { headers })
       ]);
 
       if (statsResponse.ok) {

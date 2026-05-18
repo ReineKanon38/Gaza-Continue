@@ -18,43 +18,24 @@ const sanitizeUser = (user) => ({
   savedShippingAddress: user.savedShippingAddress
 });
 
+const normalizeEmail = (value = '') => String(value).trim().toLowerCase();
+
 export const registerUser = async (req, res) => {
   try {
-    const { name, nombre, email, password, role, adminRegistrationKey } = req.body;
+    const { name, nombre, email, password } = req.body;
     const userName = name || nombre;
 
-    const requestedRole = role === 'admin' ? 'admin' : 'user';
-    let canCreateAdmin = false;
-
-    if (requestedRole === 'admin') {
-      const configuredAdminKey = String(process.env.ADMIN_REGISTRATION_KEY || '').trim();
-
-      if (configuredAdminKey) {
-        canCreateAdmin = adminRegistrationKey === configuredAdminKey;
-      } else {
-        // Modo temporal: sin clave configurada, solo permitir bootstrap del primer admin.
-        const adminCount = await User.countDocuments({ role: 'admin' });
-        canCreateAdmin = adminCount === 0;
-      }
-    }
-
-    if (requestedRole === 'admin' && !canCreateAdmin) {
-      return sendError(res, {
-        status: 403,
-        message: 'No autorizado para registrar cuentas de administrador. Si no hay clave configurada, solo se permite un primer admin temporal.'
-      });
-    }
-
-    const userExists = await User.findOne({ email });
+    const normalizedEmail = normalizeEmail(email);
+    const userExists = await User.findOne({ email: normalizedEmail });
     if (userExists) {
       return sendError(res, { status: 409, message: 'El usuario ya existe' });
     }
 
     const user = await User.create({
       name: userName,
-      email,
+      email: normalizedEmail,
       password,
-      role: canCreateAdmin ? 'admin' : 'user'
+      role: 'user'
     });
 
     if (!user) {
@@ -65,8 +46,7 @@ export const registerUser = async (req, res) => {
       status: 201,
       message: 'Usuario registrado correctamente',
       token: generateToken(user._id),
-      user: sanitizeUser(user),
-      bootstrapAdmin: requestedRole === 'admin' && canCreateAdmin && !String(process.env.ADMIN_REGISTRATION_KEY || '').trim()
+      user: sanitizeUser(user)
     });
   } catch (error) {
     logger.error('Error en registro de usuario', { message: error.message });

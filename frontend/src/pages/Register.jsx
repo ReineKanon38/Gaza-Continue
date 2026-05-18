@@ -10,8 +10,6 @@ function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
-  const [adminRegistrationKey, setAdminRegistrationKey] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,14 +39,10 @@ function Register() {
         const payload = {
           name: username,
           email,
-          password,
-          role
+          password
         };
-        if (role === 'admin') {
-          payload.adminRegistrationKey = adminRegistrationKey;
-        }
 
-        const res = await fetch(`${apiUrl}/api/auth/register`, {
+        const res = await fetch(`${apiUrl}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -135,29 +129,6 @@ function Register() {
                 />
               </InputGroup>
             </Form.Group>
-
-            <Form.Group className="mb-3" controlId="formRole">
-              <Form.Label>Tipo de cuenta</Form.Label>
-              <Form.Select value={role} onChange={(e) => setRole(e.target.value)}>
-                <option value="user">Cliente</option>
-                <option value="admin">Administrador</option>
-              </Form.Select>
-            </Form.Group>
-
-            {role === 'admin' && (
-              <Form.Group className="mb-3" controlId="formAdminRegistrationKey">
-                <Form.Label>Clave de registro admin (opcional)</Form.Label>
-                <Form.Control
-                  type="password"
-                  placeholder="Clave de autorización (si aplica)"
-                  value={adminRegistrationKey}
-                  onChange={(e) => setAdminRegistrationKey(e.target.value)}
-                />
-                <Form.Text className="text-muted">
-                  Si backend no tiene clave configurada, solo se permitirá crear un primer admin temporal.
-                </Form.Text>
-              </Form.Group>
-            )}
 
             {/* CAMBIO AQUÍ:
               Quitamos 'variant="primary"'

@@ -11,6 +11,7 @@ import Reset from './pages/Reset';
 import AdminPanel from './pages/AdminPanel';
 import SuperPrecio from './pages/SuperPrecio';
 import ProductDetailPage from './pages/ProductDetailPage';
+import OrderTracking from './pages/OrderTracking';
 // --- 1. IMPORTAR EL GUARDIÁN ---
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/product/:productId" element={<ProductDetailPage />} />
         <Route path="/catalogo" element={<Dashboard />} />
         <Route path="/super-precio" element={<SuperPrecio />} />
+        <Route path="/orders/:id" element={<OrderTracking />} />
         {/* Si tuvieras más rutas de admin, irían aquí dentro.
         <Route path="/app/perfil" element={<Perfil />} />
         <Route path="/app/configuracion" element={<Configuracion />} /> 

@@ -1,23 +1,25 @@
-version: "3.9"
-
 services:
   backend:
     build:
       context: ./backend
     container_name: gaza_backend
+    env_file:
+      - ./backend/.env
     ports:
       - "5000:5000"
     environment:
       NODE_ENV: production
       PORT: 5000
-      MONGODB_URI: ${MONGODB_URI}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
-      SYSCOM_API_URL: ${SYSCOM_API_URL:-https://developers.syscom.mx/api/v1}
-      SYSCOM_CLIENT_ID: ${SYSCOM_CLIENT_ID}
-      SYSCOM_API_KEY: ${SYSCOM_API_KEY}
-      SYSCOM_DEFAULT_QUERY: ${SYSCOM_DEFAULT_QUERY:-camara}
+      JWT_EXPIRES_IN: 1d
+      CORS_ORIGIN: http://localhost
+      SYSCOM_API_URL: https://developers.syscom.mx/api/v1
+      SYSCOM_DEFAULT_QUERY: camara
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
     restart: unless-stopped
 
   frontend:
@@ -27,7 +29,14 @@ services:
         VITE_API_URL: /api
     container_name: gaza_frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "80:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     restart: unless-stopped

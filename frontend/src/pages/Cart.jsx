@@ -106,8 +106,11 @@ function Cart() {
                           </div>
                         </Col>
                         <Col md={3} className="text-md-end">
+                          <div className="small text-muted mb-1">
+                            ${Number(item.product.price || 0).toLocaleString('es-MX')} c/u
+                          </div>
                           <div className="fs-4 fw-bold text-primary mb-3">
-                            ${(item.product.price * item.quantity).toLocaleString('es-MX')}
+                            ${(Number(item.product.price || 0) * item.quantity).toLocaleString('es-MX')}
                           </div>
                           <Button 
                             variant="outline-danger" 
