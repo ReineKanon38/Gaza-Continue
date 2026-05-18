@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button } from 'react-bootstrap';
 import { BsCartPlusFill } from 'react-icons/bs';
 import { useCartHelpers } from '../hooks/useCartHooks';
-import ProductDetailModal from './ProductDetailModal';
+import { generateProductBenefits } from '../utils/productBenefits';
 
 function ProductCard({ product }) {
+  const navigate = useNavigate();
   const { addToCart, isInCart, getItemQuantity } = useCartHelpers();
-  const [showDetail, setShowDetail] = useState(false);
 
-    if (!product) {
-        return null;
-    }
+  if (!product) {
+    return null;
+  }
 
     const imagePlaceholder = {
     height: '200px',
@@ -24,17 +24,25 @@ function ProductCard({ product }) {
     overflow: 'hidden'
   };
 
-  const imageUrl = product.image || null;
+  const imageUrl = product.image || product.img_portada || product.imagen || product.picture || product.foto || null;
   const safePrice = Number(product.price || 0);
   const safeListPrice = Number(product.listPrice || 0);
   const hasPromoPrice = safeListPrice > safePrice && safePrice > 0;
   const stock = Number(product.stock || 0);
   const hasLowStock = stock > 0 && stock <= 5;
   const isOutOfStock = stock <= 0;
+  const productBenefits = generateProductBenefits(product);
+  const productCode = product.syscomId || product._id || product.id || product.code || product.codigo || '';
+  const productSlug = encodeURIComponent(productCode || product.name || `item-${Date.now()}`);
 
   return (
-    <Card className="h-100 shadow-sm border-0 fade-in">
-      {imageUrl ? (
+    <Card
+      className="product-card h-100 shadow-sm border-0 fade-in"
+      style={{ cursor: 'pointer' }}
+      onClick={() => navigate(`/product/${productSlug}`, { state: { product } })}
+    >
+      <div className="product-card-media">
+        {imageUrl ? (
         <div style={{ height: '200px', overflow: 'hidden' }}>
           <img
             src={imageUrl}
@@ -64,38 +72,60 @@ function ProductCard({ product }) {
           </div>
         </div>
       )}
+      </div>
       <Card.Body className="d-flex flex-column p-4">
         <div className="d-flex gap-2 mb-2 flex-wrap">
           {product.isSuperPrecio && <span className="badge text-bg-danger">Super Precio</span>}
           {hasLowStock && <span className="badge text-bg-warning">Ultimas piezas</span>}
           {isOutOfStock && <span className="badge text-bg-secondary">Sin stock</span>}
         </div>
-        <Card.Title className="mb-2" style={{ 
-            fontSize: '1.1rem', 
-            fontWeight: '600',
-            color: 'var(--text-primary)',
-            minHeight: '3rem',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-        }}>
-            {product.name}
-        </Card.Title>
+        <div className="product-title-wrapper">
+          <Card.Title className="mb-2 product-title" style={{ 
+              fontSize: '1.1rem', 
+              fontWeight: '600',
+              color: 'var(--text-primary)',
+              minHeight: '3rem',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              cursor: 'default'
+          }}>
+              {product.name}
+          </Card.Title>
+          <div className="product-title-hover-overlay">
+            <div className="product-hover-info">
+              <div className="d-flex justify-content-between align-items-start mb-3">
+                <span className={`badge ${isOutOfStock ? 'bg-secondary' : hasLowStock ? 'bg-warning text-dark' : 'bg-primary text-white'}`}>
+                  {isOutOfStock ? 'Sin stock' : 'Disponible'}
+                </span>
+              </div>
+              <h6 className="product-hover-title" style={{ color: '#1d4ed8' }}>{product.name}</h6>
+              {productCode && <p className="product-hover-meta" style={{ color: '#1d4ed8' }}>Código: {productCode}</p>}
+              {productBenefits.length > 0 ? (
+                <ul className="product-hover-features mb-0">
+                  {productBenefits.map((benefit, index) => (
+                    <li key={index}>{benefit}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </div>
+        </div>
         {product.description && (
-            <Card.Text className="text-muted small mb-2" style={{
-                fontSize: '0.875rem',
+            <Card.Text className="text-muted mb-2 product-card-description" style={{
+                fontSize: '0.85rem',
                 color: 'var(--text-secondary)',
-                minHeight: '2.5rem',
+                minHeight: '1.8rem',
                 display: '-webkit-box',
-                WebkitLineClamp: 2,
+                WebkitLineClamp: 1,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden'
             }}>
                 {product.description}
             </Card.Text>
         )}
-                <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         {hasPromoPrice && (
                             <div className="text-muted text-decoration-line-through small">
@@ -122,42 +152,27 @@ function ProductCard({ product }) {
                     )}
         </div>
         <Button 
-              variant="outline-dark"
-              onClick={() => setShowDetail(true)}
-              className="w-100 d-flex align-items-center justify-content-center mb-2"
-              style={{ 
-                borderRadius: '0.5rem',
-                padding: '0.6rem',
-                fontSize: '0.95rem',
-                fontWeight: '600'
-              }}
+          onClick={(e) => {
+            e.stopPropagation();
+            addToCart(product, 1);
+          }}
+          className="btn-custom-primary w-100 d-flex align-items-center justify-content-center"
+          disabled={!product.active || isOutOfStock}
+          style={{ 
+              borderRadius: '0.5rem',
+              padding: '0.7rem 0.9rem',
+              fontSize: '0.95rem',
+              fontWeight: '600'
+          }}
         >
-              Ver informacion
+          <BsCartPlusFill className="me-2" style={{ fontSize: '0.9rem' }} />
+          {isOutOfStock
+              ? 'No disponible'
+              : isInCart(product._id)
+                  ? `En carrito (${getItemQuantity(product._id)})`
+                  : 'Agregar al Carrito'}
         </Button>
-        <Button 
-                    onClick={() => addToCart(product, 1)}
-                    className="btn-custom-primary w-100 d-flex align-items-center justify-content-center"
-                    disabled={!product.active || isOutOfStock}
-                    style={{ 
-                        borderRadius: '0.5rem',
-                        padding: '0.75rem',
-                        fontSize: '1rem',
-                        fontWeight: '600'
-                    }}
-        >
-                    <BsCartPlusFill className="me-2" style={{ fontSize: '1.1rem' }} />
-                    {isOutOfStock
-                        ? 'No disponible'
-                        : isInCart(product._id)
-                            ? `En carrito (${getItemQuantity(product._id)})`
-                            : 'Agregar al Carrito'}
-        </Button>
-            </Card.Body>
-      <ProductDetailModal
-        show={showDetail}
-        onHide={() => setShowDetail(false)}
-        product={product}
-      />
+      </Card.Body>
     </Card>
     );
 }
