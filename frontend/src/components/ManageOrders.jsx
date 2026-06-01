@@ -8,6 +8,7 @@ import OrderDetailModal from './orders/OrderDetailModal';
 import EditOrderModal from './orders/EditOrderModal';
 import OrderStats from './orders/OrderStats';
 import { useNotification } from '../hooks';
+import { requestJson } from '../services/httpClient';
 
 const ManageOrders = () => {
   const { showNotification } = useNotification();
@@ -46,22 +47,7 @@ const ManageOrders = () => {
         if (value) queryParams.append(key, value);
       });
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders/admin/all?${queryParams}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await requestJson(`/orders/admin/all?${queryParams.toString()}`);
       setOrders(data.data || []);
     } catch (err) {
       console.error('Error cargando órdenes:', err);
@@ -75,20 +61,8 @@ const ManageOrders = () => {
   // Cargar estadísticas
   const loadStats = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders/admin/stats`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
-      }
+      const data = await requestJson('/orders/admin/stats');
+      setStats(data.data);
     } catch (err) {
       console.error('Error cargando estadísticas:', err);
     }
@@ -128,19 +102,7 @@ const ManageOrders = () => {
     }
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders/${orderId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
+      await requestJson(`/orders/${orderId}`, { method: 'DELETE' });
 
       showNotification('Éxito', 'Orden eliminada correctamente', 'success');
       await loadOrders();

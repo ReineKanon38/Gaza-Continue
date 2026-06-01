@@ -17,6 +17,14 @@ export const requestResetSchema = z.object({
   email: z.string().email('Email inválido')
 });
 
+export const refreshSessionSchema = z.object({
+  refreshToken: z.string().min(20, 'Refresh token inválido')
+});
+
+export const logoutSessionSchema = z.object({
+  refreshToken: z.string().min(20, 'Refresh token inválido').optional()
+});
+
 export const updateProfileSchema = z.object({
   name: z.string().min(1, 'Nombre no puede estar vacío').optional(),
   currentPassword: z.string().min(1).optional(),

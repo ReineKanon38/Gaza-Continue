@@ -3,6 +3,7 @@ import { Modal, Form, Button, Row, Col, Spinner } from 'react-bootstrap';
 import { useState } from 'react';
 import { FiSave } from 'react-icons/fi';
 import { useNotification } from '../../hooks';
+import { requestJson } from '../../services/httpClient';
 
 const EditOrderModal = ({ show, order, onHide, onOrderUpdated }) => {
   const { showNotification } = useNotification();
@@ -47,22 +48,10 @@ const EditOrderModal = ({ show, order, onHide, onOrderUpdated }) => {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/orders/${order._id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify(formData)
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al actualizar la orden');
-      }
+      await requestJson(`/orders/${order._id}`, {
+        method: 'PUT',
+        body: JSON.stringify(formData)
+      });
 
       onOrderUpdated();
       onHide();

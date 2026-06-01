@@ -5,11 +5,12 @@ import { logger } from '../utils/logger.js';
 // Buscar productos en SYSCOM
 export const searchSyscomProducts = async (req, res) => {
   try {
-    const { query, brand, category, page, limit } = req.query;
+    const { query, brand, distributor, category, page, limit } = req.query;
+    const normalizedBrand = brand || distributor;
 
     const result = await syscomService.searchProducts({
       query,
-      brand,
+      brand: normalizedBrand,
       category,
       page: parseInt(page) || 1,
       limit: parseInt(limit) || 50

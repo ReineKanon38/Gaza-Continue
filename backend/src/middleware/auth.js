@@ -11,6 +11,9 @@ export const requireAuth = async (req, res, next) => {
   }
   try {
     const payload = jwt.verify(token, getJwtSecret());
+    if (payload?.type && payload.type !== 'access') {
+      return res.status(401).json({ success: false, message: "Tipo de token no permitido" });
+    }
     const userId = payload.sub || payload.id;
     if (!userId) {
       return res.status(401).json({ success: false, message: "Token inválido o incompleto" });

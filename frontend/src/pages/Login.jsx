@@ -5,6 +5,7 @@ import { BsEnvelopeFill, BsLockFill } from 'react-icons/bs';
 import { FiLogIn } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { requestJson } from '../services/httpClient';
 
 function Login() {
   
@@ -34,23 +35,20 @@ function Login() {
         showSuccess('Sesión iniciada correctamente');
         navigate('/catalog');
       } else {
-        const res = await fetch(`${apiUrl}/auth/login`, {
+        const data = await requestJson('/auth/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data?.message || 'Error al iniciar sesión');
-        }
-        const authToken = data?.token || data?.data?.token;
+
+        const authToken = data?.accessToken || data?.token || data?.data?.accessToken || data?.data?.token;
+        const refreshToken = data?.refreshToken || data?.data?.refreshToken;
         const authUser = data?.user || data?.data?.user;
 
         if (!authToken || !authUser) {
           throw new Error('La respuesta de autenticación no es válida');
         }
 
-        login(authToken, authUser);
+        login({ accessToken: authToken, refreshToken }, authUser);
         showSuccess(`Bienvenido, ${authUser?.name || 'Usuario'}`);
         // Redirigir según el rol del usuario
         if (authUser.role === 'admin') {

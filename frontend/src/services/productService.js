@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { requestJson } from './httpClient';
+
 const USD_TO_MXN = Number(import.meta.env.VITE_USD_TO_MXN || 17.5);
 const responseCache = new Map();
 
@@ -76,8 +77,7 @@ function setCachedResponse(cacheKey, value, ttlMs) {
   });
 }
 
-async function requestJson(url, options = {}) {
-  const token = localStorage.getItem('token');
+async function cachedRequestJson(url, options = {}) {
   const method = (options.method || 'GET').toUpperCase();
   const cacheTtlMs = method === 'GET' ? getCacheTtlMs(url) : 0;
   const cacheKey = `${method}:${url}`;
@@ -89,23 +89,7 @@ async function requestJson(url, options = {}) {
     }
   }
 
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
-
-  const res = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers,
-  });
-
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : {};
-  if (!res.ok) {
-    const err = data?.error || data?.message || res.statusText || 'Error en la petición';
-    throw new Error(err);
-  }
+  const data = await requestJson(url, options);
 
   if (cacheTtlMs) {
     setCachedResponse(cacheKey, data, cacheTtlMs);
@@ -127,7 +111,7 @@ export const getAllProducts = async (params = {}) => {
   const queryString = queryParams.toString();
   const url = queryString ? `/api/products?${queryString}` : '/api/products';
   
-  const data = await requestJson(url);
+  const data = await cachedRequestJson(url);
   // Normaliza respuesta {success, data, count, pagination}
   return {
     products: data.data || data.products || [],
@@ -138,7 +122,7 @@ export const getAllProducts = async (params = {}) => {
 };
 
 export const getProductById = async (productId) => {
-  const data = await requestJson(`/api/products/${productId}`);
+  const data = await cachedRequestJson(`/api/products/${productId}`);
   return data.data || data;
 };
 
@@ -152,7 +136,7 @@ export const getSuperPrecioProducts = async (params = {}) => {
 
   const queryString = queryParams.toString();
   const url = queryString ? `/api/syscom/super-precio?${queryString}` : '/api/syscom/super-precio';
-  const data = await requestJson(url);
+  const data = await cachedRequestJson(url);
 
   const rawProducts = data?.data?.productos || data?.data?.data || data?.data || [];
   const normalizedProducts = normalizeSyscomProductPrices(rawProducts);
@@ -223,7 +207,7 @@ const flattenSyscomCategories = (rawCategories) => {
 };
 
 export const getSyscomCategories = async () => {
-  const data = await requestJson('/api/syscom/categories');
+  const data = await cachedRequestJson('/api/syscom/categories');
   const raw =
     data?.data ??
     data?.categorias ??
@@ -250,7 +234,7 @@ export const searchSyscomProducts = async (params = {}) => {
 
   const queryString = queryParams.toString();
   const url = queryString ? `/api/syscom/search?${queryString}` : '/api/syscom/search';
-  const data = await requestJson(url);
+  const data = await cachedRequestJson(url);
 
   const rawData = data?.data;
   const rawProducts = rawData?.productos || rawData?.data || (Array.isArray(rawData) ? rawData : []);
@@ -272,21 +256,21 @@ export const searchSyscomProducts = async (params = {}) => {
 };
 
 export const createProduct = async (productData) => {
-  return requestJson('/api/products', {
+  return cachedRequestJson('/api/products', {
     method: 'POST',
     body: JSON.stringify(productData),
   });
 };
 
 export const updateProduct = async (productId, productData) => {
-  return requestJson(`/api/products/${productId}`, {
+  return cachedRequestJson(`/api/products/${productId}`, {
     method: 'PUT',
     body: JSON.stringify(productData),
   });
 };
 
 export const deleteProduct = async (productId) => {
-  return requestJson(`/api/products/${productId}`, {
+  return cachedRequestJson(`/api/products/${productId}`, {
     method: 'DELETE',
   });
 };

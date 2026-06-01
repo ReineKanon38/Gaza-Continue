@@ -4,7 +4,7 @@ import { BsCartPlusFill } from 'react-icons/bs';
 import { useCartHelpers } from '../hooks/useCartHooks';
 import { generateProductBenefits } from '../utils/productBenefits';
 
-function ProductCard({ product }) {
+function ProductCard({ product, matchMeta = null }) {
   const navigate = useNavigate();
   const { addToCart, isInCart, getItemQuantity } = useCartHelpers();
 
@@ -76,6 +76,7 @@ function ProductCard({ product }) {
       <Card.Body className="d-flex flex-column p-4">
         <div className="d-flex gap-2 mb-2 flex-wrap">
           {product.isSuperPrecio && <span className="badge text-bg-danger">Super Precio</span>}
+          {matchMeta?.isApprox && <span className="badge text-bg-info">Coincidencia aproximada</span>}
           {hasLowStock && <span className="badge text-bg-warning">Ultimas piezas</span>}
           {isOutOfStock && <span className="badge text-bg-secondary">Sin stock</span>}
         </div>

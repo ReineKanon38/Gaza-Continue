@@ -16,6 +16,7 @@ import couponService from '../services/couponService';
 import configService from '../services/configService';
 import inventoryService from '../services/inventoryService';
 import syscomAdminService from '../services/syscomAdminService';
+import { requestJson } from '../services/httpClient';
 import './AdminPanel.css';
 
 export default function AdminPanel() {
@@ -124,9 +125,6 @@ export default function AdminPanel() {
 
   const loadOrders = useCallback(async (paymentFilter = selectedPaymentFilter, orderStatusFilter = selectedOrderStatusFilter) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const query = buildOrderFilters(paymentFilter, orderStatusFilter);
       const orders = await orderService.getAllOrders(query);
       setAllOrders(orders.orders || orders.data || []);
@@ -375,9 +373,6 @@ export default function AdminPanel() {
 
   const loadUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       const users = await userService.getAllUsers();
       setAllUsers(users || []);
     } catch (error) {
@@ -773,93 +768,74 @@ export default function AdminPanel() {
     try {
       setIsLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL;
-      const token = localStorage.getItem('token');
-      if (!apiUrl || !token) {
-        console.warn('API URL o token no configurados, no se puede cargar dashboard admin');
-        setConfigError('Falta VITE_API_URL o token de sesión para cargar el panel de administración.');
+      if (!apiUrl) {
+        console.warn('API URL no configurada, no se puede cargar dashboard admin');
+        setConfigError('Falta VITE_API_URL para cargar el panel de administración.');
         setIsLoading(false);
         return;
       }
 
       setConfigError(null);
 
-      // Con backend: hacer peticiones reales
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
       const [statsResponse, ordersResponse, categorySalesResponse, monthlySalesResponse] = await Promise.all([
-        fetch(`${apiUrl}/stats/dashboard`, { headers }),
-        fetch(`${apiUrl}/stats/recent-orders?limit=5`, { headers }),
-        fetch(`${apiUrl}/stats/sales-by-category`, { headers }),
-        fetch(`${apiUrl}/stats/sales-by-month`, { headers })
+        requestJson('/stats/dashboard'),
+        requestJson('/stats/recent-orders?limit=5'),
+        requestJson('/stats/sales-by-category'),
+        requestJson('/stats/sales-by-month')
       ]);
 
-      if (statsResponse.ok) {
-        const data = await statsResponse.json();
-        if (data.success) {
-          const kpis = data.data.kpis || {};
+      if (statsResponse.success) {
+        const kpis = statsResponse.data.kpis || {};
 
-          setStats({
-            totalOrders: kpis.ordersMonth || 0,
-            totalProducts: kpis.totalProducts || 0,
-            totalUsers: kpis.totalUsers || 0,
-            revenue: kpis.salesMonth || 0
-          });
+        setStats({
+          totalOrders: kpis.ordersMonth || 0,
+          totalProducts: kpis.totalProducts || 0,
+          totalUsers: kpis.totalUsers || 0,
+          revenue: kpis.salesMonth || 0
+        });
 
-          setReportKpis({
-            salesToday: kpis.salesToday || 0,
-            salesMonth: kpis.salesMonth || 0,
-            ordersToday: kpis.ordersToday || 0,
-            ordersMonth: kpis.ordersMonth || 0,
-            pendingOrders: kpis.pendingOrders || 0
-          });
-          
-          // Procesar datos de gráficas si vienen del backend
-          if (data.data.topProducts) {
-            setReportTopProducts(data.data.topProducts);
-            setTopProducts(data.data.topProducts.map((p, idx) => ({
-              label: p.name || `Producto ${idx + 1}`,
-              value: p.totalSold || 0,
-              color: '#007bff'
-            })));
-          }
-        }
-      }
+        setReportKpis({
+          salesToday: kpis.salesToday || 0,
+          salesMonth: kpis.salesMonth || 0,
+          ordersToday: kpis.ordersToday || 0,
+          ordersMonth: kpis.ordersMonth || 0,
+          pendingOrders: kpis.pendingOrders || 0
+        });
 
-      if (categorySalesResponse.ok) {
-        const categoryData = await categorySalesResponse.json();
-        if (categoryData.success) {
-          setSalesByCategory((categoryData.data || []).map((item, idx) => ({
-            label: item.category,
-            value: item.sales,
-            color: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8'][idx % 5]
+        // Procesar datos de gráficas si vienen del backend
+        if (statsResponse.data.topProducts) {
+          setReportTopProducts(statsResponse.data.topProducts);
+          setTopProducts(statsResponse.data.topProducts.map((p, idx) => ({
+            label: p.name || `Producto ${idx + 1}`,
+            value: p.totalSold || 0,
+            color: '#007bff'
           })));
         }
       }
 
-      if (monthlySalesResponse.ok) {
-        const monthlyData = await monthlySalesResponse.json();
-        if (monthlyData.success) {
-          setMonthlySales((monthlyData.data || []).map((item) => ({
-            label: item.month,
-            value: item.sales
-          })));
-        }
+      if (categorySalesResponse.success) {
+        setSalesByCategory((categorySalesResponse.data || []).map((item, idx) => ({
+          label: item.category,
+          value: item.sales,
+          color: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8'][idx % 5]
+        })));
       }
 
-      if (ordersResponse.ok) {
-        const ordersData = await ordersResponse.json();
-        if (ordersData.success) {
-          setRecentOrders((ordersData.data || []).map(order => ({
-            id: order.id,
-            cliente: order.cliente,
-            fecha: order.fecha,
-            total: order.total,
-            estado: order.estado
-          })));
-        }
+      if (monthlySalesResponse.success) {
+        setMonthlySales((monthlySalesResponse.data || []).map((item) => ({
+          label: item.month,
+          value: item.sales
+        })));
+      }
+
+      if (ordersResponse.success) {
+        setRecentOrders((ordersResponse.data || []).map(order => ({
+          id: order.id,
+          cliente: order.cliente,
+          fecha: order.fecha,
+          total: order.total,
+          estado: order.estado
+        })));
       }
 
     } catch (error) {

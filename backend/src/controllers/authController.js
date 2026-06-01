@@ -1,12 +1,70 @@
 // src/controllers/authController.js
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import { logger } from '../utils/logger.js';
 
-// Función auxiliar para generar el token (no necesita export si solo se usa aquí)
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const getAccessTokenSecret = () => process.env.JWT_SECRET || 'dev_secret_change_me';
+const getRefreshTokenSecret = () => process.env.JWT_REFRESH_SECRET || getAccessTokenSecret();
+const getAccessTokenExpiry = () => process.env.JWT_ACCESS_EXPIRES_IN || '15m';
+const getRefreshTokenExpiry = () => process.env.JWT_REFRESH_EXPIRES_IN || process.env.JWT_EXPIRES_IN || '30d';
+const MAX_REFRESH_SESSIONS = Number(process.env.JWT_MAX_REFRESH_SESSIONS || 20);
+
+const hashRefreshToken = (token) => crypto.createHash('sha256').update(String(token || '')).digest('hex');
+
+const pruneRefreshSessions = (sessions = []) => {
+  const now = Date.now();
+  return (Array.isArray(sessions) ? sessions : []).filter((entry) => {
+    if (!entry?.expiresAt) return false;
+    return new Date(entry.expiresAt).getTime() > now;
+  });
+};
+
+const issueTokenPair = async (user, options = {}) => {
+  const userId = user._id.toString();
+  const sessionId = crypto.randomUUID();
+
+  const accessToken = jwt.sign(
+    { sub: userId, id: userId, email: user.email, role: user.role, type: 'access' },
+    getAccessTokenSecret(),
+    { expiresIn: getAccessTokenExpiry() }
+  );
+
+  const refreshToken = jwt.sign(
+    { sub: userId, sid: sessionId, type: 'refresh' },
+    getRefreshTokenSecret(),
+    { expiresIn: getRefreshTokenExpiry() }
+  );
+
+  const decodedRefresh = jwt.decode(refreshToken);
+  const refreshExpiry = decodedRefresh?.exp ? new Date(decodedRefresh.exp * 1000) : new Date(Date.now() + (30 * 24 * 60 * 60 * 1000));
+  const refreshHash = hashRefreshToken(refreshToken);
+
+  const activeSessions = pruneRefreshSessions(user.refreshTokens || []);
+
+  if (options.rotateFromHash) {
+    const previousSession = activeSessions.find((entry) => entry.tokenHash === options.rotateFromHash && !entry.revokedAt);
+    if (previousSession) {
+      previousSession.revokedAt = new Date();
+      previousSession.replacedByHash = refreshHash;
+    }
+  }
+
+  activeSessions.push({
+    tokenHash: refreshHash,
+    sessionId,
+    createdAt: new Date(),
+    expiresAt: refreshExpiry,
+    revokedAt: null,
+    replacedByHash: null
+  });
+
+  activeSessions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  user.refreshTokens = activeSessions.slice(0, Math.max(1, MAX_REFRESH_SESSIONS));
+  await user.save();
+
+  return { accessToken, refreshToken };
 };
 
 const sanitizeUser = (user) => ({
@@ -42,10 +100,14 @@ export const registerUser = async (req, res) => {
       return sendError(res, { status: 400, message: 'Datos de usuario inválidos' });
     }
 
+    const { accessToken, refreshToken } = await issueTokenPair(user);
+
     return sendSuccess(res, {
       status: 201,
       message: 'Usuario registrado correctamente',
-      token: generateToken(user._id),
+      token: accessToken,
+      accessToken,
+      refreshToken,
       user: sanitizeUser(user)
     });
   } catch (error) {
@@ -58,17 +120,22 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
+    const normalizedEmail = normalizeEmail(email);
+    const user = await User.findOne({ email: normalizedEmail });
 
         if (user && (await user.matchPassword(password))) {
             if (user.isBlocked) {
               return sendError(res, { status: 403, message: 'Usuario bloqueado. Contacta a un administrador.' });
             }
 
+            const { accessToken, refreshToken } = await issueTokenPair(user);
+
             return sendSuccess(res, {
               status: 200,
               message: 'Sesion iniciada correctamente',
-              token: generateToken(user._id),
+              token: accessToken,
+              accessToken,
+              refreshToken,
               user: sanitizeUser(user)
             });
         } else {
@@ -294,5 +361,97 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     logger.error('Error eliminando usuario', { message: error.message });
     return sendError(res, { status: 500, message: 'Error al eliminar usuario', error: error.message });
+  }
+};
+
+export const refreshSession = async (req, res) => {
+  try {
+    const incomingRefreshToken = req.body?.refreshToken || req.headers['x-refresh-token'];
+    if (!incomingRefreshToken) {
+      return sendError(res, { status: 401, message: 'Refresh token requerido' });
+    }
+
+    let payload;
+    try {
+      payload = jwt.verify(incomingRefreshToken, getRefreshTokenSecret());
+    } catch (error) {
+      return sendError(res, { status: 401, message: 'Refresh token inválido o expirado' });
+    }
+
+    if (payload?.type !== 'refresh') {
+      return sendError(res, { status: 401, message: 'Tipo de token no válido para refresh' });
+    }
+
+    const userId = payload.sub || payload.id;
+    const tokenHash = hashRefreshToken(incomingRefreshToken);
+    const user = await User.findById(userId);
+    if (!user) {
+      return sendError(res, { status: 401, message: 'Usuario no válido para refresh' });
+    }
+
+    const sessions = pruneRefreshSessions(user.refreshTokens || []);
+    const currentSession = sessions.find((entry) => (
+      entry.tokenHash === tokenHash &&
+      !entry.revokedAt &&
+      String(entry.sessionId || '') === String(payload.sid || '')
+    ));
+
+    if (!currentSession) {
+      user.refreshTokens = sessions;
+      await user.save();
+      return sendError(res, { status: 401, message: 'Refresh token revocado o desconocido' });
+    }
+
+    if (user.isBlocked) {
+      currentSession.revokedAt = new Date();
+      user.refreshTokens = sessions;
+      await user.save();
+      return sendError(res, { status: 403, message: 'Usuario bloqueado' });
+    }
+
+    user.refreshTokens = sessions;
+    const { accessToken, refreshToken } = await issueTokenPair(user, { rotateFromHash: tokenHash });
+
+    return sendSuccess(res, {
+      message: 'Sesion renovada correctamente',
+      token: accessToken,
+      accessToken,
+      refreshToken,
+      user: sanitizeUser(user)
+    });
+  } catch (error) {
+    logger.error('Error renovando sesión', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error al renovar sesión', error: error.message });
+  }
+};
+
+export const logoutSession = async (req, res) => {
+  try {
+    const refreshToken = req.body?.refreshToken;
+    const user = await User.findById(req.user?.sub);
+    if (!user) {
+      return sendSuccess(res, { message: 'Sesion cerrada' });
+    }
+
+    if (!refreshToken) {
+      user.refreshTokens = [];
+      await user.save();
+      return sendSuccess(res, { message: 'Sesion cerrada en todos los dispositivos' });
+    }
+
+    const refreshHash = hashRefreshToken(refreshToken);
+    const sessions = pruneRefreshSessions(user.refreshTokens || []);
+    const target = sessions.find((entry) => entry.tokenHash === refreshHash && !entry.revokedAt);
+    if (target) {
+      target.revokedAt = new Date();
+    }
+
+    user.refreshTokens = sessions;
+    await user.save();
+
+    return sendSuccess(res, { message: 'Sesion cerrada correctamente' });
+  } catch (error) {
+    logger.error('Error cerrando sesión', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error al cerrar sesión', error: error.message });
   }
 };

@@ -35,6 +35,7 @@ import LineChart from '../components/LineChart';
 import ManageOrders from '../components/ManageOrders';
 import { KpiCardSkeleton, ChartSkeleton, ProductCardSkeleton, TableSkeleton } from '../components/LoadingSkeletons';
 import NotificationToast from '../components/NotificationToast';
+import { requestJson } from '../services/httpClient';
 
 // Mock data para modo offline
 const mockProducts = [
@@ -87,10 +88,9 @@ function Dashboard() {
             setError('');
             
             const apiUrl = import.meta.env.VITE_API_URL;
-            const token = localStorage.getItem('token');
             
             // Modo sin-backend: usar mocks
-            if (!apiUrl || !token) {
+            if (!apiUrl) {
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 setProducts(mockProducts);
                 setKpis(mockKpis);
@@ -99,78 +99,58 @@ function Dashboard() {
                 return;
             }
 
-            const headers = {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            };
-
             // Peticiones paralelas para mejor performance
             const [
                 dashboardResponse,
                 recentOrdersResponse,
                 productsResponse
             ] = await Promise.all([
-                fetch(`${apiUrl}/stats/dashboard`, { headers }),
-                fetch(`${apiUrl}/stats/recent-orders?limit=5`, { headers }),
-                fetch(`${apiUrl}/products?limit=4`, { headers })
+                requestJson('/stats/dashboard'),
+                requestJson('/stats/recent-orders?limit=5'),
+                requestJson('/products?limit=4')
             ]);
 
             // Procesar respuesta de estadísticas
-            if (dashboardResponse.ok) {
-                const dashboardData = await dashboardResponse.json();
-                if (dashboardData.success) {
-                    const stats = dashboardData.data;
-                    setStatsData(stats);
-                    
-                    // Formatear KPIs
-                    setKpis([
-                        { 
-                            title: 'Ventas Hoy', 
-                            value: `$${stats.kpis.salesToday.toFixed(2)}` 
-                        },
-                        { 
-                            title: 'Ventas Este Mes', 
-                            value: `$${stats.kpis.salesMonth.toFixed(2)}` 
-                        },
-                        { 
-                            title: 'Órdenes Pendientes', 
-                            value: stats.kpis.pendingOrders.toString() 
-                        }
-                    ]);
-                } else {
-                    throw new Error('Error en respuesta de estadísticas');
-                }
+            if (dashboardResponse.success) {
+                const stats = dashboardResponse.data;
+                setStatsData(stats);
+                
+                // Formatear KPIs
+                setKpis([
+                    { 
+                        title: 'Ventas Hoy', 
+                        value: `$${stats.kpis.salesToday.toFixed(2)}` 
+                    },
+                    { 
+                        title: 'Ventas Este Mes', 
+                        value: `$${stats.kpis.salesMonth.toFixed(2)}` 
+                    },
+                    { 
+                        title: 'Órdenes Pendientes', 
+                        value: stats.kpis.pendingOrders.toString() 
+                    }
+                ]);
             } else {
-                throw new Error('Error al cargar estadísticas');
+                throw new Error('Error en respuesta de estadísticas');
             }
 
             // Procesar órdenes recientes
-            if (recentOrdersResponse.ok) {
-                const ordersData = await recentOrdersResponse.json();
-                if (ordersData.success) {
-                    setSales(ordersData.data.map(order => ({
-                        id: order.id,
-                        cliente: order.cliente,
-                        producto: order.productos.substring(0, 30) + (order.productos.length > 30 ? '...' : ''),
-                        cantidad: order.estado,
-                        total: order.total,
-                        fecha: order.fecha
-                    })));
-                } else {
-                    setSales(mockSales);
-                }
+            if (recentOrdersResponse.success) {
+                setSales(recentOrdersResponse.data.map(order => ({
+                    id: order.id,
+                    cliente: order.cliente,
+                    producto: order.productos.substring(0, 30) + (order.productos.length > 30 ? '...' : ''),
+                    cantidad: order.estado,
+                    total: order.total,
+                    fecha: order.fecha
+                })));
             } else {
                 setSales(mockSales);
             }
 
             // Procesar productos
-            if (productsResponse.ok) {
-                const productsData = await productsResponse.json();
-                if (productsData.success) {
-                    setProducts(productsData.data || []);
-                } else {
-                    setProducts(mockProducts);
-                }
+            if (productsResponse.success) {
+                setProducts(productsResponse.data || []);
             } else {
                 setProducts(mockProducts);
             }

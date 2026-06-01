@@ -2,7 +2,7 @@
 import '../dns-fix.js';
 
 import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { connectDB } from '../src/config/db.js';
 import User from '../src/models/User.js';
 

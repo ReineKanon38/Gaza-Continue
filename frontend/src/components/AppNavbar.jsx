@@ -4,7 +4,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { BsPersonCircle, BsShop, BsCart, BsGrid3X3Gap, BsStars, BsSearch } from 'react-icons/bs';
 // Importación de los nuevos iconos de Feather Icons
 import { 
-    FiLogOut, FiSettings
+    FiArrowLeft, FiHome, FiLogOut, FiMenu, FiSettings, FiShoppingCart
 } from 'react-icons/fi';
 import logo from '../assets/images/SG.jpg';
 import { useCartHelpers } from '../hooks/useCartHooks';
@@ -63,6 +63,15 @@ const handleCategoryClick = (categoryValue) => {
     setMenuQuery('');
 };
 
+const handleBack = () => {
+    if (window.history.length > 1) {
+        navigate(-1);
+        return;
+    }
+
+    navigate('/catalog');
+};
+
 return (
     <Navbar expand="lg" className="navbar-custom shadow-sm" sticky="top">
     <Container fluid className="px-4">
@@ -84,9 +93,23 @@ return (
             </small>
         </div>
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Toggle aria-controls="basic-navbar-nav" className="minimal-hamburger-toggle" aria-label="Abrir navegación">
+            <FiMenu />
+        </Navbar.Toggle>
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
         <Nav className="align-items-center gap-3">
+            <div className="mobile-quick-nav d-lg-none">
+                <Button variant="light" className="mobile-quick-btn" onClick={handleBack} aria-label="Regresar">
+                    <FiArrowLeft />
+                </Button>
+                <Button variant="light" className="mobile-quick-btn" onClick={() => navigate('/catalog')} aria-label="Inicio">
+                    <FiHome />
+                </Button>
+                <Button variant="light" className="mobile-quick-btn" onClick={() => navigate('/cart')} aria-label="Carrito">
+                    <FiShoppingCart />
+                    {totalItems > 0 && <span className="mobile-quick-counter">{totalItems > 99 ? '99+' : totalItems}</span>}
+                </Button>
+            </div>
             
             {/* Dropdown de Categorías con la nueva lista */}
             <NavDropdown 
@@ -115,11 +138,6 @@ return (
                             aria-label="Buscar categoría"
                         />
                     </div>
-
-                    <NavDropdown.Item onClick={() => navigate('/catalog')} className="syscom-all-products-item">
-                        <BsShop className="me-2" />
-                        Todos los Productos
-                    </NavDropdown.Item>
 
                     <div className="syscom-mega-grid">
                         <div className="syscom-mega-column">

@@ -5,6 +5,8 @@ import {
 	registerUser,
 	getUserProfile,
 	updateProfile,
+	refreshSession,
+	logoutSession,
 	requestPasswordReset,
 	getSavedShippingAddress,
 	updateSavedShippingAddress,
@@ -16,7 +18,7 @@ import {
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authorize.js";
 import { validate } from "../middleware/validate.js";
-import { registerSchema, loginSchema, updateProfileSchema, requestResetSchema, shippingAddressSchema } from "../validation/schemas.js";
+import { registerSchema, loginSchema, updateProfileSchema, requestResetSchema, shippingAddressSchema, refreshSessionSchema, logoutSessionSchema } from "../validation/schemas.js";
 
 const router = express.Router();
 
@@ -24,9 +26,11 @@ const router = express.Router();
 router.post("/login", validate(loginSchema), loginUser);
 router.post("/register", validate(registerSchema), registerUser);
 router.post("/reset-password", validate(requestResetSchema), requestPasswordReset);
+router.post('/refresh', validate(refreshSessionSchema), refreshSession);
 
 // Rutas protegidas
 router.get('/me', requireAuth, getUserProfile);
+router.post('/logout', requireAuth, validate(logoutSessionSchema), logoutSession);
 router.put("/update-profile", requireAuth, validate(updateProfileSchema), updateProfile);
 router.get('/shipping-address', requireAuth, getSavedShippingAddress);
 router.put('/shipping-address', requireAuth, validate(shippingAddressSchema), updateSavedShippingAddress);

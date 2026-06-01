@@ -13,12 +13,22 @@ const savedShippingAddressSchema = new mongoose.Schema({
   additionalInfo: { type: String, trim: true }
 }, { _id: false });
 
+const refreshTokenSessionSchema = new mongoose.Schema({
+  tokenHash: { type: String, required: true },
+  sessionId: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date, required: true },
+  revokedAt: { type: Date, default: null },
+  replacedByHash: { type: String, default: null }
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["user", "admin"], default: "user" },
   isBlocked: { type: Boolean, default: false },
+  refreshTokens: { type: [refreshTokenSessionSchema], default: [] },
   savedShippingAddress: {
     type: savedShippingAddressSchema,
     default: () => ({ country: "México" })

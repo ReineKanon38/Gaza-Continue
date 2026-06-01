@@ -1,62 +1,103 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Container, Row, Col, Form, InputGroup, Spinner, Badge, Button, ButtonGroup } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
 import ProductCard from '../components/ProductCard';
 import { BsGrid3X3Gap, BsSearch, BsCurrencyDollar, BsListUl } from 'react-icons/bs';
+import { FiActivity, FiBarChart2, FiCamera, FiCpu, FiGrid, FiLock, FiMic, FiShield, FiTool, FiZap } from 'react-icons/fi';
 import productService from '../services/productService';
 import './Catalog.css';
-
-const categoryImages = {
-  "Videovigilancia": "https://videoloft.com/wp-content/uploads/2020/12/Hikvision-cloud-storage-video-surveillance.png",
-  "Video vigilancia": "https://videoloft.com/wp-content/uploads/2020/12/Hikvision-cloud-storage-video-surveillance.png",
-  "Redes e IT": "https://s1.significados.com/foto/redes-og.jpg?class=ogImageWide",
-  "IoT / GPS / Telemática": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjT7CYnLPsfEymnXnqjPbp4wFkqqy3Wfjujg&s",
-  "IOT / GPS / TELEMÁTICA Y SEÑALIZACIÓN AUDIOVISUAL": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjT7CYnLPsfEymnXnqjPbp4wFkqqy3Wfjujg&s",
-  "Energía": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRAEUXLdthi07u5uL2FnKyOef1UXExRKJc2A&s",
-  "Energia y herramientas": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRAEUXLdthi07u5uL2FnKyOef1UXExRKJc2A&s",
-  "ENERGÍA / HERRAMIENTAS": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRAEUXLdthi07u5uL2FnKyOef1UXExRKJc2A&s",
-  "Automatización e intrusión": "https://www.tecnoseguro.com/media/k2/items/cache/fcade637289b660479a7120e9cf412b6_XL.jpg",
-  "AUTOMATIZACIÓN E INTRUSIÓN": "https://www.tecnoseguro.com/media/k2/items/cache/fcade637289b660479a7120e9cf412b6_XL.jpg",
-  "Control de acceso": "https://ita.tech/wp-content/uploads/2024/03/tipos-de-control-de-acceso-jpg-1.webp",
-  "CONTROL DE ACCESO": "https://ita.tech/wp-content/uploads/2024/03/tipos-de-control-de-acceso-jpg-1.webp",
-  "Marketing": "https://marketing4ecommerce.mx/wp-content/uploads/2023/07/e-marketing-emarketing.jpg",
-  "Cableado e infraestructura": "https://i0.wp.com/intercompras.com/blog/wp-content/uploads/2025/12/Cat5e-Cat6-o-Fibra-optica-Guia-de-Infraestructura.webp?fit=1472%2C832&ssl=1",
-  "Cableado estructurado": "https://i0.wp.com/intercompras.com/blog/wp-content/uploads/2025/12/Cat5e-Cat6-o-Fibra-optica-Guia-de-Infraestructura.webp?fit=1472%2C832&ssl=1",
-  "CABLEADO ESTRUCTURADO": "https://i0.wp.com/intercompras.com/blog/wp-content/uploads/2025/12/Cat5e-Cat6-o-Fibra-optica-Guia-de-Infraestructura.webp?fit=1472%2C832&ssl=1",
-  "Audio y video profesional": "https://produccionesarlex.com/wp-content/uploads/2023/09/audio-e-iluminacion-para-eventos-1.jpg",
-  "Industria / BMS/ Robots": "https://www.ayaatech.com/wp-content/uploads/2025/08/sd.webp"
-};
 
 const removeAccents = (str) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
 };
 
-const getCategoryImage = (categoryName) => {
-    if (!categoryName) return null;
-    const normalized = removeAccents(categoryName.trim().toLowerCase());
-    
-    // Exact normalized match
-    for (const [key, value] of Object.entries(categoryImages)) {
-        const normalizedKey = removeAccents(key.trim().toLowerCase());
-        if (normalized === normalizedKey) {
-            return value;
+const normalizeText = (value) => removeAccents(String(value || '').toLowerCase());
+
+const getCategoryIcon = (categoryName) => {
+    const normalized = normalizeText(categoryName);
+
+    if (/(videovigil|camara|cctv)/.test(normalized)) return FiCamera;
+    if (/(red|network|it|switch|router)/.test(normalized)) return FiCpu;
+    if (/(iot|gps|telemat|senaliz)/.test(normalized)) return FiActivity;
+    if (/(energia|herramient|fuente|ups|bateria)/.test(normalized)) return FiZap;
+    if (/(automatiz|intrusion|sensor|alarma)/.test(normalized)) return FiShield;
+    if (/(acceso|biometri|cerradura)/.test(normalized)) return FiLock;
+    if (/(marketing|publicidad|anuncio)/.test(normalized)) return FiBarChart2;
+    if (/(cableado|infraestructura|fibra|conector)/.test(normalized)) return FiTool;
+    if (/(audio|video profesional|microfono|bocina)/.test(normalized)) return FiMic;
+    return FiGrid;
+};
+
+const levenshteinDistance = (a, b) => {
+    const first = String(a || '');
+    const second = String(b || '');
+
+    if (!first.length) return second.length;
+    if (!second.length) return first.length;
+
+    const matrix = Array.from({ length: first.length + 1 }, () => new Array(second.length + 1).fill(0));
+
+    for (let i = 0; i <= first.length; i += 1) matrix[i][0] = i;
+    for (let j = 0; j <= second.length; j += 1) matrix[0][j] = j;
+
+    for (let i = 1; i <= first.length; i += 1) {
+        for (let j = 1; j <= second.length; j += 1) {
+            const cost = first[i - 1] === second[j - 1] ? 0 : 1;
+            matrix[i][j] = Math.min(
+                matrix[i - 1][j] + 1,
+                matrix[i][j - 1] + 1,
+                matrix[i - 1][j - 1] + cost
+            );
         }
     }
 
-    // Partial normalized match
-    for (const [key, value] of Object.entries(categoryImages)) {
-        const normalizedKey = removeAccents(key.trim().toLowerCase());
-        if (normalized.includes(normalizedKey) || normalizedKey.includes(normalized)) {
-            return value;
+    return matrix[first.length][second.length];
+};
+
+const getApproximateMatch = (product, term) => {
+    const normalizedTerm = normalizeText(term);
+    if (!normalizedTerm) {
+        return { score: 1, isApprox: false };
+    }
+
+    const name = normalizeText(product?.name);
+    const distributor = normalizeText(product?.distributor);
+    const fields = [name, distributor].filter(Boolean);
+
+    if (fields.some((field) => field.includes(normalizedTerm))) {
+        return { score: 1, isApprox: false };
+    }
+
+    const searchTokens = normalizedTerm.split(' ').filter(Boolean);
+    let bestScore = 0;
+
+    for (const token of searchTokens) {
+        for (const field of fields) {
+            const words = field.split(' ').filter(Boolean);
+            for (const word of words) {
+                const maxLen = Math.max(token.length, word.length);
+                if (!maxLen) continue;
+                const distance = levenshteinDistance(token, word);
+                const similarity = 1 - (distance / maxLen);
+                if (similarity > bestScore) {
+                    bestScore = similarity;
+                }
+            }
         }
     }
-    return null;
+
+    if (bestScore >= 0.7) {
+        return { score: bestScore, isApprox: true };
+    }
+
+    return { score: 0, isApprox: false };
 };
 
 function Catalog() {
     const [products, setProducts] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [priceFilter, setPriceFilter] = useState('');
     const [viewMode, setViewMode] = useState('grid');
@@ -67,6 +108,7 @@ function Catalog() {
     const [categories, setCategories] = useState([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const hasLoadedOnceRef = useRef(false);
     const productsPerPage = 20;
 
     const syscomCategoryFilter = searchParams.get('syscomCategory') || '';
@@ -99,6 +141,7 @@ function Catalog() {
             name: product.titulo || product.nombre || product.name || 'Producto SYSCOM',
             description: product.descripcion || product.description || '',
             image: product.imagen || product.image || product.img_portada || '',
+            distributor: product.marca || product.brand || product.fabricante || product.proveedor || '',
             price: finalPrice,
             listPrice,
             stock,
@@ -151,13 +194,19 @@ function Catalog() {
 
     useEffect(() => {
         const loadProducts = async () => {
-            setIsLoading(true);
+            if (!hasLoadedOnceRef.current && currentPage === 1) {
+                setIsInitialLoading(true);
+            } else {
+                setIsRefreshing(true);
+            }
+
             try {
                 const res = await productService.searchSyscomProducts({
                     page: currentPage,
                     limit: productsPerPage,
                     category: syscomCategoryFilter || undefined,
-                    query: debouncedSearchTerm || undefined
+                    query: debouncedSearchTerm || undefined,
+                    brand: debouncedSearchTerm || undefined
                 });
 
                 const list = (res.products || []).map((item) => normalizeSyscomProduct(item));
@@ -165,7 +214,11 @@ function Catalog() {
                 if (currentPage === 1) {
                     setProducts(list);
                 } else {
-                    setProducts(prev => [...prev, ...list]);
+                    setProducts((prev) => {
+                        const existingIds = new Set(prev.map((item) => item._id));
+                        const uniqueItems = list.filter((item) => !existingIds.has(item._id));
+                        return [...prev, ...uniqueItems];
+                    });
                 }
                 
                 const total = res.total || 0;
@@ -178,19 +231,53 @@ function Catalog() {
                     setTotalProducts(0);
                 }
             } finally {
-                setIsLoading(false);
+                setIsInitialLoading(false);
+                setIsRefreshing(false);
+                hasLoadedOnceRef.current = true;
             }
         };
         loadProducts();
     }, [syscomCategoryFilter, currentPage, debouncedSearchTerm]);
 
+    const searchRankedProducts = useMemo(() => {
+        const normalizedTerm = normalizeText(debouncedSearchTerm);
+        if (!normalizedTerm) {
+            return products.map((product) => ({
+                ...product,
+                _matchScore: 1,
+                _approxMatch: false
+            }));
+        }
+
+        return products
+            .map((product) => {
+                const match = getApproximateMatch(product, normalizedTerm);
+                return {
+                    ...product,
+                    _matchScore: match.score,
+                    _approxMatch: match.isApprox
+                };
+            })
+            .filter((product) => product._matchScore > 0)
+            .sort((a, b) => b._matchScore - a._matchScore);
+    }, [products, debouncedSearchTerm]);
+
     // Filtrar por precio localmente (filtro adicional)
-    const displayedProducts = priceFilter 
-        ? products.filter(p => p.price <= parseFloat(priceFilter))
-        : products;
+    const displayedProducts = useMemo(() => {
+        if (!priceFilter) {
+            return searchRankedProducts;
+        }
+
+        const maxPrice = parseFloat(priceFilter);
+        if (Number.isNaN(maxPrice)) {
+            return searchRankedProducts;
+        }
+
+        return searchRankedProducts.filter((p) => p.price <= maxPrice);
+    }, [searchRankedProducts, priceFilter]);
 
     const loadMoreProducts = () => {
-        if (hasMore && !isLoading) {
+        if (hasMore && !isRefreshing) {
             setCurrentPage(prev => prev + 1);
         }
     };
@@ -216,7 +303,7 @@ function Catalog() {
             </div>
 
             <Container fluid className="px-4 pb-4">
-                {isLoading ? (
+                {isInitialLoading ? (
                     <div className="text-center py-5"><Spinner animation="border" variant="info" /></div>
                 ) : (
                     <>
@@ -247,24 +334,20 @@ function Catalog() {
                                 className={`category-glass-card ${!syscomCategoryFilter ? 'active' : ''}`} 
                                 onClick={() => handleCategoryChange('')}
                             >
-                                <div className="cat-icon-box"><BsGrid3X3Gap /></div>
+                                <div className="cat-icon-box"><FiGrid /></div>
                                 <span>Todos</span>
                             </div>
 
                             {!isLoadingCategories && categories.map((cat) => {
-                              const imgUrl = getCategoryImage(cat.name);
+                                                            const CategoryIcon = getCategoryIcon(cat.name);
                               return (
                                 <div
                                   key={cat.id}
                                   className={`category-glass-card ${syscomCategoryFilter === cat.id ? 'active' : ''}`}
                                   onClick={() => handleCategoryChange(cat.id)}
                                 >
-                                  <div className={`cat-icon-box ${imgUrl ? 'with-image' : ''}`}>
-                                    {imgUrl ? (
-                                        <img src={imgUrl} alt={cat.name} />
-                                    ) : (
-                                        `#${cat.level || '-'}`
-                                    )}
+                                                                    <div className="cat-icon-box">
+                                                                        <CategoryIcon aria-hidden="true" />
                                   </div>
                                   <span>{cat.name}</span>
                                 </div>
@@ -275,13 +358,14 @@ function Catalog() {
                         <Row className="mb-4 g-3 align-items-center filter-row-custom shadow-sm p-3 mx-0">
                             <Col md={12} className="d-flex justify-content-end">
                                 <Badge bg="success">Precios en MXN</Badge>
+                                {isRefreshing && <Badge bg="secondary" className="ms-2">Actualizando...</Badge>}
                             </Col>
                             <Col md={5}>
                                 <InputGroup className="search-group-modern">
                                     <InputGroup.Text className="bg-transparent border-0"><BsSearch/></InputGroup.Text>
                                     <Form.Control 
                                         className="bg-transparent border-0 shadow-none" 
-                                        placeholder="Buscar..." 
+                                        placeholder="Buscar por producto o distribuidor..." 
                                         value={searchTerm} 
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
@@ -310,13 +394,20 @@ function Catalog() {
                         <Row xs={1} md={2} lg={viewMode === 'grid' ? 4 : 2} xl={viewMode === 'grid' ? 5 : 2} className="g-4">
                             {displayedProducts.map((product) => (
                                 <Col key={product.id || product._id}>
-                                    <ProductCard product={product} viewMode={viewMode} />
+                                    <ProductCard
+                                        product={product}
+                                        viewMode={viewMode}
+                                        matchMeta={{
+                                            isApprox: product._approxMatch,
+                                            score: product._matchScore
+                                        }}
+                                    />
                                 </Col>
                             ))}
                         </Row>
 
                         {/* Botón Cargar Más */}
-                        {hasMore && !isLoading && (
+                        {hasMore && !isRefreshing && (
                             <div className="text-center my-5">
                                 <Button 
                                     variant="outline-primary" 
@@ -346,7 +437,7 @@ function Catalog() {
                         )}
 
                         {/* Indicador de carga al cargar más */}
-                        {isLoading && currentPage > 1 && (
+                        {isRefreshing && currentPage > 1 && (
                             <div className="text-center my-4">
                                 <Spinner animation="border" variant="info" />
                                 <p className="text-muted mt-2">Cargando más productos...</p>

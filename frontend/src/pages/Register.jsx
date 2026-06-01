@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 // Importamos los iconos
 import { BsPersonFill, BsEnvelopeFill, BsLockFill } from 'react-icons/bs';
 import { FiUserPlus } from 'react-icons/fi';
+import { requestJson } from '../services/httpClient';
 
 function Register() {
 
@@ -42,15 +43,11 @@ function Register() {
           password
         };
 
-        const res = await fetch(`${apiUrl}/auth/register`, {
+        await requestJson('/auth/register', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data?.message || 'Error al registrarse');
-        }
+
         setSuccess('Registro exitoso. Ahora puedes iniciar sesión.');
         setTimeout(() => navigate('/login'), 1000);
       }

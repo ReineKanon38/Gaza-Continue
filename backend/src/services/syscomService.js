@@ -380,7 +380,37 @@ class SyscomService {
     const resultProducts = Array.isArray(result.data?.productos)
       ? result.data.productos
       : (Array.isArray(result.data) ? result.data : []);
-    const filteredProducts = resultProducts.filter((product) => this.isAllowedSyscomProduct(product));
+    let filteredProducts = resultProducts.filter((product) => this.isAllowedSyscomProduct(product));
+
+    // Fallback: si query textual no devolvio resultados, intentamos como marca/distribuidor.
+    if (
+      filteredProducts.length === 0 &&
+      searchParams?.query &&
+      !searchParams?.brand
+    ) {
+      const brandFallbackResult = await syscomClient.searchProducts({
+        ...searchParams,
+        brand: searchParams.query,
+        query: undefined,
+        busqueda: undefined
+      });
+
+      if (brandFallbackResult.success) {
+        const brandProducts = Array.isArray(brandFallbackResult.data?.productos)
+          ? brandFallbackResult.data.productos
+          : (Array.isArray(brandFallbackResult.data) ? brandFallbackResult.data : []);
+        const allowedBrandProducts = brandProducts.filter((product) => this.isAllowedSyscomProduct(product));
+        const byId = new Map();
+
+        for (const product of [...filteredProducts, ...allowedBrandProducts]) {
+          const productId = product?.producto_id || product?.id;
+          if (!productId) continue;
+          byId.set(String(productId), product);
+        }
+
+        filteredProducts = Array.from(byId.values());
+      }
+    }
 
     const filteredData = Array.isArray(result.data)
       ? filteredProducts
@@ -472,18 +502,32 @@ class SyscomService {
       total: syscomProductIds.length
     };
 
-    for (const productId of syscomProductIds) {
-      try {
-        const result = await this.syncProduct(productId);
-        results.success.push({
-          syscomId: productId,
-          action: result.action,
-          productId: result.product._id
-        });
-      } catch (error) {
+    const concurrency = 6;
+    for (let i = 0; i < syscomProductIds.length; i += concurrency) {
+      const chunk = syscomProductIds.slice(i, i + concurrency);
+      const chunkResults = await Promise.allSettled(
+        chunk.map(async (productId) => {
+          const syncResult = await this.syncProduct(productId);
+          return {
+            syscomId: productId,
+            action: syncResult.action,
+            productId: syncResult.product._id
+          };
+        })
+      );
+
+      for (let index = 0; index < chunkResults.length; index += 1) {
+        const status = chunkResults[index];
+        const productId = chunk[index];
+
+        if (status.status === 'fulfilled') {
+          results.success.push(status.value);
+          continue;
+        }
+
         results.failed.push({
           syscomId: productId,
-          error: error.message
+          error: status.reason?.message || 'Error desconocido en sincronizacion'
         });
       }
     }

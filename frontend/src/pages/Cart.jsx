@@ -125,7 +125,11 @@ function Cart() {
                   ))}
                 </div>
                 <div className="p-4 bg-white d-flex justify-content-between">
-                  <Button variant="link" className="text-decoration-none text-secondary p-0 small" onClick={() => navigate('/catalog')}>
+                  <Button
+                    variant="link"
+                    className="text-decoration-none text-secondary p-0 small"
+                    onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/catalog'))}
+                  >
                     <BsArrowLeft className="me-2" /> Seguir comprando
                   </Button>
                   <Button variant="link" className="text-muted small text-decoration-none p-0" onClick={clearCart}>

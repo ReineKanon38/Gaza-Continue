@@ -17,6 +17,7 @@ import categoriesRoutes from "./src/routes/categories.js";
 import couponsRoutes from "./src/routes/coupons.js";
 import inventoryRoutes from "./src/routes/inventory.js";
 import { connectDB } from "./src/config/db.js";
+import { allowedCorsOrigins, corsOptions } from "./src/config/cors.js";
 import { errorHandler } from "./src/middleware/errorHandler.js";
 
 dotenv.config();
@@ -25,10 +26,7 @@ dotenv.config();
 
 // Middlewares de seguridad y parsing
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || ["http://localhost:5173"],
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Rate limit básico para rutas API
@@ -79,6 +77,7 @@ async function start() {
     await connectDB();
     app.listen(PORT, () => {
       console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+      console.log(`🌐 CORS habilitado para: ${Array.isArray(allowedCorsOrigins) ? allowedCorsOrigins.join(', ') : allowedCorsOrigins}`);
     });
   } catch (err) {
     console.error("❌ No se pudo iniciar el servidor:", err.message);

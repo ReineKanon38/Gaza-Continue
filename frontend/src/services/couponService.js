@@ -1,116 +1,37 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { requestJson } from './httpClient';
 
 const couponService = {
   // Obtener todos los cupones (solo admin)
-  getAllCoupons: async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/coupons`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!response.ok) throw new Error('Error al obtener cupones');
-      return await response.json();
-    } catch (error) {
-      console.error('Error:', error);
-      throw error;
-    }
-  },
+  getAllCoupons: () => requestJson('/api/coupons'),
 
   // Validar cupón
-  validateCoupon: async (code) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/coupons/validate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ code })
-      });
-      if (!response.ok) throw new Error('Cupón no válido');
-      return await response.json();
-    } catch (error) {
-      console.error('Error:', error);
-      throw error;
-    }
-  },
+  validateCoupon: (code) => requestJson('/api/coupons/validate', {
+    method: 'POST',
+    body: JSON.stringify({ code })
+  }),
 
   // Aplicar cupón
-  applyCoupon: async (code, orderAmount) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/coupons/apply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ code, orderAmount })
-      });
-      if (!response.ok) throw new Error('Error al aplicar cupón');
-      return await response.json();
-    } catch (error) {
-      console.error('Error:', error);
-      throw error;
-    }
-  },
+  applyCoupon: (code, orderAmount) => requestJson('/api/coupons/apply', {
+    method: 'POST',
+    body: JSON.stringify({ code, orderAmount })
+  }),
 
   // Crear cupón
-  createCoupon: async (data) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/coupons`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Error al crear cupón');
-      return await response.json();
-    } catch (error) {
-      console.error('Error:', error);
-      throw error;
-    }
-  },
+  createCoupon: (data) => requestJson('/api/coupons', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
 
   // Actualizar cupón
-  updateCoupon: async (id, data) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/coupons/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Error al actualizar cupón');
-      return await response.json();
-    } catch (error) {
-      console.error('Error:', error);
-      throw error;
-    }
-  },
+  updateCoupon: (id, data) => requestJson(`/api/coupons/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
 
   // Eliminar cupón
-  deleteCoupon: async (id) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/api/coupons/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!response.ok) throw new Error('Error al eliminar cupón');
-      return await response.json();
-    } catch (error) {
-      console.error('Error:', error);
-      throw error;
-    }
-  }
+  deleteCoupon: (id) => requestJson(`/api/coupons/${id}`, {
+    method: 'DELETE'
+  })
 };
 
 export default couponService;

@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Form, Button, InputGroup, Alert } from 'reac
 import { Link } from 'react-router-dom';
 import { BsEnvelopeFill, BsCheckCircle } from 'react-icons/bs';
 import { FiSend, FiArrowLeft } from 'react-icons/fi';
+import { requestJson } from '../services/httpClient';
 
 function Reset() {
     const [email, setEmail] = useState('');
@@ -44,24 +45,17 @@ function Reset() {
                 setEmail('');
             } else {
                 // Con backend: hacer petición real
-                const response = await fetch(`${apiUrl}/auth/reset-password`, {
+                const result = await requestJson('/auth/reset-password', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
 
-                const result = await response.json();
-
-                if (response.ok) {
-                    setMessage(result.message || 'Si tu correo está registrado, recibirás un enlace para restaurar tu contraseña.');
-                    setEmail('');
-                } else {
-                    setError(result.message || 'Error al procesar la solicitud. Inténtalo de nuevo.');
-                }
+                setMessage(result.message || 'Si tu correo está registrado, recibirás un enlace para restaurar tu contraseña.');
+                setEmail('');
             }
         } catch (err) {
             console.error('Error en reset password:', err);
-            setError('Error de conexión. Verifica tu internet e inténtalo de nuevo.');
+            setError(err.message || 'Error de conexión. Verifica tu internet e inténtalo de nuevo.');
         } finally {
             setIsLoading(false);
         }

@@ -14,16 +14,14 @@ import paymentRoutes from './routes/payment.js';
 import configRoutes from './routes/config.js';
 import addressRoutes from './routes/address.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { corsOptions } from './config/cors.js';
 import swaggerUi from 'swagger-ui-express';
 
 const app = express();
 
 app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',').map(o => o.trim()) || ['http://localhost:5173', 'http://localhost:5174'],
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const apiLimiter = rateLimit({

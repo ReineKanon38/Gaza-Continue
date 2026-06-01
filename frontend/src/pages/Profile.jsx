@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Form, Button, Alert, Badge, Spinner } from '
 import AppNavbar from '../components/AppNavbar';
 import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare, BsTruck } from 'react-icons/bs';
 import orderService from '../services/orderService';
+import { requestJson } from '../services/httpClient';
 
 function Profile() {
     // Estados para los datos del usuario
@@ -149,7 +150,6 @@ function Profile() {
                 setIsEditing(false);
             } else {
                 // Con backend: hacer petición real
-                const token = localStorage.getItem('token');
                 const updateData = {
                     name: editData.name
                 };
@@ -159,32 +159,22 @@ function Profile() {
                     updateData.newPassword = editData.newPassword;
                 }
 
-                const response = await fetch(`${apiUrl}/auth/update-profile`, {
+                const result = await requestJson('/auth/update-profile', {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
                     body: JSON.stringify(updateData)
                 });
 
-                const result = await response.json();
+                // Actualizar localStorage con nueva data
+                const updatedUser = { ...userData, name: editData.name };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setUserData(updatedUser);
 
-                if (response.ok) {
-                    // Actualizar localStorage con nueva data
-                    const updatedUser = { ...userData, name: editData.name };
-                    localStorage.setItem('user', JSON.stringify(updatedUser));
-                    setUserData(updatedUser);
-                    
-                    setMessage(result.message || 'Perfil actualizado exitosamente.');
-                    setIsEditing(false);
-                } else {
-                    setError(result.message || 'Error al actualizar perfil.');
-                }
+                setMessage(result.message || 'Perfil actualizado exitosamente.');
+                setIsEditing(false);
             }
         } catch (err) {
             console.error('Error updating profile:', err);
-            setError('Error de conexión. Inténtalo de nuevo.');
+            setError(err.message || 'Error de conexión. Inténtalo de nuevo.');
         } finally {
             setIsLoading(false);
         }

@@ -1,22 +1,25 @@
+import { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Index from './pages/Index';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Catalog from './pages/Catalog';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Profile from './pages/Profile';
-import Reset from './pages/Reset';
-import AdminPanel from './pages/AdminPanel';
-import SuperPrecio from './pages/SuperPrecio';
-import ProductDetailPage from './pages/ProductDetailPage';
-import OrderTracking from './pages/OrderTracking';
 // --- 1. IMPORTAR EL GUARDIÁN ---
 import ProtectedRoute from './components/ProtectedRoute';
 
+const Index = lazy(() => import('./pages/Index'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Catalog = lazy(() => import('./pages/Catalog'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Reset = lazy(() => import('./pages/Reset'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const SuperPrecio = lazy(() => import('./pages/SuperPrecio'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const OrderTracking = lazy(() => import('./pages/OrderTracking'));
+
 function App() {
   return (
+    <Suspense fallback={<div className="text-center mt-5">Cargando...</div>}>
     <Routes>
       {/* --- Rutas Públicas --- */}
       {/* Cualquiera puede ver estas */}
@@ -50,6 +53,7 @@ function App() {
       <Route path="*" element={<h2>Error 404: Página no encontrada</h2>} />
 
     </Routes>
+    </Suspense>
   );
 }
 

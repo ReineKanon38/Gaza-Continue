@@ -1,9 +1,10 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getStoredAccessToken } from '../services/httpClient';
 
 function ProtectedRoute({ requiredRole }) {
   const { token, user, loading } = useAuth();
-  const persistedToken = localStorage.getItem('token');
+  const persistedToken = getStoredAccessToken();
   const effectiveToken = token || persistedToken;
   
   if (loading) {
