@@ -63,7 +63,9 @@ const getApproximateMatch = (product, term) => {
 
     const name = normalizeText(product?.name);
     const distributor = normalizeText(product?.distributor);
-    const fields = [name, distributor].filter(Boolean);
+    const syscomId = normalizeText(product?.syscomId);
+    const id = normalizeText(product?._id);
+    const fields = [name, distributor, syscomId, id].filter(Boolean);
 
     if (fields.some((field) => field.includes(normalizedTerm))) {
         return { score: 1, isApprox: false };
@@ -99,6 +101,8 @@ function Catalog() {
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const searchRef = useRef(null);
     const [priceFilter, setPriceFilter] = useState('');
     const [viewMode, setViewMode] = useState('grid');
     const [searchParams, setSearchParams] = useSearchParams();
@@ -276,6 +280,30 @@ function Catalog() {
         return searchRankedProducts.filter((p) => p.price <= maxPrice);
     }, [searchRankedProducts, priceFilter]);
 
+    const suggestions = useMemo(() => {
+        const cleanTerm = String(searchTerm || '').trim().toLowerCase();
+        if (!cleanTerm) return [];
+
+        return products
+            .filter((p) => {
+                const name = String(p.name || '').toLowerCase();
+                const brand = String(p.distributor || '').toLowerCase();
+                const syscomId = String(p.syscomId || '').toLowerCase();
+                return name.includes(cleanTerm) || brand.includes(cleanTerm) || syscomId.includes(cleanTerm);
+            })
+            .slice(0, 6);
+    }, [products, searchTerm]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const loadMoreProducts = () => {
         if (hasMore && !isRefreshing) {
             setCurrentPage(prev => prev + 1);
@@ -361,15 +389,42 @@ function Catalog() {
                                 {isRefreshing && <Badge bg="secondary" className="ms-2">Actualizando...</Badge>}
                             </Col>
                             <Col md={5}>
-                                <InputGroup className="search-group-modern">
-                                    <InputGroup.Text className="bg-transparent border-0"><BsSearch/></InputGroup.Text>
-                                    <Form.Control 
-                                        className="bg-transparent border-0 shadow-none" 
-                                        placeholder="Buscar por producto o distribuidor..." 
-                                        value={searchTerm} 
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </InputGroup>
+                                <div className="search-container-relative" ref={searchRef}>
+                                    <InputGroup className="search-group-modern">
+                                        <InputGroup.Text className="bg-transparent border-0"><BsSearch/></InputGroup.Text>
+                                        <Form.Control 
+                                            className="bg-transparent border-0 shadow-none" 
+                                            placeholder="Buscar por producto, marca o ID..." 
+                                            value={searchTerm} 
+                                            onChange={(e) => {
+                                                setSearchTerm(e.target.value);
+                                                setShowSuggestions(true);
+                                            }}
+                                            onFocus={() => setShowSuggestions(true)}
+                                        />
+                                    </InputGroup>
+                                    
+                                    {showSuggestions && suggestions.length > 0 && (
+                                        <div className="search-suggestions-dropdown">
+                                            {suggestions.map((item) => (
+                                                <div 
+                                                    key={item._id} 
+                                                    className="suggestion-item"
+                                                    onClick={() => {
+                                                        setSearchTerm(item.name);
+                                                        setShowSuggestions(false);
+                                                    }}
+                                                >
+                                                    <span className="suggestion-name">{item.name}</span>
+                                                    <div className="suggestion-meta">
+                                                        <span className="suggestion-brand">{item.distributor}</span>
+                                                        <span className="suggestion-id">ID: {item.syscomId}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </Col>
                             <Col md={3}>
                                 <InputGroup className="search-group-modern">

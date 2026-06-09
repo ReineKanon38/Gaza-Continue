@@ -45,7 +45,7 @@ function Reset() {
                 setEmail('');
             } else {
                 // Con backend: hacer petición real
-                const result = await requestJson('/auth/reset-password', {
+                const result = await requestJson('/api/auth/reset-password', {
                     method: 'POST',
                     body: JSON.stringify({ email })
                 });
@@ -62,8 +62,8 @@ function Reset() {
     };
 
 return (
-    <div style={{ backgroundColor: 'var(--body-bg)', minHeight: '100vh' }}>
-    <Container className="d-flex vh-100 justify-content-center align-items-center">
+    <div className="bg-page-content" style={{ minHeight: '100vh' }}>
+    <Container className="d-flex vh-100 justify-content-center align-items-center fade-in-up">
         <Row className="justify-content-center w-100">
         <Col md={8} lg={6} xl={4}>
             <Card className="shadow-sm border-0">

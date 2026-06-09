@@ -15,7 +15,8 @@ import {
   syncAllSuperPrecioByCategories,
   repairMissingPrices,
   getSyscomHealth,
-  getSyscomHealthHistory
+  getSyscomHealthHistory,
+  getExchangeRate
 } from '../controllers/syscomController.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/authorize.js';
@@ -29,6 +30,7 @@ router.get('/search', searchSyscomProducts);
 router.get('/categories', getSyscomCategories);
 router.get('/brands', getSyscomBrands);
 router.get('/tags', getSyscomTags);
+router.get('/exchange-rate', getExchangeRate);
 
 // Endpoints de Súper Precio
 router.get('/super-precio', getSuperPrecioProducts);

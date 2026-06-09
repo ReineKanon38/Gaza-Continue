@@ -303,3 +303,145 @@
   padding: 0.45rem 0.65rem;
 }
 
+/* ============================================
+   DISEÑO PREMIUM Y GLASSMORPHISM
+   ============================================ */
+
+/* Fondo dinámico de página con gradiente de alta tecnología */
+.bg-page-content {
+  background: radial-gradient(circle at 10% 20%, rgba(2, 6, 23, 0.05) 0%, rgba(243, 248, 255, 0.95) 90%) !important;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.bg-page-content::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.bg-page-content::after {
+  content: "";
+  position: absolute;
+  bottom: -20%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(21, 101, 192, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Tarjeta Glassmorphic para Formularios (Login, Registro, Recuperación) */
+.bg-page-content .card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 20px 40px rgba(15, 25, 41, 0.08) !important;
+  border-radius: 1.5rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bg-page-content .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px rgba(15, 25, 41, 0.12) !important;
+  border-color: rgba(0, 212, 255, 0.4) !important;
+}
+
+/* Inputs de formulario premium con micro-animación de foco */
+.bg-page-content .form-control {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(207, 216, 220, 0.8) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  font-weight: 400;
+  transition: all 0.25s ease;
+}
+
+.bg-page-content .form-control:focus {
+  background: #ffffff !important;
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.12) !important;
+  transform: scale(1.01);
+}
+
+/* Grupo de Entrada (InputGroup) premium */
+.bg-page-content .input-group-text {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(207, 216, 220, 0.8) !important;
+  border-right: none !important;
+  border-radius: 0.75rem 0 0 0.75rem !important;
+  color: var(--text-secondary);
+}
+
+.bg-page-content .input-group .form-control {
+  border-left: none !important;
+  border-radius: 0 0.75rem 0.75rem 0 !important;
+}
+
+/* Botón con gradiente brillante */
+.btn-custom-primary {
+  background: linear-gradient(135deg, #1565c0 0%, #00bcd4 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.8rem 1.8rem !important;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(21, 101, 192, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-custom-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(21, 101, 192, 0.4) !important;
+  filter: brightness(1.08);
+}
+
+.btn-custom-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(21, 101, 192, 0.2) !important;
+}
+
+/* Botones secundariosoutline con transiciones suaves */
+.btn-outline-secondary {
+  border: 1px solid rgba(84, 110, 122, 0.4) !important;
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.8rem 1.8rem !important;
+  font-weight: 500 !important;
+  transition: all 0.25s ease !important;
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+  background: var(--text-light) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--text-secondary) !important;
+  transform: translateY(-1px);
+}
+
+/* Animación de entrada general */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+

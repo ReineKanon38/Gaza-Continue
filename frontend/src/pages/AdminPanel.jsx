@@ -778,10 +778,10 @@ export default function AdminPanel() {
       setConfigError(null);
 
       const [statsResponse, ordersResponse, categorySalesResponse, monthlySalesResponse] = await Promise.all([
-        requestJson('/stats/dashboard'),
-        requestJson('/stats/recent-orders?limit=5'),
-        requestJson('/stats/sales-by-category'),
-        requestJson('/stats/sales-by-month')
+        requestJson('/api/stats/dashboard'),
+        requestJson('/api/stats/recent-orders?limit=5'),
+        requestJson('/api/stats/sales-by-category'),
+        requestJson('/api/stats/sales-by-month')
       ]);
 
       if (statsResponse.success) {
@@ -1139,7 +1139,7 @@ export default function AdminPanel() {
               </Row>
 
               <h6>Productos</h6>
-              <Table size="sm" bordered>
+              <Table responsive size="sm" bordered>
                 <thead>
                   <tr>
                     <th>Producto</th>

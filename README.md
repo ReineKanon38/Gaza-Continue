@@ -41,4 +41,4 @@ Aplicacion ecommerce con frontend en React/Vite y backend en Node/Express.
 
 Consulta tambien:
 - THIRD_PARTY_NOTICES.md
-- REUSE_CHECKLIST.md
+- docs/legacy/REUSE_CHECKLIST.md

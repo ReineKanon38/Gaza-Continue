@@ -3,8 +3,8 @@
 ## 1) Seguridad
 
 - [x] JWT access + refresh con rotacion habilitado.
-- [ ] Revocacion de sesiones validada en logout.
-- [ ] Variables sensibles solo por entorno.
+- [x] Revocacion de sesiones validada en logout.
+- [x] Variables sensibles solo por entorno.
 - [x] CORS y rate limit validados para despliegue.
 
 ## 2) Calidad de codigo
@@ -37,8 +37,8 @@
 
 ## 6) Documentacion final
 
-- [ ] Guia de despliegue actualizada.
-- [ ] Manual tecnico de arquitectura actualizado.
+- [x] Guia de despliegue actualizada.
+- [x] Manual tecnico de arquitectura actualizado.
 - [x] Evidencias (capturas, reportes, commits) organizadas.
 - [ ] Acta de cierre del proyecto preparada.
 

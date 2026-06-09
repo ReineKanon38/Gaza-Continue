@@ -1,9 +1,9 @@
 // Script para probar sincronización de un producto individual
-import './dns-fix.js';
+import '../../src/utils/dns-fix.js';
 import dotenv from 'dotenv';
-import syscomService from './src/services/syscomService.js';
-import { connectDB } from './src/config/db.js';
-import Product from './src/models/Product.js';
+import syscomService from '../../src/services/syscomService.js';
+import { connectDB } from '../../src/config/db.js';
+import Product from '../../src/models/Product.js';
 
 dotenv.config();
 

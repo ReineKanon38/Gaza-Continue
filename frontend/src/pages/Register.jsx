@@ -43,7 +43,7 @@ function Register() {
           password
         };
 
-        await requestJson('/auth/register', {
+        await requestJson('/api/auth/register', {
           method: 'POST',
           body: JSON.stringify(payload)
         });
@@ -61,7 +61,7 @@ function Register() {
   return (
     <Container 
       fluid
-      className="d-flex vh-100 justify-content-center align-items-center bg-page-content"
+      className="d-flex vh-100 justify-content-center align-items-center bg-page-content fade-in-up"
     >
       <Card className="w-100 p-4 shadow-sm" style={{ maxWidth: '400px' }}>
         <Card.Body>

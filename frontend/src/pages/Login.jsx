@@ -35,7 +35,7 @@ function Login() {
         showSuccess('Sesión iniciada correctamente');
         navigate('/catalog');
       } else {
-        const data = await requestJson('/auth/login', {
+        const data = await requestJson('/api/auth/login', {
           method: 'POST',
           body: JSON.stringify({ email, password })
         });
@@ -68,7 +68,7 @@ function Login() {
   return (
     <Container 
       fluid
-      className="d-flex vh-100 justify-content-center align-items-center bg-page-content"
+      className="d-flex vh-100 justify-content-center align-items-center bg-page-content fade-in-up"
     >
       <Card className="w-100 p-4 shadow-sm" style={{ maxWidth: '400px' }}>
         <Card.Body>

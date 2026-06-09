@@ -1,17 +1,47 @@
 /* ============================================
-   PANEL DE ADMINISTRADOR - ESTILOS ESPECÍFICOS
+   PANEL DE ADMINISTRADOR - ESTILOS PREMIUM
    ============================================ */
 
 .admin-panel {
   min-height: 100vh;
-  background: var(--gradient-bg);
+  background: radial-gradient(circle at 10% 20%, rgba(2, 6, 23, 0.05) 0%, rgba(243, 248, 255, 0.95) 90%) !important;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.admin-panel::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.admin-panel::after {
+  content: "";
+  position: absolute;
+  bottom: -20%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(21, 101, 192, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .admin-header {
-  background: var(--bg-white);
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   padding: var(--spacing-lg);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 25px rgba(15, 25, 41, 0.04);
 }
 
 .admin-header h2 {
@@ -24,41 +54,50 @@
   position: sticky;
   top: 20px;
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 25px rgba(15, 25, 41, 0.05);
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
 }
 
 .admin-sidebar .nav-link {
   padding: var(--spacing-md) var(--spacing-lg);
-  color: var(--text-secondary);
+  color: var(--text-secondary) !important;
   transition: all var(--transition-base);
-  border-left: 3px solid transparent;
+  border-left: 4px solid transparent;
   display: flex;
   align-items: center;
+  font-weight: 500;
 }
 
 .admin-sidebar .nav-link:hover {
-  background: var(--bg-light);
-  color: var(--primary-orange);
-  border-left-color: var(--primary-orange);
+  background: rgba(21, 101, 192, 0.05);
+  color: var(--primary-blue) !important;
+  border-left-color: var(--secondary-accent);
 }
 
 .admin-sidebar .nav-link.active {
-  background: var(--gradient-card);
-  color: var(--primary-orange);
-  border-left-color: var(--primary-orange);
+  background: rgba(21, 101, 192, 0.08) !important;
+  color: var(--primary-blue) !important;
+  border-left-color: var(--primary-blue);
   font-weight: var(--font-weight-semibold);
 }
 
 .stat-card {
   border-radius: var(--border-radius);
-  border: none;
-  box-shadow: var(--shadow-md);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 10px 25px rgba(15, 25, 41, 0.05);
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 15px 35px rgba(21, 101, 192, 0.1);
+  border-color: rgba(0, 188, 212, 0.4) !important;
 }
 
 .stat-card h3 {
@@ -75,35 +114,183 @@
 
 .admin-panel .card {
   border-radius: var(--border-radius);
-  border: none;
-  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 10px 25px rgba(15, 25, 41, 0.05);
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .admin-panel .card-header {
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-accent) 100%) !important;
   color: var(--text-white);
   border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
   padding: var(--spacing-md) var(--spacing-lg);
   font-weight: var(--font-weight-semibold);
+  border-bottom: none;
 }
 
 .admin-panel .table {
   margin-bottom: 0;
+  background: transparent !important;
 }
 
 .admin-panel .table thead th {
-  border-bottom: 2px solid var(--border-color);
-  color: var(--text-secondary);
+  border-bottom: 2px solid rgba(207, 216, 220, 0.8) !important;
+  color: var(--text-primary);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background: rgba(21, 101, 192, 0.04) !important;
 }
 
 .admin-panel .table tbody tr {
+  background: transparent !important;
   transition: background var(--transition-fast);
 }
 
 .admin-panel .table tbody tr:hover {
-  background: var(--bg-light);
+  background: rgba(21, 101, 192, 0.04) !important;
+}
+
+/* Modals Premium */
+.modal-content {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 1.25rem !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+  overflow: hidden;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(207, 216, 220, 0.4) !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  padding: 1.25rem 1.5rem !important;
+}
+
+.modal-title {
+  font-weight: var(--font-weight-bold) !important;
+  color: var(--primary-dark) !important;
+  letter-spacing: -0.5px;
+}
+
+.modal-body {
+  padding: 1.5rem !important;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(207, 216, 220, 0.4) !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  padding: 1rem 1.5rem !important;
+}
+
+/* Inputs y Formularios dentro de Modals */
+.modal-content .form-label {
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+.modal-content .form-control,
+.modal-content .form-select {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(207, 216, 220, 0.8) !important;
+  border-radius: 0.75rem !important;
+  padding: 0.65rem 0.85rem !important;
+  transition: all 0.25s ease;
+}
+
+.modal-content .form-control:focus,
+.modal-content .form-select:focus {
+  background: #ffffff !important;
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.12) !important;
+  transform: scale(1.005);
+}
+
+.modal-content textarea.form-control {
+  min-height: 100px;
+}
+
+/* ==================================================
+   RESPONSIVIDAD Y ADAPTABILIDAD MÓVIL
+   ================================================== */
+@media (max-width: 991px) {
+  .admin-sidebar {
+    position: relative !important;
+    top: 0 !important;
+    margin-bottom: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(15, 25, 41, 0.05);
+  }
+
+  .admin-sidebar .card-body {
+    padding: 0.5rem !important;
+  }
+
+  .admin-sidebar .nav {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    gap: 8px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-sidebar .nav-item {
+    flex: 0 0 auto;
+  }
+
+  .admin-sidebar .nav-link {
+    padding: 8px 14px !important;
+    font-size: 0.85rem !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    white-space: nowrap !important;
+    border-radius: 8px;
+  }
+
+  .admin-sidebar .nav-link.active {
+    background: rgba(21, 101, 192, 0.08) !important;
+    border-bottom-color: var(--primary-blue) !important;
+    color: var(--primary-blue) !important;
+  }
+
+  /* Ajustar los KPI Cards para móvil */
+  .stat-card {
+    padding: 1.25rem !important;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-card h3 {
+    font-size: 1.6rem !important;
+  }
+
+  /* Forzar scroll suave en tablas responsivas */
+  .table-responsive {
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-header {
+    padding: 1rem !important;
+    text-align: center;
+  }
+
+  .admin-header h2 {
+    font-size: 1.4rem !important;
+  }
+
+  .admin-header .d-flex {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center !important;
+  }
 }

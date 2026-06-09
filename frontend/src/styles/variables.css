@@ -8,6 +8,9 @@
   --primary-blue: #1565c0;
   --primary-orange: #ff6b35;
   --primary-orange-hover: #e85a24;
+  --primary-color: var(--primary-blue);
+  --primary-hover: var(--primary-blue); /* fallback to avoid orange on standard primary hover if not wanted, or orange for contrast */
+  --primary-light: #42a5f5;
   
   /* Colores Secundarios - Acentos Premium */
   --secondary-accent: #00bcd4;

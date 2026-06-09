@@ -48,7 +48,7 @@ const EditOrderModal = ({ show, order, onHide, onOrderUpdated }) => {
     setLoading(true);
 
     try {
-      await requestJson(`/orders/${order._id}`, {
+      await requestJson(`/api/orders/${order._id}`, {
         method: 'PUT',
         body: JSON.stringify(formData)
       });

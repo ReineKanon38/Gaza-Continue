@@ -1,51 +1,22 @@
 import { requestJson } from './httpClient';
 
-const USD_TO_MXN = Number(import.meta.env.VITE_USD_TO_MXN || 17.5);
 const responseCache = new Map();
-
-function toNumber(value) {
-  if (value === null || value === undefined) return 0;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-  const sanitized = String(value).replace(/[^0-9.-]/g, '');
-  const numeric = Number(sanitized);
-  return Number.isFinite(numeric) ? numeric : 0;
-}
-
-function usdToMxn(value) {
-  const usd = toNumber(value);
-  if (usd <= 0) return 0;
-  return Math.round(usd * USD_TO_MXN * 100) / 100;
-}
 
 function normalizeSyscomProductPrices(products) {
   if (!Array.isArray(products)) return [];
 
   return products.map((product) => {
-    const discountUSD =
-      toNumber(product?.precio_descuento) ||
-      toNumber(product?.precios?.precio_descuento);
-
-    const listUSD =
-      toNumber(product?.precio) ||
-      toNumber(product?.precio_lista) ||
-      toNumber(product?.precios?.precio_lista) ||
-      toNumber(product?.precios?.precio_1) ||
-      toNumber(product?.price);
-
-    const fallbackUSD = listUSD || discountUSD;
-
-    const priceDiscountMXN = usdToMxn(discountUSD || fallbackUSD);
-    const priceListMXN = usdToMxn(listUSD || discountUSD || fallbackUSD);
+    const priceMXN = Number(product?.price || product?.precio_mxn || 0);
 
     return {
       ...product,
-      precio_descuento_mxn: priceDiscountMXN,
-      precio_lista_mxn: priceListMXN,
-      precio_mxn: priceDiscountMXN || priceListMXN,
+      precio_mxn: priceMXN,
+      precio_descuento_mxn: priceMXN,
+      precio_lista_mxn: priceMXN,
       precios: {
         ...(product?.precios || {}),
-        precio_descuento_mxn: priceDiscountMXN,
-        precio_lista_mxn: priceListMXN
+        precio_descuento_mxn: priceMXN,
+        precio_lista_mxn: priceMXN
       }
     };
   });

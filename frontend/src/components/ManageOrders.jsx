@@ -47,7 +47,7 @@ const ManageOrders = () => {
         if (value) queryParams.append(key, value);
       });
 
-      const data = await requestJson(`/orders/admin/all?${queryParams.toString()}`);
+      const data = await requestJson(`/api/orders/admin/all?${queryParams.toString()}`);
       setOrders(data.data || []);
     } catch (err) {
       console.error('Error cargando órdenes:', err);
@@ -61,7 +61,7 @@ const ManageOrders = () => {
   // Cargar estadísticas
   const loadStats = useCallback(async () => {
     try {
-      const data = await requestJson('/orders/admin/stats');
+      const data = await requestJson('/api/orders/admin/stats');
       setStats(data.data);
     } catch (err) {
       console.error('Error cargando estadísticas:', err);
@@ -102,7 +102,7 @@ const ManageOrders = () => {
     }
 
     try {
-      await requestJson(`/orders/${orderId}`, { method: 'DELETE' });
+      await requestJson(`/api/orders/${orderId}`, { method: 'DELETE' });
 
       showNotification('Éxito', 'Orden eliminada correctamente', 'success');
       await loadOrders();

@@ -74,11 +74,6 @@ function Dashboard() {
     
     // Estados para UX mejorada
     const [activeView, setActiveView] = useState('overview'); // 'overview' o 'orders'
-    const [loadingStates] = useState({
-        products: true,
-        stats: true,
-        orders: true
-    });
     const [toast, setToast] = useState({ show: false, title: '', message: '', variant: 'info' });
 
     // --- FUNCIÓN PARA CARGAR DATOS DEL BACKEND ---
@@ -105,9 +100,9 @@ function Dashboard() {
                 recentOrdersResponse,
                 productsResponse
             ] = await Promise.all([
-                requestJson('/stats/dashboard'),
-                requestJson('/stats/recent-orders?limit=5'),
-                requestJson('/products?limit=4')
+                requestJson('/api/stats/dashboard'),
+                requestJson('/api/stats/recent-orders?limit=5'),
+                requestJson('/api/products?limit=4')
             ]);
 
             // Procesar respuesta de estadísticas
@@ -373,7 +368,7 @@ function Dashboard() {
 
                         {/* --- Tarjetas de KPIs --- */}
                         <Row xs={1} md={3} className="g-4 mb-4">
-                            {loadingStates.stats ? (
+                            {isLoading ? (
                                 // Mostrar skeletons mientras cargan las estadísticas
                                 [1, 2, 3, 4, 5, 6].map(i => (
                                     <Col key={i}>
@@ -395,7 +390,7 @@ function Dashboard() {
                         {/* --- Gráficas Funcionales con Datos Reales --- */}
                         <Row className="g-4 mb-4">
                             <Col md={6}>
-                                {loadingStates.stats ? (
+                                {isLoading ? (
                                     <ChartSkeleton height={250} />
                                 ) : (
                                     <BarChart 
@@ -406,7 +401,7 @@ function Dashboard() {
                                 )}
                             </Col>
                             <Col md={6}>
-                                {loadingStates.stats ? (
+                                {isLoading ? (
                                     <ChartSkeleton height={250} />
                                 ) : (
                                     <DonutChart 
@@ -421,7 +416,7 @@ function Dashboard() {
                         {/* --- Gráfica de Tendencia Mensual --- */}
                         <Row className="g-4 mb-4">
                             <Col md={12}>
-                                {loadingStates.stats ? (
+                                {isLoading ? (
                                     <ChartSkeleton height={250} />
                                 ) : (
                                     <LineChart 

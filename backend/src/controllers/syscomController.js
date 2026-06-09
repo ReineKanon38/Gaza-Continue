@@ -341,3 +341,18 @@ export const getSyscomHealthHistory = async (req, res) => {
     });
   }
 };
+
+// Obtener tipo de cambio configurado actual
+export const getExchangeRate = async (req, res) => {
+  try {
+    const rateInfo = syscomService.getExchangeRate();
+    return sendSuccess(res, rateInfo);
+  } catch (error) {
+    logger.error('Error obteniendo tipo de cambio', { message: error.message });
+    return sendError(res, {
+      status: 500,
+      message: 'Error al obtener el tipo de cambio',
+      error: error.message
+    });
+  }
+};

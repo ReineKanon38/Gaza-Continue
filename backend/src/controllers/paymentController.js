@@ -71,8 +71,9 @@ export const createPaymentSession = async (req, res) => {
     };
 
     return sendSuccess(res, {
+      status: 200,
       paymentSessionId,
-      status: 'pending_bank_validation',
+      paymentStatus: 'pending_bank_validation',
       instructions
     });
 
@@ -108,9 +109,10 @@ export const confirmPayment = async (req, res) => {
     }
 
     return sendSuccess(res, {
+      status: 200,
       paymentSessionId,
       provider: selectedProvider,
-      status: 'pending_bank_review'
+      paymentStatus: 'pending_bank_review'
     });
 
   } catch (error) {

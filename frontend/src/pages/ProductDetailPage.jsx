@@ -7,6 +7,7 @@ import productService from '../services/productService';
 import { generateProductBenefits, extractTechnicalBenefits } from '../utils/productBenefits';
 import { getRelatedProducts } from '../utils/complementaryProducts';
 import ProductCard from '../components/ProductCard';
+import AppNavbar from '../components/AppNavbar';
 
 function ProductDetailPage() {
   const { productId } = useParams();
@@ -101,8 +102,10 @@ function ProductDetailPage() {
   }
 
   return (
-    <Container className="py-4">
-      <Button variant="outline-secondary" onClick={() => navigate(-1)} className="mb-4">
+    <div className="bg-page-content min-vh-100">
+      <AppNavbar />
+      <Container className="py-4 fade-in-up">
+        <Button variant="outline-secondary" onClick={() => navigate(-1)} className="mb-4">
         <BsArrowLeft className="me-2" /> Volver al catálogo
       </Button>
 
@@ -333,7 +336,8 @@ function ProductDetailPage() {
           </div>
         </Col>
       </Row>
-    </Container>
+      </Container>
+    </div>
   );
 }
 

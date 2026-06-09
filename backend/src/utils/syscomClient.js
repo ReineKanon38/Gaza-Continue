@@ -277,6 +277,26 @@ class SyscomClient {
     isConfigured() { return !!(this.clientId && this.clientSecret); }
     async getStock(id) { return { success: false }; }
     async getPrice(id) { return { success: false }; }
+
+    /**
+     * Obtener el tipo de cambio oficial de SYSCOM
+     */
+    async getExchangeRate() {
+        try {
+            const token = await this.getAccessToken();
+            const response = await this.requestWithRetry(
+                () => axios.get(`${this.baseURL}/tipocambio`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    timeout: this.timeoutMs,
+                }),
+                'Tipo de cambio SYSCOM'
+            );
+            return { success: true, data: response.data };
+        } catch (error) {
+            logger.error('Error obteniendo tipo de cambio SYSCOM', { message: error.response?.data || error.message });
+            return { success: false, error: error.message };
+        }
+    }
 }
 
 export default new SyscomClient();

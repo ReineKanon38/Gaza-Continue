@@ -8,7 +8,7 @@ import {
   isBlockedPlatformCategory,
   isBlockedSyscomCategoryName
 } from '../config/categoryMapping.js';
-import { convertUSDtoMXN } from '../config/currency.js';
+import { convertUSDtoMXN, CURRENCY_CONFIG, updateExchangeRate } from '../config/currency.js';
 import { logger } from '../utils/logger.js';
 
 class SyscomService {
@@ -27,6 +27,46 @@ class SyscomService {
     this.healthRetentionHours = Number(process.env.SYSCOM_HEALTH_RETENTION_HOURS || 168);
     this.healthHistoryLimit = Number(process.env.SYSCOM_HEALTH_MAX_POINTS || 288);
     this.startHealthSnapshotScheduler();
+    this.startExchangeRateScheduler();
+  }
+
+  startExchangeRateScheduler() {
+    const syncRate = () => {
+      this.syncExchangeRate().catch((error) => {
+        logger.warn('No se pudo sincronizar el tipo de cambio de SYSCOM', { message: error.message });
+      });
+    };
+
+    // Sincronizar inmediatamente al iniciar el servicio
+    syncRate();
+
+    // Sincronizar cada 12 horas
+    this.exchangeRateTimer = setInterval(syncRate, 12 * 60 * 60 * 1000);
+
+    if (typeof this.exchangeRateTimer.unref === 'function') {
+      this.exchangeRateTimer.unref();
+    }
+  }
+
+  async syncExchangeRate() {
+    if (!syscomClient.isConfigured()) {
+      return false;
+    }
+
+    logger.info('🔄 Sincronizando tipo de cambio dinámico desde SYSCOM...');
+    const result = await syscomClient.getExchangeRate();
+
+    if (result.success && result.data && result.data.normal) {
+      const normalRate = parseFloat(result.data.normal);
+      if (normalRate > 0) {
+        updateExchangeRate(normalRate);
+        logger.info(`✅ Tipo de cambio actualizado dinámicamente: 1 USD = ${normalRate} MXN`);
+        return true;
+      }
+    }
+
+    logger.warn('⚠️ No se pudo obtener el tipo de cambio oficial de SYSCOM, se mantiene el tipo de cambio por defecto');
+    return false;
   }
 
   startHealthSnapshotScheduler() {
@@ -336,6 +376,21 @@ class SyscomService {
       return response;
     }
 
+    let directProduct = null;
+    const queryStr = String(searchParams?.query || '').trim();
+    const looksLikeId = queryStr.length >= 3 && !queryStr.includes(' ');
+
+    if (looksLikeId) {
+      try {
+        const directRes = await syscomClient.getProduct(queryStr);
+        if (directRes.success && directRes.data) {
+          directProduct = directRes.data;
+        }
+      } catch (err) {
+        // Ignorar fallo de búsqueda directa
+      }
+    }
+
     const result = await syscomClient.searchProducts(searchParams);
     
     if (!result.success) {
@@ -382,6 +437,12 @@ class SyscomService {
       : (Array.isArray(result.data) ? result.data : []);
     let filteredProducts = resultProducts.filter((product) => this.isAllowedSyscomProduct(product));
 
+    if (directProduct && this.isAllowedSyscomProduct(directProduct)) {
+      const directId = String(directProduct.producto_id || directProduct.id || '');
+      filteredProducts = filteredProducts.filter((p) => String(p.producto_id || p.id || '') !== directId);
+      filteredProducts.unshift(directProduct);
+    }
+
     // Fallback: si query textual no devolvio resultados, intentamos como marca/distribuidor.
     if (
       filteredProducts.length === 0 &&
@@ -412,11 +473,13 @@ class SyscomService {
       }
     }
 
+    const transformedProducts = filteredProducts.map((product) => this.transformSyscomProduct(product));
+
     const filteredData = Array.isArray(result.data)
-      ? filteredProducts
+      ? transformedProducts
       : {
           ...(result.data || {}),
-          ...(Array.isArray(result.data?.productos) ? { productos: filteredProducts } : {})
+          ...(Array.isArray(result.data?.productos) ? { productos: transformedProducts } : {})
         };
 
     const inferredTotal = filteredProducts.length;
@@ -764,11 +827,13 @@ class SyscomService {
       : (Array.isArray(result.data) ? result.data : []);
     const filteredProducts = baseProducts.filter((product) => this.isAllowedSyscomProduct(product));
 
+    const transformedProducts = filteredProducts.map((product) => this.transformSyscomProduct(product));
+
     const filteredData = Array.isArray(result.data)
-      ? filteredProducts
+      ? transformedProducts
       : {
           ...(result.data || {}),
-          ...(Array.isArray(result.data?.productos) ? { productos: filteredProducts } : {})
+          ...(Array.isArray(result.data?.productos) ? { productos: transformedProducts } : {})
         };
 
     const responsePayload = {
@@ -1256,6 +1321,18 @@ class SyscomService {
       success: true,
       message: `Sincronización completada: ${synced} productos en ${categoryStats.length} categorías`,
       ...results
+    };
+  }
+
+  /**
+   * Obtener el tipo de cambio configurado actual
+   */
+  getExchangeRate() {
+    return {
+      success: true,
+      rate: CURRENCY_CONFIG.USD_TO_MXN,
+      currency: CURRENCY_CONFIG.PLATFORM_CURRENCY,
+      symbol: CURRENCY_CONFIG.CURRENCY_SYMBOL
     };
   }
 }

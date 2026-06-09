@@ -159,7 +159,7 @@ function Profile() {
                     updateData.newPassword = editData.newPassword;
                 }
 
-                const result = await requestJson('/auth/update-profile', {
+                const result = await requestJson('/api/auth/update-profile', {
                     method: 'PUT',
                     body: JSON.stringify(updateData)
                 });
@@ -180,10 +180,10 @@ function Profile() {
         }
     };
     return (
-        <div style={{ backgroundColor: 'var(--body-bg)', minHeight: '100vh' }}>
+        <div className="bg-page-content" style={{ minHeight: '100vh' }}>
             <AppNavbar />
 
-            <Container className="p-4">
+            <Container className="p-4 fade-in-up">
                 
                 {/* Título */}
                 <Row className="mb-4">

@@ -1,5 +1,5 @@
 // Fix DNS PRIMERO (para Windows)
-await import('./dns-fix.js');
+await import('./src/utils/dns-fix.js');
 
 // Cargar variables de entorno
 import dotenv from 'dotenv';

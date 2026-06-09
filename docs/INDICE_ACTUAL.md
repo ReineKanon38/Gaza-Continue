@@ -18,6 +18,8 @@ Este indice concentra la documentacion util para operar y desarrollar el sistema
 1. Backend integrado con SYSCOM: [backend/SYSCOM_INTEGRATION.md](../backend/SYSCOM_INTEGRATION.md)
 2. Frontend base: [frontend/README.md](../frontend/README.md)
 3. Hooks frontend: [frontend/src/hooks/README.md](../frontend/src/hooks/README.md)
+4. Manual Técnico de Arquitectura: [docs/MANUAL_TECNICO.md](MANUAL_TECNICO.md)
+5. Guía de Despliegue en Producción: [docs/GUIA_DESPLIEGUE.md](GUIA_DESPLIEGUE.md)
 
 ## Historico
 
