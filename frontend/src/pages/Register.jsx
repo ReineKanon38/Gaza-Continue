@@ -31,12 +31,6 @@ function Register() {
     }
     try {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL;
-      // Modo sin-backend: simular registro exitoso
-      if (!apiUrl) {
-        setSuccess('Registro simulado exitoso. Ahora puedes iniciar sesión.');
-        setTimeout(() => navigate('/login'), 800);
-      } else {
         const payload = {
           name: username,
           email,
@@ -50,7 +44,6 @@ function Register() {
 
         setSuccess('Registro exitoso. Ahora puedes iniciar sesión.');
         setTimeout(() => navigate('/login'), 1000);
-      }
     } catch (err) {
       setError(err.message);
     } finally {

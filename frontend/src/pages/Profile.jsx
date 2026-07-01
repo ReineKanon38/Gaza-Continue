@@ -146,24 +146,6 @@ function Profile() {
         setIsLoading(true);
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL;
-            
-            // Modo sin-backend: simular actualización
-            if (!apiUrl) {
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Actualizar datos locales
-                const updatedUser = {
-                    ...JSON.parse(localStorage.getItem('user')),
-                    name: editData.name
-                };
-                localStorage.setItem('user', JSON.stringify(updatedUser));
-                setUserData(prev => ({ ...prev, name: editData.name }));
-                
-                setMessage('Perfil actualizado exitosamente.');
-                setIsEditing(false);
-            } else {
-                // Con backend: hacer petición real
                 const updateData = {
                     name: editData.name
                 };
@@ -185,7 +167,6 @@ function Profile() {
 
                 setMessage(result.message || 'Perfil actualizado exitosamente.');
                 setIsEditing(false);
-            }
         } catch (err) {
             console.error('Error updating profile:', err);
             setError(err.message || 'Error de conexión. Inténtalo de nuevo.');

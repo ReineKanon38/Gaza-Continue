@@ -767,14 +767,6 @@ export default function AdminPanel() {
   const loadAdminData = async () => {
     try {
       setIsLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL;
-      if (!apiUrl) {
-        console.warn('API URL no configurada, no se puede cargar dashboard admin');
-        setConfigError('Falta VITE_API_URL para cargar el panel de administración.');
-        setIsLoading(false);
-        return;
-      }
-
       setConfigError(null);
 
       const [statsResponse, ordersResponse, categorySalesResponse, monthlySalesResponse] = await Promise.all([

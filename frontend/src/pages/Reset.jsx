@@ -35,15 +35,6 @@ function Reset() {
         setIsLoading(true);
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL;
-            
-            // Modo sin-backend: simular envío
-            if (!apiUrl) {
-                // Simular delay de servidor
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                setMessage('Si tu correo está registrado, recibirás un enlace para restaurar tu contraseña en breve.');
-                setEmail('');
-            } else {
                 // Con backend: hacer petición real
                 const result = await requestJson('/api/auth/reset-password', {
                     method: 'POST',
@@ -61,7 +52,6 @@ function Reset() {
                     setMessage(result.message || 'Si tu correo está registrado, recibirás un enlace para restaurar tu contraseña.');
                 }
                 setEmail('');
-            }
         } catch (err) {
             console.error('Error en reset password:', err);
             setError(err.message || 'Error de conexión. Verifica tu internet e inténtalo de nuevo.');

@@ -82,18 +82,6 @@ function Dashboard() {
             setIsLoading(true);
             setError('');
             
-            const apiUrl = import.meta.env.VITE_API_URL;
-            
-            // Modo sin-backend: usar mocks
-            if (!apiUrl) {
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                setProducts(mockProducts);
-                setKpis(mockKpis);
-                setSales(mockSales);
-                setIsLoading(false);
-                return;
-            }
-
             // Peticiones paralelas para mejor performance
             const [
                 dashboardResponse,

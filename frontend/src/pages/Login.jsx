@@ -29,14 +29,6 @@ function Login() {
     }
     try {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL;
-      // Modo sin-backend: simular login localmente
-      if (!apiUrl) {
-        const fakeUser = { id: 'local-1', name: email.split('@')[0] || 'Usuario', email, role: 'user' };
-        login('dev-token', fakeUser);
-        showSuccess('Sesión iniciada correctamente');
-        navigate('/catalog');
-      } else {
         const payload = { email, password };
         if (requires2FA) {
           if (!twoFactorToken) {
@@ -69,13 +61,12 @@ function Login() {
 
         login({ accessToken: authToken, refreshToken }, authUser);
         showSuccess(`Bienvenido, ${authUser?.name || 'Usuario'}`);
-        // Redirigir según el rol del usuario
+        
         if (authUser.role === 'admin') {
           navigate('/admin');
         } else {
           navigate('/catalog');
         }
-      }
     } catch (err) {
       setError(err.message);
       showError(err.message);

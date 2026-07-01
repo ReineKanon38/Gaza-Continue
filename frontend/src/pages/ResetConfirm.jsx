@@ -39,13 +39,7 @@ function ResetConfirm() {
         setIsLoading(true);
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL;
-            
-            if (!apiUrl) {
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                setMessage('Contraseña actualizada con éxito.');
-                setTimeout(() => navigate('/login'), 2000);
-            } else {
+
                 const result = await requestJson(`/api/auth/reset-password/${token}`, {
                     method: 'POST',
                     body: JSON.stringify({ password })
@@ -53,7 +47,6 @@ function ResetConfirm() {
 
                 setMessage(result.message || 'Contraseña actualizada con éxito.');
                 setTimeout(() => navigate('/login'), 3000);
-            }
         } catch (err) {
             console.error('Error en reset confirm:', err);
             setError(err.message || 'El enlace es inválido o ha expirado.');
