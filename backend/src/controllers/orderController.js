@@ -4,6 +4,7 @@ import Product from '../models/Product.js';
 import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import { logger } from '../utils/logger.js';
+import syscomService from '../services/syscomService.js';
 
 const ORDER_STATUS_TRANSITIONS = {
   pending: ['processing', 'cancelled'],
@@ -92,16 +93,33 @@ export const createOrder = async (req, res) => {
     const orderItems = [];
 
     for (const item of products) {
-      const { productId, quantity } = item;
-      const product = await Product.findById(productId);
+      let { productId, quantity } = item;
+      
+      let product = null;
+      // Handle virtual syscom products by syncing them on-the-fly
+      if (String(productId).startsWith('syscom-')) {
+        const syscomId = String(productId).replace('syscom-', '');
+        try {
+          const result = await syscomService.syncProduct(syscomId);
+          if (result && result.product) {
+            product = result.product;
+            productId = product._id;
+          }
+        } catch (error) {
+          logger.warn(`Could not sync syscom product ${syscomId} on the fly: ${error.message}`);
+        }
+      } else {
+        product = await Product.findById(productId);
+      }
 
       if (!product) {
         return sendError(res, {
           status: 404,
-          message: `Producto con ID ${productId} no encontrado`
+          message: `Producto con ID ${item.productId} no encontrado en base de datos ni SYSCOM`
         });
       }
 
+      // Check stock
       if (product.stock < quantity) {
         return sendError(res, {
           status: 400,

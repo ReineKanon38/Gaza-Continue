@@ -43,7 +43,7 @@ class SyscomClient {
                 }
 
                 const delay = 300 * (attempt + 1);
-                logger.warn(`${context} fallo temporal, reintentando`, {
+                logger.debug(`${context} fallo temporal, reintentando`, {
                     attempt: attempt + 1,
                     maxRetries: this.maxRetries,
                     status: error?.response?.status,

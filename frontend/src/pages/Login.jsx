@@ -11,6 +11,8 @@ function Login() {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [twoFactorToken, setTwoFactorToken] = useState('');
+  const [requires2FA, setRequires2FA] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -35,10 +37,27 @@ function Login() {
         showSuccess('Sesión iniciada correctamente');
         navigate('/catalog');
       } else {
+        const payload = { email, password };
+        if (requires2FA) {
+          if (!twoFactorToken) {
+            setError('Por favor ingresa el código de 6 dígitos.');
+            setLoading(false);
+            return;
+          }
+          payload.twoFactorToken = twoFactorToken;
+        }
+
         const data = await requestJson('/api/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify(payload)
         });
+
+        if (data?.requires2fa || data?.data?.requires2fa || data?.status === 202) {
+          setRequires2FA(true);
+          setError('');
+          setLoading(false);
+          return;
+        }
 
         const authToken = data?.accessToken || data?.token || data?.data?.accessToken || data?.data?.token;
         const refreshToken = data?.refreshToken || data?.data?.refreshToken;
@@ -82,35 +101,63 @@ function Login() {
               </Alert>
             )}
 
-            <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Correo electrónico</Form.Label>
-              <InputGroup>
-                <InputGroup.Text>
-                  <BsEnvelopeFill />
-                </InputGroup.Text>
-                <Form.Control 
-                  type="email" 
-                  placeholder="Ingresa tu correo" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </InputGroup>
-            </Form.Group>
+            {!requires2FA ? (
+              <>
+                <Form.Group className="mb-3" controlId="formBasicEmail">
+                  <Form.Label>Correo electrónico</Form.Label>
+                  <InputGroup>
+                    <InputGroup.Text>
+                      <BsEnvelopeFill />
+                    </InputGroup.Text>
+                    <Form.Control 
+                      type="email" 
+                      placeholder="Ingresa tu correo" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={loading}
+                    />
+                  </InputGroup>
+                </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formBasicPassword">
-              <Form.Label>Contraseña</Form.Label>
-              <InputGroup>
-                <InputGroup.Text>
-                  <BsLockFill />
-                </InputGroup.Text>
-                <Form.Control 
-                  type="password" 
-                  placeholder="Contraseña" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </InputGroup>
-            </Form.Group>
+                <Form.Group className="mb-3" controlId="formBasicPassword">
+                  <Form.Label>Contraseña</Form.Label>
+                  <InputGroup>
+                    <InputGroup.Text>
+                      <BsLockFill />
+                    </InputGroup.Text>
+                    <Form.Control 
+                      type="password" 
+                      placeholder="Contraseña" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
+                    />
+                  </InputGroup>
+                </Form.Group>
+              </>
+            ) : (
+              <>
+                <Alert variant="info">
+                  Tu cuenta está protegida con Autenticación de Dos Factores.
+                </Alert>
+                <Form.Group className="mb-3" controlId="formBasic2FA">
+                  <Form.Label>Código A2F</Form.Label>
+                  <InputGroup>
+                    <InputGroup.Text>
+                      <BsLockFill />
+                    </InputGroup.Text>
+                    <Form.Control 
+                      type="text" 
+                      placeholder="Código de 6 dígitos" 
+                      value={twoFactorToken}
+                      onChange={(e) => setTwoFactorToken(e.target.value.replace(/\D/g, '').substring(0, 6))}
+                      disabled={loading}
+                      maxLength={6}
+                    />
+                  </InputGroup>
+                </Form.Group>
+              </>
+            )}
             
             <Button 
               type="submit"
@@ -119,7 +166,7 @@ function Login() {
               disabled={loading}
             >
               <FiLogIn className="me-2" /> 
-              {loading ? 'Ingresando...' : 'Ingresar'}
+              {loading ? (requires2FA ? 'Verificando...' : 'Ingresando...') : (requires2FA ? 'Verificar A2F' : 'Ingresar')}
             </Button>
             
             <div className="text-center mt-4">

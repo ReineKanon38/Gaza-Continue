@@ -378,7 +378,10 @@ class SyscomService {
 
     let directProduct = null;
     const queryStr = String(searchParams?.query || '').trim();
-    const looksLikeId = queryStr.length >= 3 && !queryStr.includes(' ');
+    // Un ID de SYSCOM suele ser numérico (ej. 123456) o un modelo con letras, números y guiones.
+    // Para evitar buscar términos genéricos (como "camara") como si fueran IDs, exigimos que
+    // contenga al menos un número si no tiene espacios.
+    const looksLikeId = queryStr.length >= 3 && !queryStr.includes(' ') && /\d/.test(queryStr);
 
     if (looksLikeId) {
       try {
@@ -395,7 +398,7 @@ class SyscomService {
     
     if (!result.success) {
       if (cached?.data) {
-        logger.warn('SYSCOM search fallo, devolviendo cache previo', {
+        logger.debug('SYSCOM search fallo, devolviendo cache previo', {
           cacheKey,
           cacheAgeMs: cached.ageMs,
           error: result.error
@@ -786,7 +789,7 @@ class SyscomService {
 
     if (!result.success) {
       if (cached?.data) {
-        logger.warn('SYSCOM super-precio fallo, devolviendo cache previo', {
+        logger.debug('SYSCOM super-precio fallo, devolviendo cache previo', {
           cacheKey,
           cacheAgeMs: cached.ageMs,
           error: result.error

@@ -32,7 +32,11 @@ const userSchema = new mongoose.Schema({
   savedShippingAddress: {
     type: savedShippingAddressSchema,
     default: () => ({ country: "México" })
-  }
+  },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpire: { type: Date, default: null },
+  twoFactorSecret: { type: String, default: null },
+  twoFactorEnabled: { type: Boolean, default: false }
 }, { timestamps: true });
 
 // 🔒 MÉTODO PARA COMPARAR CONTRASEÑAS (Esto arregla tu error)

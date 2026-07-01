@@ -101,8 +101,8 @@ function ProductCard({ product, matchMeta = null }) {
                   {isOutOfStock ? 'Sin stock' : 'Disponible'}
                 </span>
               </div>
-              <h6 className="product-hover-title" style={{ color: '#1d4ed8' }}>{product.name}</h6>
-              {productCode && <p className="product-hover-meta" style={{ color: '#1d4ed8' }}>Código: {productCode}</p>}
+              <h6 className="product-hover-title" style={{ color: 'var(--primary-light)' }}>{product.name}</h6>
+              {productCode && <p className="product-hover-meta" style={{ color: 'var(--primary-light)' }}>Código: {productCode}</p>}
               {productBenefits.length > 0 ? (
                 <ul className="product-hover-features mb-0">
                   {productBenefits.map((benefit, index) => (

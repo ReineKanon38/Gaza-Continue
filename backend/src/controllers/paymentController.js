@@ -1,10 +1,21 @@
 import dotenv from 'dotenv';
 import { logger } from '../utils/logger.js';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
+import Stripe from 'stripe';
 
 dotenv.config();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 
 const PAYMENT_METHODS = [
+  {
+    id: 'stripe_card',
+    provider: 'stripe',
+    name: 'Tarjeta de Crédito / Débito',
+    description: 'Pago seguro en línea vía Stripe',
+    enabled: true,
+    settlementWindowHours: 0,
+    disputeRisk: 'medium'
+  },
   {
     id: 'banamex_transfer',
     provider: 'banamex',
@@ -55,8 +66,27 @@ export const createPaymentSession = async (req, res) => {
     if (!selectedProvider || !allowedProviders.includes(selectedProvider)) {
       return sendError(res, {
         status: 400,
-        message: `Proveedor bancario inválido. Disponibles: ${allowedProviders.join(', ')}`,
-        error: 'Proveedor bancario inválido'
+        message: `Proveedor de pago inválido. Disponibles: ${allowedProviders.join(', ')}`,
+        error: 'Proveedor inválido'
+      });
+    }
+
+    if (selectedProvider === 'stripe') {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Stripe expects cents
+        currency: currency.toLowerCase(),
+        metadata: {
+          orderId: orderId || 'N/A',
+          userId: req.user?.sub || 'guest'
+        }
+      });
+
+      return sendSuccess(res, {
+        status: 200,
+        paymentSessionId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret,
+        paymentStatus: 'requires_payment_method',
+        provider: 'stripe'
       });
     }
 
@@ -138,5 +168,32 @@ export const getPaymentMethods = async (req, res) => {
       error: error.message
     });
   }
+};
+
+export const stripeWebhook = async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test');
+  } catch (err) {
+    logger.error('Webhook signature verification failed', { error: err.message });
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+      logger.info(`Stripe payment intent ${paymentIntent.id} succeeded for order ${paymentIntent.metadata.orderId}`);
+      // Here you would typically update the Order status in the DB
+      break;
+    case 'payment_intent.payment_failed':
+      logger.warn(`Stripe payment failed: ${event.data.object.id}`);
+      break;
+    default:
+      logger.info(`Unhandled event type ${event.type}`);
+  }
+
+  res.send();
 };
 

@@ -13,6 +13,7 @@ import ordersRoutes from "./src/routes/orders.js";
 import statsRoutes from "./src/routes/stats.js";
 import seedRoutes from "./src/routes/seed.js";
 import paymentRoutes from "./src/routes/payment.js";
+import { stripeWebhook } from "./src/controllers/paymentController.js";
 import categoriesRoutes from "./src/routes/categories.js";
 import couponsRoutes from "./src/routes/coupons.js";
 import inventoryRoutes from "./src/routes/inventory.js";
@@ -27,6 +28,9 @@ dotenv.config();
 // Middlewares de seguridad y parsing
 app.use(helmet());
 app.use(cors(corsOptions));
+// Stripe Webhook needs raw body, must be before express.json()
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), stripeWebhook);
+
 app.use(express.json());
 
 // Rate limit básico para rutas API
@@ -76,7 +80,7 @@ async function start() {
   try {
     await connectDB();
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
       console.log(`🌐 CORS habilitado para: ${Array.isArray(allowedCorsOrigins) ? allowedCorsOrigins.join(', ') : allowedCorsOrigins}`);
     });
   } catch (err) {

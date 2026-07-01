@@ -8,6 +8,9 @@ import {
 	refreshSession,
 	logoutSession,
 	requestPasswordReset,
+	resetPassword,
+	generate2fa,
+	verify2fa,
 	getSavedShippingAddress,
 	updateSavedShippingAddress,
 	listUsers,
@@ -26,10 +29,13 @@ const router = express.Router();
 router.post("/login", validate(loginSchema), loginUser);
 router.post("/register", validate(registerSchema), registerUser);
 router.post("/reset-password", validate(requestResetSchema), requestPasswordReset);
+router.post("/reset-password/:token", resetPassword);
 router.post('/refresh', validate(refreshSessionSchema), refreshSession);
 
 // Rutas protegidas
 router.get('/me', requireAuth, getUserProfile);
+router.post('/2fa/generate', requireAuth, generate2fa);
+router.post('/2fa/verify', requireAuth, verify2fa);
 router.post('/logout', requireAuth, validate(logoutSessionSchema), logoutSession);
 router.put("/update-profile", requireAuth, validate(updateProfileSchema), updateProfile);
 router.get('/shipping-address', requireAuth, getSavedShippingAddress);

@@ -9,7 +9,12 @@ import { paymentService } from '../services/paymentService';
 import orderService from '../services/orderService';
 import addressService from '../services/addressService';
 import authService from '../services/authService';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import StripePaymentForm from '../components/StripePaymentForm';
 import './Checkout.css'; 
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_placeholder');
 
 const CHECKOUT_ADDRESS_STORAGE_KEY = 'gaza-checkout-address';
 
@@ -34,6 +39,7 @@ function Checkout() {
   const [selectedProvider, setSelectedProvider] = useState('');
   const [isLoadingPayment, setIsLoadingPayment] = useState(true);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const [stripeClientSecret, setStripeClientSecret] = useState('');
 
   useEffect(() => {
     if (address.zipCode && address.zipCode.length === 5) {
@@ -171,11 +177,29 @@ function Checkout() {
         provider: selectedProvider
       });
 
+      if (selectedProvider === 'stripe') {
+        setStripeClientSecret(paymentSession.clientSecret);
+        setCreatedOrderId(generatedOrderId);
+        setIsSubmittingOrder(false);
+        return; // wait for user to interact with Stripe UI
+      }
+
+      // Bank Transfer Flow
       await paymentService.confirmPaymentSession({
         paymentSessionId: paymentSession.paymentSessionId,
         provider: selectedProvider
       });
 
+      await createOrderInDB(generatedOrderId, 'bank_transfer', `${selectedProvider.toUpperCase()} - VALIDACIÓN MANUAL`);
+    } catch (error) {
+      console.error('Error al crear la orden:', error);
+      setServerError(error.message || 'No fue posible registrar la orden. Intenta nuevamente.');
+      setIsSubmittingOrder(false);
+    }
+  };
+
+  const createOrderInDB = async (orderId, method, cardHolder) => {
+    try {
       const orderData = {
         products: cart.items.map(item => ({
           productId: item.product?._id || item._id,
@@ -188,22 +212,27 @@ function Checkout() {
           country: address.country || 'México'
         },
         paymentInfo: {
-          method: 'bank_transfer',
-          cardHolder: `${selectedProvider.toUpperCase()} - VALIDACIÓN MANUAL`
+          method: method,
+          cardHolder: cardHolder
         }
       };
 
       await orderService.createOrder(orderData);
       await authService.updateSavedShippingAddress(address);
-      setCreatedOrderId(generatedOrderId);
+      setCreatedOrderId(orderId);
       clearCart();
       setOrderSuccess(true);
     } catch (error) {
-      console.error('Error al crear la orden:', error);
-      setServerError(error.message || 'No fue posible registrar la orden. Intenta nuevamente.');
+      console.error('Error al registrar orden DB:', error);
+      setServerError(error.message || 'Error al guardar la orden.');
     } finally {
       setIsSubmittingOrder(false);
     }
+  };
+
+  const handleStripeSuccess = async (paymentIntent) => {
+    setIsSubmittingOrder(true);
+    await createOrderInDB(createdOrderId, 'credit_card', 'STRIPE PAYMENT');
   };
 
   if (orderSuccess) {
@@ -297,7 +326,10 @@ function Checkout() {
                           {paymentMethods.map((method) => (
                             <div
                               key={method.id}
-                              onClick={() => handleProviderSelect(method)}
+                              onClick={() => {
+                                handleProviderSelect(method);
+                                setStripeClientSecret(''); // reset stripe
+                              }}
                               className={`payment-method-card p-3 d-flex align-items-center gap-3 ${selectedProvider === method.provider ? 'selected' : ''}`}
                               role="button"
                             >
@@ -306,7 +338,10 @@ function Checkout() {
                                 id={`provider-${method.provider}`}
                                 name="selectedProvider"
                                 checked={selectedProvider === method.provider}
-                                onChange={() => handleProviderSelect(method)}
+                                onChange={() => {
+                                  handleProviderSelect(method);
+                                  setStripeClientSecret('');
+                                }}
                                 className="m-0"
                               />
                               <div className="d-flex flex-column text-start">
@@ -317,22 +352,33 @@ function Checkout() {
                           ))}
                         </div>
 
-                        <Button
-                          className="w-100 py-3 fw-bold btn-primary-gaza"
-                          onClick={handlePlaceOrder}
-                          disabled={isSubmittingOrder || !selectedProvider || cart.items.length === 0}
-                        >
-                          {isSubmittingOrder ? (
-                            <>
-                              <Spinner size="sm" className="me-2" animation="border" />
-                              Registrando pedido...
-                            </>
-                          ) : (
-                            <>
-                              <BsShieldCheck className="me-2" /> Confirmar Pedido con Pago Bancario
-                            </>
-                          )}
-                        </Button>
+                        {selectedProvider === 'stripe' && stripeClientSecret ? (
+                          <Elements stripe={stripePromise} options={{ clientSecret: stripeClientSecret }}>
+                            <StripePaymentForm 
+                              amount={totalPrice + shippingCost} 
+                              onPaymentSuccess={handleStripeSuccess} 
+                              isProcessingParent={isSubmittingOrder}
+                            />
+                          </Elements>
+                        ) : (
+                          <Button
+                            className="w-100 py-3 fw-bold btn-primary-gaza"
+                            onClick={handlePlaceOrder}
+                            disabled={isSubmittingOrder || !selectedProvider || cart.items.length === 0}
+                          >
+                            {isSubmittingOrder ? (
+                              <>
+                                <Spinner size="sm" className="me-2" animation="border" />
+                                {selectedProvider === 'stripe' ? 'Preparando pago seguro...' : 'Registrando pedido...'}
+                              </>
+                            ) : (
+                              <>
+                                <BsShieldCheck className="me-2" /> 
+                                {selectedProvider === 'stripe' ? 'Pagar con Tarjeta' : 'Confirmar Pedido con Pago Bancario'}
+                              </>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     )}
                   </>

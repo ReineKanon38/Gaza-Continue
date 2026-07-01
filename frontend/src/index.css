@@ -309,10 +309,15 @@
 
 /* Fondo dinámico de página con gradiente de alta tecnología */
 .bg-page-content {
-  background: radial-gradient(circle at 10% 20%, rgba(2, 6, 23, 0.05) 0%, rgba(243, 248, 255, 0.95) 90%) !important;
+  background: var(--bs-body-bg) !important;
+  background-image: radial-gradient(circle at 10% 20%, rgba(2, 6, 23, 0.05) 0%, rgba(var(--bs-body-bg-rgb, 243, 248, 255), 0.95) 90%) !important;
   position: relative;
   overflow: hidden;
   z-index: 1;
+}
+
+[data-bs-theme="dark"] .bg-page-content {
+  background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.02) 0%, rgba(15, 23, 42, 0.95) 90%) !important;
 }
 
 .bg-page-content::before {
@@ -341,13 +346,18 @@
 
 /* Tarjeta Glassmorphic para Formularios (Login, Registro, Recuperación) */
 .bg-page-content .card {
-  background: rgba(255, 255, 255, 0.75) !important;
+  background: var(--bg-card, rgba(255, 255, 255, 0.75)) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 20px 40px rgba(15, 25, 41, 0.08) !important;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.5)) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
   border-radius: 1.5rem !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-bs-theme="dark"] .bg-page-content .card {
+  background: rgba(30, 41, 59, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .bg-page-content .card:hover {

@@ -7,6 +7,7 @@ import App from './App.jsx'
 import { CartProvider } from './context/CartContext.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 createRoot(document.getElementById('root')).render(
@@ -15,9 +16,11 @@ createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <AuthProvider>
           <NotificationProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
+            <ThemeProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </ThemeProvider>
           </NotificationProvider>
         </AuthProvider>
       </BrowserRouter>

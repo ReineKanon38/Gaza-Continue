@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Container, Row, Col, Form, InputGroup, Spinner, Badge, Button, ButtonGroup } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
 import ProductCard from '../components/ProductCard';
+import PromoModal from '../components/PromoModal';
 import { BsGrid3X3Gap, BsSearch, BsCurrencyDollar, BsListUl } from 'react-icons/bs';
 import { FiActivity, FiBarChart2, FiCamera, FiCpu, FiGrid, FiLock, FiMic, FiShield, FiTool, FiZap } from 'react-icons/fi';
 import productService from '../services/productService';
@@ -112,6 +113,7 @@ function Catalog() {
     const [categories, setCategories] = useState([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [dataSource, setDataSource] = useState('syscom');
     const hasLoadedOnceRef = useRef(false);
     const productsPerPage = 20;
 
@@ -227,6 +229,7 @@ function Catalog() {
                 
                 const total = res.total || 0;
                 setTotalProducts(total);
+                setDataSource(res.source || 'syscom');
                 setHasMore(Boolean(res.pagination?.hasNextPage) || (list.length === productsPerPage));
             } catch (error) {
                 console.error("Error cargando productos:", error);
@@ -313,6 +316,7 @@ function Catalog() {
     return (
         <div className="catalog-page-wrapper">
             <AppNavbar />
+            <PromoModal />
 
             <div className="promo-banner-container">
                 <div className="promo-banner-wrapper">
@@ -384,7 +388,12 @@ function Catalog() {
                         </div>
                         
                         <Row className="mb-4 g-3 align-items-center filter-row-custom shadow-sm p-3 mx-0">
-                            <Col md={12} className="d-flex justify-content-end">
+                            <Col md={12} className="d-flex justify-content-end align-items-center">
+                                {dataSource === 'cache' || dataSource === 'stale-cache' ? (
+                                    <Badge bg="info" className="me-2 text-dark">
+                                        ⚡ Caché Optimizada
+                                    </Badge>
+                                ) : null}
                                 <Badge bg="success">Precios en MXN</Badge>
                                 {isRefreshing && <Badge bg="secondary" className="ms-2">Actualizando...</Badge>}
                             </Col>

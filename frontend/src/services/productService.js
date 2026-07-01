@@ -222,7 +222,8 @@ export const searchSyscomProducts = async (params = {}) => {
     total,
     page: Number(pagination?.pagina_actual || data?.page || params.page || 1),
     pagination,
-    success: !!data?.success
+    success: !!data?.success,
+    source: data?.source || 'syscom'
   };
 };
 

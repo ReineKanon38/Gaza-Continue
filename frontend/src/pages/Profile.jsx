@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Form, Button, Alert, Badge, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Alert, Badge, Spinner, Modal, InputGroup } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
-import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare, BsTruck } from 'react-icons/bs';
+import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare, BsTruck, BsShieldLock, BsMoonFill, BsSunFill } from 'react-icons/bs';
+import { useTheme } from '../context/ThemeContext';
 import orderService from '../services/orderService';
+import authService from '../services/authService';
 import { requestJson } from '../services/httpClient';
 
 function Profile() {
@@ -22,6 +24,17 @@ function Profile() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { theme, toggleTheme } = useTheme();
+
+    // 2FA states
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [qrCodeData, setQrCodeData] = useState('');
+    const [twoFactorSecret, setTwoFactorSecret] = useState('');
+    const [twoFactorToken, setTwoFactorToken] = useState('');
+    const [twoFAError, setTwoFAError] = useState('');
+    const [twoFASuccess, setTwoFASuccess] = useState('');
+    const [isGenerating2FA, setIsGenerating2FA] = useState(false);
+
     const [orders, setOrders] = useState([]);
     const [selectedTracking, setSelectedTracking] = useState(null);
     const [trackingError, setTrackingError] = useState('');
@@ -35,7 +48,8 @@ function Profile() {
                 const user = JSON.parse(userStr);
                 setUserData({
                     name: user.name || 'Usuario',
-                    email: user.email || 'email@ejemplo.com'
+                    email: user.email || 'email@ejemplo.com',
+                    twoFactorEnabled: user.twoFactorEnabled || false
                 });
                 setEditData(prevData => ({
                     ...prevData,
@@ -179,6 +193,41 @@ function Profile() {
             setIsLoading(false);
         }
     };
+
+    const handleGenerate2FA = async () => {
+        try {
+            setIsGenerating2FA(true);
+            setTwoFAError('');
+            const response = await authService.generate2FA();
+            setQrCodeData(response.data.qrCodeUrl);
+            setTwoFactorSecret(response.data.secret);
+            setShow2FAModal(true);
+        } catch (err) {
+            setError(err.message || 'Error al generar A2F');
+        } finally {
+            setIsGenerating2FA(false);
+        }
+    };
+
+    const handleVerify2FA = async () => {
+        try {
+            setTwoFAError('');
+            setTwoFASuccess('');
+            await authService.verify2FA(twoFactorToken);
+            setTwoFASuccess('Autenticación de 2 Factores activada exitosamente.');
+            const updatedUser = { ...JSON.parse(localStorage.getItem('user')), twoFactorEnabled: true };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setUserData(prev => ({ ...prev, twoFactorEnabled: true }));
+            setTimeout(() => {
+                setShow2FAModal(false);
+                setTwoFactorToken('');
+                setTwoFASuccess('');
+            }, 2000);
+        } catch (err) {
+            setTwoFAError(err.message || 'Código inválido. Intenta de nuevo.');
+        }
+    };
+
     return (
         <div className="bg-page-content" style={{ minHeight: '100vh' }}>
             <AppNavbar />
@@ -279,6 +328,23 @@ function Profile() {
                                         </Col>
                                     </Form.Group>
 
+                                    {/* Campo: Modo Oscuro */}
+                                    <Form.Group as={Row} className="mb-3 align-items-center">
+                                        <Form.Label column sm="4" className="fw-bold">
+                                            {theme === 'dark' ? <BsMoonFill className="me-2 text-primary" /> : <BsSunFill className="me-2 text-warning" />}
+                                            Tema:
+                                        </Form.Label>
+                                        <Col sm="8">
+                                            <Form.Check 
+                                                type="switch"
+                                                id="theme-switch"
+                                                label={theme === 'dark' ? 'Modo Oscuro Activado' : 'Modo Claro Activado'}
+                                                checked={theme === 'dark'}
+                                                onChange={toggleTheme}
+                                            />
+                                        </Col>
+                                    </Form.Group>
+
                                     {/* Cambio de contraseña (solo en modo edición) */}
                                     {isEditing && (
                                         <>
@@ -360,6 +426,29 @@ function Profile() {
                                     )}
                                 </Form>
                                 
+                                <hr className="mt-4 mb-4" />
+                                
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 className="fw-bold mb-1"><BsShieldLock className="me-2" />Autenticación de 2 Factores (A2F)</h6>
+                                        <p className="text-muted small mb-0">Protege tu cuenta agregando una capa extra de seguridad.</p>
+                                    </div>
+                                    <div>
+                                        {userData.twoFactorEnabled ? (
+                                            <Badge bg="success" className="px-3 py-2">Activo</Badge>
+                                        ) : (
+                                            <Button 
+                                                variant="outline-primary" 
+                                                size="sm" 
+                                                onClick={handleGenerate2FA}
+                                                disabled={isGenerating2FA}
+                                            >
+                                                {isGenerating2FA ? 'Generando...' : 'Configurar A2F'}
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                                
                             </Card.Body>
                         </Card>
                     </Col>
@@ -433,6 +522,60 @@ function Profile() {
                     </Col>
                 </Row>
             </Container>
+
+            {/* Modal de Configuración A2F */}
+            <Modal show={show2FAModal} onHide={() => setShow2FAModal(false)} backdrop="static" keyboard={false}>
+                <Modal.Header closeButton>
+                    <Modal.Title><BsShieldLock className="me-2" />Configurar A2F</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {twoFASuccess ? (
+                        <Alert variant="success" className="text-center">
+                            <BsShieldLock size={32} className="mb-2" /><br/>
+                            {twoFASuccess}
+                        </Alert>
+                    ) : (
+                        <>
+                            <p className="small text-muted mb-3">
+                                Escanea el código QR utilizando tu aplicación de autenticación (Google Authenticator, Microsoft Authenticator o Authy) e ingresa el código generado abajo para verificar.
+                            </p>
+                            {qrCodeData && (
+                                <div className="text-center mb-4">
+                                    <img src={qrCodeData} alt="Código QR A2F" className="img-fluid border rounded p-2" />
+                                    <div className="mt-2 text-muted small user-select-all">
+                                        <strong className="d-block mb-1">¿No puedes escanear el código?</strong>
+                                        Usa esta clave secreta: <br/><code className="bg-light p-1 rounded border">{twoFactorSecret}</code>
+                                    </div>
+                                </div>
+                            )}
+
+                            {twoFAError && <Alert variant="danger">{twoFAError}</Alert>}
+
+                            <Form.Group>
+                                <Form.Label className="fw-bold">Código de verificación</Form.Label>
+                                <InputGroup>
+                                    <InputGroup.Text><BsLockFill /></InputGroup.Text>
+                                    <Form.Control 
+                                        type="text" 
+                                        placeholder="Código de 6 dígitos"
+                                        maxLength="6"
+                                        value={twoFactorToken}
+                                        onChange={(e) => setTwoFactorToken(e.target.value.replace(/\D/g, '').substring(0, 6))}
+                                    />
+                                </InputGroup>
+                            </Form.Group>
+                        </>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShow2FAModal(false)} disabled={!!twoFASuccess}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleVerify2FA} disabled={twoFactorToken.length < 6 || !!twoFASuccess}>
+                        Verificar y Activar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 }

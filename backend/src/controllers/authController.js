@@ -4,6 +4,9 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import { logger } from '../utils/logger.js';
+import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/emailService.js';
+import { authenticator } from 'otplib';
+import qrcode from 'qrcode';
 
 const getAccessTokenSecret = () => process.env.JWT_SECRET || 'dev_secret_change_me';
 const getRefreshTokenSecret = () => process.env.JWT_REFRESH_SECRET || getAccessTokenSecret();
@@ -73,7 +76,8 @@ const sanitizeUser = (user) => ({
   email: user.email,
   role: user.role,
   isBlocked: user.isBlocked,
-  savedShippingAddress: user.savedShippingAddress
+  savedShippingAddress: user.savedShippingAddress,
+  twoFactorEnabled: user.twoFactorEnabled
 });
 
 const normalizeEmail = (value = '') => String(value).trim().toLowerCase();
@@ -102,6 +106,9 @@ export const registerUser = async (req, res) => {
 
     const { accessToken, refreshToken } = await issueTokenPair(user);
 
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user.email, user.name).catch(e => logger.error('Error enviando correo de bienvenida', { error: e.message }));
+
     return sendSuccess(res, {
       status: 201,
       message: 'Usuario registrado correctamente',
@@ -119,13 +126,23 @@ export const registerUser = async (req, res) => {
 // @desc    Autenticar usuario y obtener token
 export const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
-    const normalizedEmail = normalizeEmail(email);
-    const user = await User.findOne({ email: normalizedEmail });
+        const { email, password, twoFactorToken } = req.body;
+        const normalizedEmail = normalizeEmail(email);
+        const user = await User.findOne({ email: normalizedEmail });
 
         if (user && (await user.matchPassword(password))) {
             if (user.isBlocked) {
               return sendError(res, { status: 403, message: 'Usuario bloqueado. Contacta a un administrador.' });
+            }
+
+            if (user.twoFactorEnabled) {
+              if (!twoFactorToken) {
+                return sendSuccess(res, { status: 202, message: 'A2F Requerido', requires2fa: true });
+              }
+              const isValid = authenticator.verify({ token: twoFactorToken, secret: user.twoFactorSecret });
+              if (!isValid) {
+                return sendError(res, { status: 401, message: 'Código A2F inválido' });
+              }
             }
 
             const { accessToken, refreshToken } = await issueTokenPair(user);
@@ -243,7 +260,113 @@ export const updateSavedShippingAddress = async (req, res) => {
 
 // @desc    Solicitar restablecimiento de contraseña
 export const requestPasswordReset = async (req, res) => {
-  return sendSuccess(res, { message: 'Solicitud de reset enviada' });
+  try {
+    const { email } = req.body;
+    const normalizedEmail = normalizeEmail(email);
+    const user = await User.findOne({ email: normalizedEmail });
+    
+    if (!user) {
+      // Evitar que atacantes descubran si el correo existe
+      return sendSuccess(res, { message: 'Si el correo está registrado, recibirás instrucciones.' });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 mins
+    await user.save();
+
+    const resetUrl = `${req.headers.origin || 'http://localhost:5173'}/reset/${resetToken}`;
+    await sendPasswordResetEmail(user.email, resetUrl);
+
+    if (process.env.NODE_ENV !== 'production') {
+      return sendSuccess(res, { 
+        message: 'Si tu correo está registrado, recibirás un enlace.',
+        data: { resetUrl }
+      });
+    }
+
+    return sendSuccess(res, { message: 'Si tu correo está registrado, recibirás un enlace.' });
+  } catch (error) {
+    logger.error('Error en password reset', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
+};
+
+// @desc    Restablecer contraseña usando token
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return sendError(res, { status: 400, message: 'Token inválido o expirado' });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    return sendSuccess(res, { message: 'Contraseña actualizada correctamente' });
+  } catch (error) {
+    logger.error('Error en reset password confirm', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
+};
+
+// @desc Generar 2FA (A2F)
+export const generate2fa = async (req, res) => {
+  try {
+    const user = await User.findById(req.user?.sub);
+    if (!user) return sendError(res, { status: 404, message: 'Usuario no encontrado' });
+
+    const secret = authenticator.generateSecret();
+    user.twoFactorSecret = secret;
+    await user.save();
+
+    const otpauth = authenticator.keyuri(user.email, 'SYSCOM-GAZA', secret);
+    const qrCodeUrl = await qrcode.toDataURL(otpauth);
+
+    return sendSuccess(res, {
+      message: 'A2F generado',
+      data: { secret, qrCodeUrl }
+    });
+  } catch (error) {
+    logger.error('Error generando A2F', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor' });
+  }
+};
+
+// @desc Verificar y Activar 2FA
+export const verify2fa = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const user = await User.findById(req.user?.sub);
+    
+    if (!user || !user.twoFactorSecret) {
+      return sendError(res, { status: 400, message: 'A2F no ha sido generado' });
+    }
+
+    const isValid = authenticator.verify({ token, secret: user.twoFactorSecret });
+    if (!isValid) {
+      return sendError(res, { status: 400, message: 'Código inválido' });
+    }
+
+    user.twoFactorEnabled = true;
+    await user.save();
+
+    return sendSuccess(res, { message: 'Autenticación de 2 Factores activada correctamente' });
+  } catch (error) {
+    logger.error('Error verificando A2F', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor' });
+  }
 };
 
 // @desc    Listar todos los usuarios (Admin)
@@ -455,3 +578,4 @@ export const logoutSession = async (req, res) => {
     return sendError(res, { status: 500, message: 'Error al cerrar sesión', error: error.message });
   }
 };
+

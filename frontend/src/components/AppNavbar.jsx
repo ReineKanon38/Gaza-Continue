@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Navbar, Nav, Container, Image, Badge, NavDropdown } from 'react-bootstrap';
+import { Button, Navbar, Nav, Container, Image, Badge, NavDropdown, Offcanvas } from 'react-bootstrap';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { BsPersonCircle, BsShop, BsCart, BsGrid3X3Gap, BsStars, BsSearch } from 'react-icons/bs';
 // Importación de los nuevos iconos de Feather Icons
@@ -73,10 +73,11 @@ const handleBack = () => {
 };
 
 return (
-    <Navbar expand="lg" className="navbar-custom shadow-sm" sticky="top">
+    <Navbar expand={false} className="navbar-custom shadow-sm" sticky="top">
     <Container fluid className="px-4">
         <Navbar.Brand 
-        onClick={() => navigate('/catalog')} 
+        as={Link}
+        to="/"
         className="d-flex align-items-center brand-hover"
         style={{ cursor: 'pointer' }}
         >
@@ -93,157 +94,93 @@ return (
             </small>
         </div>
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" className="minimal-hamburger-toggle" aria-label="Abrir navegación">
+        
+        {/* Carrito directo en la barra principal para acceso rápido */}
+        <div className="d-flex align-items-center ms-auto me-3">
+            <Button variant="link" onClick={() => navigate('/cart')} className="position-relative text-white p-0 nav-link-custom">
+                <BsCart style={{ fontSize: '1.5rem' }} />
+                {totalItems > 0 && (
+                    <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle" style={{ fontSize: '0.65rem' }}>
+                        {totalItems > 99 ? '99+' : totalItems}
+                    </Badge>
+                )}
+            </Button>
+        </div>
+
+        <Navbar.Toggle aria-controls="offcanvasNavbar" className="minimal-hamburger-toggle" aria-label="Abrir menú">
             <FiMenu />
         </Navbar.Toggle>
-        <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-        <Nav className="align-items-center gap-3">
-            <div className="mobile-quick-nav d-lg-none">
-                <Button variant="light" className="mobile-quick-btn" onClick={handleBack} aria-label="Regresar">
-                    <FiArrowLeft />
-                </Button>
-                <Button variant="light" className="mobile-quick-btn" onClick={() => navigate('/catalog')} aria-label="Inicio">
-                    <FiHome />
-                </Button>
-                <Button variant="light" className="mobile-quick-btn" onClick={() => navigate('/cart')} aria-label="Carrito">
-                    <FiShoppingCart />
-                    {totalItems > 0 && <span className="mobile-quick-counter">{totalItems > 99 ? '99+' : totalItems}</span>}
-                </Button>
-            </div>
-            
-            {/* Dropdown de Categorías con la nueva lista */}
-            <NavDropdown 
-                title={
-                    <span className="d-flex align-items-center">
-                        <BsGrid3X3Gap className="me-2" />
-                        Categorías
-                    </span>
-                } 
-                id="categories-dropdown"
-                className="categories-dropdown"
-            >
-                <div className="syscom-mega-menu">
-                    <div className="syscom-mega-header">
-                        <div className="syscom-mega-title">Categorías de productos</div>
-                        <Badge bg="info">{visibleCategories.length}</Badge>
-                    </div>
+        
+        <Navbar.Offcanvas
+            id="offcanvasNavbar"
+            aria-labelledby="offcanvasNavbarLabel"
+            placement="end"
+            className="offcanvas-custom"
+        >
+            <Offcanvas.Header closeButton>
+                <Offcanvas.Title id="offcanvasNavbarLabel" className="fw-bold">
+                    Menú
+                </Offcanvas.Title>
+            </Offcanvas.Header>
+            <Offcanvas.Body className="d-flex flex-column">
+                <Nav className="flex-column mb-auto">
+                    
+                    <Nav.Link as={Link} to="/profile" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
+                        <BsPersonCircle className="me-3" /> Perfil de {user?.name || 'Usuario'}
+                    </Nav.Link>
 
-                    <div className="syscom-mega-search">
-                        <BsSearch />
-                        <input
-                            type="text"
-                            value={menuQuery}
-                            onChange={(e) => setMenuQuery(e.target.value)}
-                            placeholder="Buscar categoría..."
-                            aria-label="Buscar categoría"
-                        />
-                    </div>
-
-                    <div className="syscom-mega-grid">
-                        <div className="syscom-mega-column">
-                            {leftColumnCategories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    type="button"
-                                    className={`syscom-mega-item ${currentCategory === cat.id ? 'active' : ''}`}
-                                    onClick={() => handleCategoryClick(cat.id)}
-                                >
-                                    <span>{cat.name}</span>
-                                    <small>Nivel {cat.level || 0}</small>
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="syscom-mega-column">
-                            {rightColumnCategories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    type="button"
-                                    className={`syscom-mega-item ${currentCategory === cat.id ? 'active' : ''}`}
-                                    onClick={() => handleCategoryClick(cat.id)}
-                                >
-                                    <span>{cat.name}</span>
-                                    <small>Nivel {cat.level || 0}</small>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {visibleCategories.length === 0 && (
-                        <div className="syscom-empty-state">No hay categorías que coincidan con la búsqueda.</div>
+                    {isAdmin() && (
+                        <Nav.Link as={Link} to="/admin" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
+                            <FiSettings className="me-3" /> Administración
+                        </Nav.Link>
                     )}
+
+                    <hr />
+
+                    <Nav.Link as={Link} to="/catalog" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
+                        <BsShop className="me-3" /> Catálogo Completo
+                    </Nav.Link>
+
+                    <Nav.Link as={Link} to="/super-precio" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
+                        <BsStars className="me-3" /> Súper Precio
+                    </Nav.Link>
+
+                    {/* Categorías integradas en el menú */}
+                    <div className="mt-3">
+                        <div className="fw-bold text-muted mb-2 ps-2">CATEGORÍAS</div>
+                        <div className="syscom-mega-search mb-2 mx-2">
+                            <BsSearch />
+                            <input
+                                type="text"
+                                value={menuQuery}
+                                onChange={(e) => setMenuQuery(e.target.value)}
+                                placeholder="Buscar categoría..."
+                                className="form-control"
+                            />
+                        </div>
+                        <div style={{ maxHeight: '30vh', overflowY: 'auto' }} className="px-2">
+                            {visibleCategories.map(cat => (
+                                <Button 
+                                    key={cat.id} 
+                                    variant="link" 
+                                    className={`d-block w-100 text-start text-decoration-none py-2 ${currentCategory === cat.id ? 'fw-bold text-primary' : 'text-body'}`}
+                                    onClick={() => handleCategoryClick(cat.id)}
+                                >
+                                    {cat.name}
+                                </Button>
+                            ))}
+                            {visibleCategories.length === 0 && <div className="text-muted small">Sin resultados.</div>}
+                        </div>
+                    </div>
+                </Nav>
+
+                <div className="mt-auto pt-4">
+                    <Button onClick={handleLogout} variant="danger" className="w-100 d-flex align-items-center justify-content-center">
+                        <FiLogOut className="me-2" /> Salir
+                    </Button>
                 </div>
-            </NavDropdown>
-            
-            {/* Link al catálogo */}
-            <Nav.Link 
-            as={Link} 
-            to="/catalog" 
-            className="d-flex align-items-center nav-link-custom"
-            >
-            <BsShop className="me-1" />
-            Catálogo
-            </Nav.Link>
-
-            <Nav.Link
-            as={Link}
-            to="/super-precio"
-            className="d-flex align-items-center nav-link-custom"
-            >
-            <BsStars className="me-1" />
-            Super Precio
-            </Nav.Link>
-            
-            {/* Link al carrito con badge */}
-            <Nav.Link 
-            as={Link} 
-            to="/cart" 
-            className="d-flex align-items-center position-relative nav-link-custom"
-            >
-            <BsCart className="me-1" style={{ fontSize: '1.3rem' }} />
-            Carrito
-            {totalItems > 0 && (
-                <Badge 
-                bg="danger" 
-                pill 
-                className="position-absolute cart-badge"
-                >
-                {totalItems > 99 ? '99+' : totalItems}
-                </Badge>
-            )}
-            </Nav.Link>
-
-            {/* Link al panel de admin */}
-            {isAdmin() && (
-                <Nav.Link 
-                as={Link} 
-                to="/admin" 
-                className="d-flex align-items-center nav-link-custom"
-                >
-                <FiSettings className="me-1" style={{ fontSize: '1.3rem' }} />
-                <span className="d-none d-lg-inline">Admin</span>
-                </Nav.Link>
-            )}
-            
-            {/* Link al perfil */}
-            <Nav.Link 
-            as={Link} 
-            to="/profile" 
-            className="d-flex align-items-center nav-link-custom"
-            >
-            <BsPersonCircle className="me-1" style={{ fontSize: '1.3rem' }} />
-            <span className="d-none d-lg-inline">{user?.name || 'Usuario'}</span>
-            </Nav.Link>
-            
-            <Button 
-            onClick={handleLogout} 
-            className="btn-logout d-flex align-items-center"
-            >
-            <FiLogOut className="me-2" />
-            <span className="d-none d-lg-inline">Salir</span>
-            </Button>
-        </Nav>
-        </Navbar.Collapse>
+            </Offcanvas.Body>
+        </Navbar.Offcanvas>
     </Container>
     </Navbar>
 );

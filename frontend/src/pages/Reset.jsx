@@ -50,7 +50,16 @@ function Reset() {
                     body: JSON.stringify({ email })
                 });
 
-                setMessage(result.message || 'Si tu correo está registrado, recibirás un enlace para restaurar tu contraseña.');
+                if (result.data?.resetUrl) {
+                    setMessage(
+                        <span>
+                            {result.message} <br/><br/>
+                            <strong>Modo Dev:</strong> <a href={result.data.resetUrl} target="_blank" rel="noreferrer">Clic aquí para cambiar tu contraseña</a>
+                        </span>
+                    );
+                } else {
+                    setMessage(result.message || 'Si tu correo está registrado, recibirás un enlace para restaurar tu contraseña.');
+                }
                 setEmail('');
             }
         } catch (err) {

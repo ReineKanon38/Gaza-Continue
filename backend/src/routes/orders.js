@@ -35,18 +35,18 @@ router.post("/", validate(createOrderSchema), createOrder);
 // GET /api/orders - Obtener órdenes del usuario logueado
 router.get("/", getUserOrders);
 
-// GET /api/orders/:id - Obtener orden específica por ID
-router.get("/:id", getOrderById);
-
-// GET /api/orders/:id/tracking - Obtener rastreo de orden
-router.get('/:id/tracking', getOrderTracking);
-
 // Rutas de ADMIN
 // GET /api/orders/admin/all - Obtener todas las órdenes (solo admin)
 router.get("/admin/all", requireRole('admin'), getAllOrders);
 
 // GET /api/orders/admin/stats - Estadísticas de órdenes (solo admin)
 router.get("/admin/stats", requireRole('admin'), getOrderStats);
+
+// GET /api/orders/:id - Obtener orden específica por ID
+router.get("/:id", getOrderById);
+
+// GET /api/orders/:id/tracking - Obtener rastreo de orden
+router.get('/:id/tracking', getOrderTracking);
 
 // PUT /api/orders/:id/status - Actualizar estado de orden (solo admin)
 router.put("/:id/status", requireRole('admin'), validate(updateOrderStatusSchema), updateOrderStatus);

@@ -31,6 +31,12 @@ export const corsOptions = {
       return;
     }
 
+    // Permitir acceso desde red local (192.168.* o 10.* o 172.*) en desarrollo
+    if (process.env.NODE_ENV !== 'production' && /^http:\/\/(192\.168\.|10\.|172\.|localhost|127\.0\.0\.1)/.test(origin)) {
+      callback(null, true);
+      return;
+    }
+
     callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
   credentials: true,

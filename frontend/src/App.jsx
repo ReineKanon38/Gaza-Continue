@@ -12,6 +12,7 @@ const Cart = lazy(() => import('./pages/Cart'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Reset = lazy(() => import('./pages/Reset'));
+const ResetConfirm = lazy(() => import('./pages/ResetConfirm'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const SuperPrecio = lazy(() => import('./pages/SuperPrecio'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
@@ -27,6 +28,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/reset" element={<Reset />} />
+      <Route path="/reset/:token" element={<ResetConfirm />} />
 
       <Route element={<ProtectedRoute requiredRole="admin" />}>
         <Route path="/admin" element={<AdminPanel />} />

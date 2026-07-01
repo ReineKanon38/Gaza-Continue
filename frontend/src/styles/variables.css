@@ -112,4 +112,64 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+
+  /* Mapeo a variables de Bootstrap */
+  --bs-body-bg: var(--bg-light);
+  --bs-body-color: var(--text-primary);
+}
+
+/* ============================================
+   TEMA OSCURO (DARK MODE)
+   ============================================ */
+[data-theme="dark"] {
+  /* Colores Primarios */
+  --primary-dark: #070d14;
+  --primary-blue: #64b5f6;
+  --primary-orange: #ff8a65;
+  --primary-orange-hover: #ff7043;
+  --primary-color: var(--primary-blue);
+  --primary-hover: #42a5f5;
+  --primary-light: #1e88e5;
+  
+  /* Colores Secundarios */
+  --secondary-accent: #4dd0e1;
+  --secondary-accent-dark: #00bcd4;
+  
+  /* Colores de Fondo (Invertidos) */
+  --bg-light: #121826;
+  --bg-lighter: #1e293b;
+  --bg-white: #0f172a;
+  --bg-card: #1e293b;
+  --bg-dark: #070d14;
+  
+  /* Colores de Texto (Invertidos) */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-white: #ffffff;
+  --text-light: #e2e8f0;
+  --text-strong: #ffffff;
+  --text-soft: #cbd5e1;
+
+  /* Superficies de alto contraste */
+  --surface-0: #0f172a;
+  --surface-1: #1e293b;
+  --surface-2: #334155;
+  --surface-dark-1: #070d14;
+  --surface-dark-2: #0b1930;
+
+  /* Bordes */
+  --border-color: #334155;
+  --border-color-dark: #475569;
+  --border-strong: #64748b;
+  
+  /* Gradientes */
+  --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --gradient-card: linear-gradient(90deg, #1e293b 0%, #334155 100%);
+  
+  /* Bootstrap overrides for dark mode */
+  --bs-body-bg: var(--bg-light);
+  --bs-body-color: var(--text-primary);
+  --bs-dark: var(--bg-card);
+  --bs-light: var(--text-primary);
 }

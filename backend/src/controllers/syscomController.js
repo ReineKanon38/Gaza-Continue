@@ -23,7 +23,8 @@ export const searchSyscomProducts = async (req, res) => {
     return sendSuccess(res, {
       data: result.data,
       total: result.total,
-      page: result.page
+      page: result.page,
+      source: result.source
     });
   } catch (error) {
     logger.error('Error searching SYSCOM', { message: error.message });

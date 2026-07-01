@@ -342,3 +342,23 @@
 .categories-dropdown .dropdown-item:hover {
   background-color: rgba(21, 101, 192, 0.28) !important;
 }
+
+/* Offcanvas Dark Theme Adjustments */
+[data-bs-theme="dark"] .offcanvas-custom {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-left: 1px solid var(--border-color);
+}
+[data-bs-theme="dark"] .offcanvas-custom .offcanvas-header {
+  border-bottom: 1px solid var(--border-color);
+}
+[data-bs-theme="dark"] .nav-offcanvas-link {
+  color: var(--text-primary) !important;
+}
+[data-bs-theme="dark"] .nav-offcanvas-link:hover {
+  color: var(--primary-color) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-bs-theme="dark"] .offcanvas-custom .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
