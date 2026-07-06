@@ -46,7 +46,7 @@
 
 .admin-header h2 {
   margin: 0;
-  color: var(--primary-dark);
+  color: var(--text-primary);
   font-weight: var(--font-weight-bold);
 }
 
@@ -104,7 +104,7 @@
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   margin: var(--spacing-sm) 0;
-  color: var(--primary-dark);
+  color: var(--text-primary);
 }
 
 .stat-card p {
@@ -173,7 +173,7 @@
 
 .modal-title {
   font-weight: var(--font-weight-bold) !important;
-  color: var(--primary-dark) !important;
+  color: var(--text-primary) !important;
   letter-spacing: -0.5px;
 }
 
@@ -294,3 +294,116 @@
     align-items: center !important;
   }
 }
+
+/* ==================================================
+   SOPORTE PARA MODO OSCURO (DATA-THEME="DARK")
+   ================================================== */
+[data-theme="dark"] .admin-panel,
+[data-bs-theme="dark"] .admin-panel {
+  background: radial-gradient(circle at 10% 20%, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.95) 90%) !important;
+}
+
+[data-theme="dark"] .admin-header,
+[data-bs-theme="dark"] .admin-header {
+  background: rgba(30, 41, 59, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .admin-sidebar,
+[data-bs-theme="dark"] .admin-sidebar {
+  background: rgba(30, 41, 59, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .admin-sidebar .nav-link,
+[data-bs-theme="dark"] .admin-sidebar .nav-link {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .admin-sidebar .nav-link:hover,
+[data-bs-theme="dark"] .admin-sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--primary-light) !important;
+}
+
+[data-theme="dark"] .admin-sidebar .nav-link.active,
+[data-bs-theme="dark"] .admin-sidebar .nav-link.active {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: var(--primary-light) !important;
+  border-left-color: var(--primary-light);
+}
+
+[data-theme="dark"] .stat-card,
+[data-bs-theme="dark"] .stat-card,
+[data-theme="dark"] .admin-panel .card,
+[data-bs-theme="dark"] .admin-panel .card {
+  background: rgba(30, 41, 59, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .stat-card:hover,
+[data-bs-theme="dark"] .stat-card:hover {
+  border-color: rgba(0, 212, 255, 0.3) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .stat-card .text-muted,
+[data-bs-theme="dark"] .stat-card .text-muted,
+[data-theme="dark"] .admin-panel .card .text-muted,
+[data-bs-theme="dark"] .admin-panel .card .text-muted {
+  color: rgba(203, 213, 225, 0.8) !important;
+}
+
+[data-theme="dark"] .admin-panel .table thead th,
+[data-bs-theme="dark"] .admin-panel .table thead th {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .admin-panel .table tbody tr,
+[data-bs-theme="dark"] .admin-panel .table tbody tr {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .admin-panel .table tbody tr:hover,
+[data-bs-theme="dark"] .admin-panel .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+[data-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .modal-content {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer,
+[data-bs-theme="dark"] .modal-footer {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .modal-content .form-label,
+[data-bs-theme="dark"] .modal-content .form-label {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .modal-content .form-control,
+[data-bs-theme="dark"] .modal-content .form-control,
+[data-theme="dark"] .modal-content .form-select,
+[data-bs-theme="dark"] .modal-content .form-select {
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .modal-content .form-control:focus,
+[data-bs-theme="dark"] .modal-content .form-control:focus,
+[data-theme="dark"] .modal-content .form-select:focus,
+[data-bs-theme="dark"] .modal-content .form-select:focus {
+  background: rgba(30, 41, 59, 0.9) !important;
+  border-color: var(--primary-light) !important;
+}
+

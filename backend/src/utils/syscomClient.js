@@ -104,9 +104,17 @@ class SyscomClient {
             
             // Construir parámetros de búsqueda
             const queryParams = {};
-            const query = params.query || params.busqueda;
-            const brand = params.marca || params.brand;
-            const category = params.categoria || params.category;
+            
+            const sanitize = (val) => {
+                if (val === undefined || val === null) return '';
+                const trimmed = String(val).trim();
+                if (trimmed === 'undefined' || trimmed === 'null') return '';
+                return trimmed;
+            };
+
+            const query = sanitize(params.query || params.busqueda);
+            const brand = sanitize(params.marca || params.brand);
+            const category = sanitize(params.categoria || params.category);
             const page = params.pagina || params.page;
             const limit = params.limite || params.limit;
 
@@ -146,6 +154,7 @@ class SyscomClient {
                 queryParams.limite = limit;
             }
 
+            logger.debug('[SyscomClient] Enviando queryParams a SYSCOM:', queryParams);
             const response = await this.requestWithRetry(
                 () => axios.get(`${this.baseURL}/productos`, {
                     params: queryParams,

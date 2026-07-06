@@ -10,7 +10,7 @@ import productService from '../services/productService';
 import './Catalog.css';
 
 const removeAccents = (str) => {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ' ').trim();
 };
 
 const normalizeText = (value) => removeAccents(String(value || '').toLowerCase());
@@ -216,7 +216,7 @@ function Catalog() {
                 });
 
                 const list = (res.products || []).map((item) => normalizeSyscomProduct(item));
-                
+
                 if (currentPage === 1) {
                     setProducts(list);
                 } else {
@@ -226,7 +226,7 @@ function Catalog() {
                         return [...prev, ...uniqueItems];
                     });
                 }
-                
+
                 const total = res.total || 0;
                 setTotalProducts(total);
                 setDataSource(res.source || 'syscom');
@@ -325,7 +325,7 @@ function Catalog() {
                     <div className="banner-content-premium">
                         <h1 className="main-headline">
                             <span className="text-cyan-bright">
-                                Infraestructura Tecnológica <br/> de Alto Nivel
+                                Infraestructura Tecnológica <br /> de Alto Nivel
                             </span>
                         </h1>
                         <p className="lead">Líderes en distribución de tecnología y seguridad electrónica.</p>
@@ -340,7 +340,7 @@ function Catalog() {
                 ) : (
                     <>
                         {syscomCategoryFilter && getCurrentCategoryInfo() && (
-                            <div 
+                            <div
                                 className="premium-page-header"
                                 style={{
                                     backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.75))',
@@ -353,8 +353,8 @@ function Catalog() {
                             >
                                 <div>
                                     <Badge className="badge-premium-tag">PRODUCTOS PREMIUM</Badge>
-                                    <h2 style={{color: '#00d4ff', textShadow: '0 0 20px rgba(0, 212, 255, 0.5)'}}>{getCurrentCategoryInfo().name}</h2>
-                                    <p className="catalog-status-text" style={{color: 'rgba(255,255,255,0.95)', textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
+                                    <h2 style={{ color: '#00d4ff', textShadow: '0 0 20px rgba(0, 212, 255, 0.5)' }}>{getCurrentCategoryInfo().name}</h2>
+                                    <p className="catalog-status-text" style={{ color: 'rgba(255,255,255,0.95)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
                                         <span>CATÁLOGO</span> {totalProducts} productos disponibles. Mostrando {displayedProducts.length} de {totalProducts}.
                                     </p>
                                 </div>
@@ -362,8 +362,8 @@ function Catalog() {
                         )}
 
                         <div className="category-scroll-wrapper">
-                            <div 
-                                className={`category-glass-card ${!syscomCategoryFilter ? 'active' : ''}`} 
+                            <div
+                                className={`category-glass-card ${!syscomCategoryFilter ? 'active' : ''}`}
                                 onClick={() => handleCategoryChange('')}
                             >
                                 <div className="cat-icon-box"><FiGrid /></div>
@@ -371,22 +371,22 @@ function Catalog() {
                             </div>
 
                             {!isLoadingCategories && categories.map((cat) => {
-                                                            const CategoryIcon = getCategoryIcon(cat.name);
-                              return (
-                                <div
-                                  key={cat.id}
-                                  className={`category-glass-card ${syscomCategoryFilter === cat.id ? 'active' : ''}`}
-                                  onClick={() => handleCategoryChange(cat.id)}
-                                >
-                                                                    <div className="cat-icon-box">
-                                                                        <CategoryIcon aria-hidden="true" />
-                                  </div>
-                                  <span>{cat.name}</span>
-                                </div>
-                              );
+                                const CategoryIcon = getCategoryIcon(cat.name);
+                                return (
+                                    <div
+                                        key={cat.id}
+                                        className={`category-glass-card ${syscomCategoryFilter === cat.id ? 'active' : ''}`}
+                                        onClick={() => handleCategoryChange(cat.id)}
+                                    >
+                                        <div className="cat-icon-box">
+                                            <CategoryIcon aria-hidden="true" />
+                                        </div>
+                                        <span>{cat.name}</span>
+                                    </div>
+                                );
                             })}
                         </div>
-                        
+
                         <Row className="mb-4 g-3 align-items-center filter-row-custom shadow-sm p-3 mx-0">
                             <Col md={12} className="d-flex justify-content-end align-items-center">
                                 {dataSource === 'cache' || dataSource === 'stale-cache' ? (
@@ -400,11 +400,11 @@ function Catalog() {
                             <Col md={5}>
                                 <div className="search-container-relative" ref={searchRef}>
                                     <InputGroup className="search-group-modern">
-                                        <InputGroup.Text className="bg-transparent border-0"><BsSearch/></InputGroup.Text>
-                                        <Form.Control 
-                                            className="bg-transparent border-0 shadow-none" 
-                                            placeholder="Buscar por producto, marca o ID..." 
-                                            value={searchTerm} 
+                                        <InputGroup.Text className="bg-transparent border-0"><BsSearch /></InputGroup.Text>
+                                        <Form.Control
+                                            className="bg-transparent border-0 shadow-none"
+                                            placeholder="Buscar por producto, marca o ID..."
+                                            value={searchTerm}
                                             onChange={(e) => {
                                                 setSearchTerm(e.target.value);
                                                 setShowSuggestions(true);
@@ -412,12 +412,12 @@ function Catalog() {
                                             onFocus={() => setShowSuggestions(true)}
                                         />
                                     </InputGroup>
-                                    
+
                                     {showSuggestions && suggestions.length > 0 && (
                                         <div className="search-suggestions-dropdown">
                                             {suggestions.map((item) => (
-                                                <div 
-                                                    key={item._id} 
+                                                <div
+                                                    key={item._id}
                                                     className="suggestion-item"
                                                     onClick={() => {
                                                         setSearchTerm(item.name);
@@ -437,12 +437,12 @@ function Catalog() {
                             </Col>
                             <Col md={3}>
                                 <InputGroup className="search-group-modern">
-                                    <InputGroup.Text className="bg-transparent border-0"><BsCurrencyDollar/></InputGroup.Text>
-                                    <Form.Control 
-                                        className="bg-transparent border-0 shadow-none" 
-                                        type="number" 
-                                        placeholder="Precio Máximo" 
-                                        value={priceFilter} 
+                                    <InputGroup.Text className="bg-transparent border-0"><BsCurrencyDollar /></InputGroup.Text>
+                                    <Form.Control
+                                        className="bg-transparent border-0 shadow-none"
+                                        type="number"
+                                        placeholder="Precio Máximo"
+                                        value={priceFilter}
                                         onChange={(e) => setPriceFilter(e.target.value)}
                                     />
                                 </InputGroup>
@@ -454,7 +454,7 @@ function Catalog() {
                                 </ButtonGroup>
                             </Col>
                         </Row>
-                        
+
                         <Row xs={1} md={2} lg={viewMode === 'grid' ? 4 : 2} xl={viewMode === 'grid' ? 5 : 2} className="g-4">
                             {displayedProducts.map((product) => (
                                 <Col key={product.id || product._id}>
@@ -473,8 +473,8 @@ function Catalog() {
                         {/* Botón Cargar Más */}
                         {hasMore && !isRefreshing && (
                             <div className="text-center my-5">
-                                <Button 
-                                    variant="outline-primary" 
+                                <Button
+                                    variant="outline-primary"
                                     size="lg"
                                     onClick={loadMoreProducts}
                                     style={{

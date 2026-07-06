@@ -198,12 +198,13 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(0, 188, 212, 0.35);
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 0.42rem 0.6rem;
   margin-bottom: 0.6rem;
-  color: #57d7e7;
+  color: var(--primary-blue);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .syscom-mega-search input {
@@ -211,18 +212,18 @@
   outline: none;
   width: 100%;
   background: transparent;
-  color: #ecf7ff;
+  color: var(--text-primary);
   font-size: 0.92rem;
   font-weight: 600;
 }
 
 .syscom-mega-search input::placeholder {
-  color: rgba(220, 240, 255, 0.7);
+  color: var(--text-muted);
 }
 
 .syscom-mega-search:focus-within {
-  border-color: rgba(87, 215, 231, 0.85);
-  box-shadow: 0 0 0 3px rgba(87, 215, 231, 0.26);
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
 }
 
 .syscom-all-products-item {
@@ -343,22 +344,59 @@
   background-color: rgba(21, 101, 192, 0.28) !important;
 }
 
-/* Offcanvas Dark Theme Adjustments */
-[data-bs-theme="dark"] .offcanvas-custom {
-  background-color: var(--card-bg) !important;
+/* ============================================
+   OFFCANVAS - ESTILOS Y TEMA (CON CONTRASTE MEJORADO)
+   ============================================ */
+
+.offcanvas-custom {
+  background-color: var(--bg-white) !important;
   color: var(--text-primary) !important;
-  border-left: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-xl);
 }
-[data-bs-theme="dark"] .offcanvas-custom .offcanvas-header {
-  border-bottom: 1px solid var(--border-color);
+
+.offcanvas-custom .offcanvas-header {
+  border-bottom: 1px solid var(--border-color) !important;
 }
+
+.offcanvas-custom .offcanvas-title {
+  color: var(--text-primary) !important;
+}
+
+.nav-offcanvas-link {
+  color: var(--text-primary) !important;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast) !important;
+  border-radius: var(--border-radius-sm);
+  padding: 0.52rem 0.8rem !important;
+}
+
+.nav-offcanvas-link:hover {
+  color: var(--primary-blue) !important;
+  background-color: rgba(21, 101, 192, 0.08) !important;
+  transform: translateX(4px);
+}
+
+/* Ajustes de Tema Oscuro para Offcanvas */
+[data-theme="dark"] .offcanvas-custom,
+[data-bs-theme="dark"] .offcanvas-custom {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+  border-left: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .nav-offcanvas-link,
 [data-bs-theme="dark"] .nav-offcanvas-link {
   color: var(--text-primary) !important;
 }
+
+[data-theme="dark"] .nav-offcanvas-link:hover,
 [data-bs-theme="dark"] .nav-offcanvas-link:hover {
-  color: var(--primary-color) !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--primary-blue) !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
 }
+
+[data-theme="dark"] .offcanvas-custom .btn-close,
 [data-bs-theme="dark"] .offcanvas-custom .btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%);
+  filter: invert(1) grayscale(100%) brightness(200%) !important;
 }
