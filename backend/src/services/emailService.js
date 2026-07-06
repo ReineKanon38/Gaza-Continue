@@ -8,6 +8,21 @@ const createTransporter = () => {
     logger.warn('Faltan credenciales de correo (EMAIL_USER o EMAIL_PASS). Los correos se simularán en consola.');
     return null;
   }
+
+  // Si se definen parámetros SMTP individuales, los usamos (ej. Hostinger, Outlook, etc.)
+  if (process.env.EMAIL_HOST) {
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT) || 587,
+      secure: process.env.EMAIL_SECURE === 'true', // true para puerto 465, false para otros puertos
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+  }
+
+  // Por defecto, cae en Gmail
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {

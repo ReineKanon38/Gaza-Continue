@@ -13,7 +13,7 @@ export const createTestUsers = async (req, res) => {
                 name: 'María González',
                 email: 'maria@cliente.com',
                 password: password,
-                role: 'cliente',
+                role: 'user',
                 phone: '+52 55 1234 5678',
                 address: {
                     street: 'Av. Reforma 123',
@@ -27,7 +27,7 @@ export const createTestUsers = async (req, res) => {
                 name: 'Carlos Rodríguez',
                 email: 'carlos@cliente.com',
                 password: password,
-                role: 'cliente',
+                role: 'user',
                 phone: '+52 33 9876 5432',
                 address: {
                     street: 'Calle Juárez 456',

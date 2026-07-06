@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import { logger } from '../utils/logger.js';
-import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/emailService.js';
+import { sendWelcomeEmail, sendPasswordResetEmail, sendEmail } from '../services/emailService.js';
 import { authenticator } from 'otplib';
 import qrcode from 'qrcode';
 
@@ -578,4 +578,55 @@ export const logoutSession = async (req, res) => {
     return sendError(res, { status: 500, message: 'Error al cerrar sesión', error: error.message });
   }
 };
-
+
+// @desc    Enviar correos promocionales a usuarios
+export const sendPromoEmail = async (req, res) => {
+  try {
+    const { subject, htmlBody, targetRole } = req.body;
+    if (!subject || !htmlBody) {
+      return sendError(res, { status: 400, message: 'El asunto y el cuerpo del correo son requeridos.' });
+    }
+
+    const filter = {};
+    if (targetRole) {
+      filter.role = targetRole;
+    }
+
+    const users = await User.find(filter).select('email name');
+    if (users.length === 0) {
+      return sendSuccess(res, { message: 'No hay usuarios destinatarios.' });
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const user of users) {
+      // Personalizar el correo con el nombre si se desea, o simplemente enviar
+      const personalizedHtml = htmlBody.replace(/{{name}}/g, user.name || 'Usuario');
+      const sent = await sendEmail({
+        to: user.email,
+        subject,
+        html: personalizedHtml,
+        text: subject // fallback básico
+      });
+
+      if (sent) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+    }
+
+    return sendSuccess(res, {
+      message: `Campaña promocional procesada.`,
+      data: {
+        totalDestinatarios: users.length,
+        enviadosExitosamente: successCount,
+        fallidos: failCount
+      }
+    });
+  } catch (error) {
+    logger.error('Error enviando correos promocionales', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
+};

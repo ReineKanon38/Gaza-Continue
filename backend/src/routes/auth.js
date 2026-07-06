@@ -16,7 +16,8 @@ import {
 	listUsers,
 	updateUserRole,
 	updateUserStatus,
-	deleteUser
+	deleteUser,
+	sendPromoEmail
 } from "../controllers/authController.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authorize.js";
@@ -44,5 +45,6 @@ router.get("/users", requireAuth, requireRole('admin'), listUsers);
 router.put("/users/:id/role", requireAuth, requireRole('admin'), updateUserRole);
 router.put("/users/:id/status", requireAuth, requireRole('admin'), updateUserStatus);
 router.delete("/users/:id", requireAuth, requireRole('admin'), deleteUser);
+router.post("/send-promo-email", requireAuth, requireRole('admin'), sendPromoEmail);
 
 export default router;
