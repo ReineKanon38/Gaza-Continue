@@ -296,7 +296,20 @@ export const requestPasswordReset = async (req, res) => {
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { newPassword } = req.body;
+    const { newPassword, password } = req.body || {};
+    const targetPassword = newPassword || password;
+
+    if (!token) {
+      return sendError(res, { status: 400, message: 'Token de recuperación no proporcionado.' });
+    }
+
+    if (!targetPassword) {
+      return sendError(res, { status: 400, message: 'La nueva contraseña es requerida.' });
+    }
+
+    if (String(targetPassword).trim().length < 6) {
+      return sendError(res, { status: 400, message: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -306,15 +319,15 @@ export const resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return sendError(res, { status: 400, message: 'Token inválido o expirado' });
+      return sendError(res, { status: 400, message: 'El enlace es inválido o ha expirado.' });
     }
 
-    user.password = newPassword;
+    user.password = targetPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    return sendSuccess(res, { message: 'Contraseña actualizada correctamente' });
+    return sendSuccess(res, { message: 'Contraseña actualizada correctamente.' });
   } catch (error) {
     logger.error('Error en reset password confirm', { message: error.message });
     return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
