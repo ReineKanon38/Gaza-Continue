@@ -148,6 +148,8 @@ function Checkout() {
     ].every((field) => String(field || '').trim().length > 0) && /^\d{5}$/.test(address.zipCode || '');
   };
 
+  const [isSandboxSession, setIsSandboxSession] = useState(false);
+
   const handleProviderSelect = (method) => {
     setSelectedProvider(method.provider);
     setSelectedBankName(method.name);
@@ -179,6 +181,7 @@ function Checkout() {
 
       if (selectedProvider === 'stripe') {
         setStripeClientSecret(paymentSession.clientSecret);
+        setIsSandboxSession(Boolean(paymentSession.isSandbox));
         setCreatedOrderId(generatedOrderId);
         setIsSubmittingOrder(false);
         return; // wait for user to interact with Stripe UI
@@ -232,34 +235,56 @@ function Checkout() {
 
   const handleStripeSuccess = async (paymentIntent) => {
     setIsSubmittingOrder(true);
-    await createOrderInDB(createdOrderId, 'credit_card', 'STRIPE PAYMENT');
+    const label = paymentIntent?.isSandbox ? 'STRIPE SANDBOX (TARJETA PRUEBA)' : 'STRIPE PAYMENT';
+    await createOrderInDB(createdOrderId, 'credit_card', label);
   };
 
   if (orderSuccess) {
+    const isStripePayment = selectedProvider === 'stripe';
     return (
       <div className="checkout-main-wrapper pb-5">
         <AppNavbar />
         <Container className="py-5">
           <div className="checkout-success-card fade-in-up">
             <BsCheckCircle className="status-icon-success" />
-            <h2 className="fw-bold text-dark mb-3">¡Pedido Registrado Exitosamente!</h2>
-            <p className="text-secondary mb-4">Tu pedido ha sido creado y el pago ha entrado en proceso de **validación manual**.</p>
+            <h2 className="fw-bold text-dark mb-3">
+              {isStripePayment ? '¡Pago Confirmado y Pedido Registrado!' : '¡Pedido Registrado Exitosamente!'}
+            </h2>
+            <p className="text-secondary mb-4">
+              {isStripePayment
+                ? 'Tu pago con tarjeta ha sido procesado correctamente. Hemos recibido tu pedido y comenzará a prepararse para su envío.'
+                : 'Tu pedido ha sido creado y el pago ha entrado en proceso de validación manual.'}
+            </p>
             
             <div className="p-4 rounded-4 text-start bg-white bg-opacity-60 border border-white mb-4">
-              <h5 className="fw-bold mb-3 text-primary">Instrucciones de Transferencia Bancaria</h5>
-              <p className="small text-secondary mb-3">
-                Para confirmar tu compra, realiza la transferencia electrónica SPEI utilizando la siguiente información bancaria:
-              </p>
-              <ul className="list-unstyled mb-0 d-grid gap-2 small text-dark">
-                <li><strong>Banco Destino:</strong> {selectedBankName}</li>
-                <li><strong>Titular de la Cuenta:</strong> GAZA TI E-COMMERCE S.A. DE C.V.</li>
-                <li><strong>CLABE Interbancaria:</strong> 0121 8000 1234 5678 90</li>
-                <li><strong>Monto a Transferir:</strong> ${(totalPrice + shippingCost).toLocaleString('es-MX')} MXN</li>
-                <li><strong>Concepto / Referencia de Pago:</strong> <code className="bg-light px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
-              </ul>
-              <div className="mt-3 p-3 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 text-warning small">
-                <strong>Importante:</strong> Envía tu comprobante de pago con el número de orden a <strong>ventas@gaza.com</strong> o súbelo en la sección de tus pedidos en tu perfil para agilizar la entrega.
-              </div>
+              {isStripePayment ? (
+                <div>
+                  <h5 className="fw-bold mb-3 text-primary">Resumen de la Transacción</h5>
+                  <ul className="list-unstyled mb-0 d-grid gap-2 small text-dark">
+                    <li><strong>No. de Orden:</strong> <code className="bg-light px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
+                    <li><strong>Método de Pago:</strong> Tarjeta de Crédito / Débito (Procesado en Línea)</li>
+                    <li><strong>Monto Total Pagado:</strong> ${(totalPrice + shippingCost).toLocaleString('es-MX')} MXN</li>
+                    <li><strong>Estado de la Orden:</strong> <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">En Proceso / Preparación</span></li>
+                  </ul>
+                </div>
+              ) : (
+                <div>
+                  <h5 className="fw-bold mb-3 text-primary">Instrucciones de Transferencia Bancaria</h5>
+                  <p className="small text-secondary mb-3">
+                    Para confirmar tu compra, realiza la transferencia electrónica SPEI utilizando la siguiente información bancaria:
+                  </p>
+                  <ul className="list-unstyled mb-0 d-grid gap-2 small text-dark">
+                    <li><strong>Banco Destino:</strong> {selectedBankName}</li>
+                    <li><strong>Titular de la Cuenta:</strong> GAZA TI E-COMMERCE S.A. DE C.V.</li>
+                    <li><strong>CLABE Interbancaria:</strong> 0121 8000 1234 5678 90</li>
+                    <li><strong>Monto a Transferir:</strong> ${(totalPrice + shippingCost).toLocaleString('es-MX')} MXN</li>
+                    <li><strong>Concepto / Referencia de Pago:</strong> <code className="bg-light px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
+                  </ul>
+                  <div className="mt-3 p-3 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 text-warning small">
+                    <strong>Importante:</strong> Envía tu comprobante de pago con el número de orden a <strong>ventas@gaza.com</strong> o súbelo en la sección de tus pedidos en tu perfil para agilizar la entrega.
+                  </div>
+                </div>
+              )}
             </div>
 
             <Button as={Link} to="/catalog" className="btn-primary-gaza py-2.5 px-4 mt-2">Volver al Catálogo</Button>
@@ -358,6 +383,7 @@ function Checkout() {
                               amount={totalPrice + shippingCost} 
                               onPaymentSuccess={handleStripeSuccess} 
                               isProcessingParent={isSubmittingOrder}
+                              isSandbox={isSandboxSession}
                             />
                           </Elements>
                         ) : (

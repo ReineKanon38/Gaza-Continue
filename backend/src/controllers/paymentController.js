@@ -72,6 +72,22 @@ export const createPaymentSession = async (req, res) => {
     }
 
     if (selectedProvider === 'stripe') {
+      const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
+      const isRealStripeKey = stripeSecret.startsWith('sk_live_') || (stripeSecret.startsWith('sk_test_') && !stripeSecret.includes('placeholder'));
+
+      if (!isRealStripeKey) {
+        logger.info('[payment] Modo Sandbox de Stripe activado para pruebas');
+        const mockSessionId = `pi_sandbox_${Date.now()}`;
+        return sendSuccess(res, {
+          status: 200,
+          paymentSessionId: mockSessionId,
+          clientSecret: `pi_sandbox_secret_${Date.now()}`,
+          paymentStatus: 'requires_payment_method',
+          provider: 'stripe',
+          isSandbox: true
+        });
+      }
+
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Stripe expects cents
         currency: currency.toLowerCase(),
@@ -86,7 +102,8 @@ export const createPaymentSession = async (req, res) => {
         paymentSessionId: paymentIntent.id,
         clientSecret: paymentIntent.client_secret,
         paymentStatus: 'requires_payment_method',
-        provider: 'stripe'
+        provider: 'stripe',
+        isSandbox: false
       });
     }
 
@@ -158,6 +175,7 @@ export const confirmPayment = async (req, res) => {
 export const getPaymentMethods = async (req, res) => {
   try {
     return sendSuccess(res, {
+      data: { methods: PAYMENT_METHODS },
       methods: PAYMENT_METHODS
     });
   } catch (error) {
