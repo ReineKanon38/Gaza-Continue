@@ -58,11 +58,31 @@ const updateOrderTrackingStage = (order) => {
 
 // Crear una nueva orden
 export const createOrder = async (req, res) => {
+  const session = await mongoose.startSession();
+  let inTx = false;
+
+  // Detect if MongoDB instance supports transactions (ReplicaSet or Sharded Cluster)
+  const topologyType = mongoose.connection.client?.topology?.description?.type;
+  const supportsTransactions = topologyType && topologyType !== 'Single' && topologyType !== 'Unknown';
+
+  if (supportsTransactions) {
+    try {
+      session.startTransaction();
+      inTx = true;
+    } catch (e) {
+      inTx = false;
+    }
+  }
+
+  const sessionOpts = inTx ? { session } : {};
+
   try {
     const { products, shippingAddress, paymentInfo } = req.body;
     const userId = req.user.sub;
 
     if (!products || !Array.isArray(products) || products.length === 0) {
+      if (inTx && session.inTransaction()) await session.abortTransaction();
+      await session.endSession();
       return sendError(res, {
         status: 400,
         message: 'Los productos son requeridos y deben ser un array valido'
@@ -70,6 +90,8 @@ export const createOrder = async (req, res) => {
     }
 
     if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode) {
+      if (inTx && session.inTransaction()) await session.abortTransaction();
+      await session.endSession();
       return sendError(res, { status: 400, message: 'Direccion de envio incompleta' });
     }
 
@@ -81,11 +103,15 @@ export const createOrder = async (req, res) => {
     };
 
     if (!paymentInfo || !paymentInfo.method) {
+      if (inTx && session.inTransaction()) await session.abortTransaction();
+      await session.endSession();
       return sendError(res, { status: 400, message: 'Informacion de pago requerida' });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId, null, sessionOpts);
     if (!user) {
+      if (inTx && session.inTransaction()) await session.abortTransaction();
+      await session.endSession();
       return sendError(res, { status: 404, message: 'Usuario no encontrado' });
     }
 
@@ -94,6 +120,12 @@ export const createOrder = async (req, res) => {
 
     for (const item of products) {
       let { productId, quantity } = item;
+
+      if (!quantity || quantity <= 0) {
+        if (inTx && session.inTransaction()) await session.abortTransaction();
+        await session.endSession();
+        return sendError(res, { status: 400, message: 'La cantidad debe ser mayor a 0' });
+      }
       
       let product = null;
       // Handle virtual syscom products by syncing them on-the-fly
@@ -102,28 +134,37 @@ export const createOrder = async (req, res) => {
         try {
           const result = await syscomService.syncProduct(syscomId);
           if (result && result.product) {
-            product = result.product;
-            productId = product._id;
+            productId = result.product._id;
           }
         } catch (error) {
           logger.warn(`Could not sync syscom product ${syscomId} on the fly: ${error.message}`);
         }
-      } else {
-        product = await Product.findById(productId);
       }
+
+      // Decrement stock ATOMICALLY using findOneAndUpdate with condition { stock: { $gte: quantity } }
+      // This prevents race conditions where two concurrent requests read stock before either decrements it.
+      product = await Product.findOneAndUpdate(
+        { _id: productId, stock: { $gte: quantity }, active: { $ne: false } },
+        { $inc: { stock: -quantity } },
+        { new: true, ...sessionOpts }
+      );
 
       if (!product) {
-        return sendError(res, {
-          status: 404,
-          message: `Producto con ID ${item.productId} no encontrado en base de datos ni SYSCOM`
-        });
-      }
+        // Find if product exists at all to give accurate error message
+        const existingProd = await Product.findById(productId);
+        if (inTx && session.inTransaction()) await session.abortTransaction();
+        await session.endSession();
 
-      // Check stock
-      if (product.stock < quantity) {
+        if (!existingProd) {
+          return sendError(res, {
+            status: 404,
+            message: `Producto con ID ${item.productId} no encontrado`
+          });
+        }
+
         return sendError(res, {
           status: 400,
-          message: `Stock insuficiente para ${product.name}. Disponible: ${product.stock}, Solicitado: ${quantity}`
+          message: `Stock insuficiente para ${existingProd.name}. Disponible: ${existingProd.stock}, Solicitado: ${quantity}`
         });
       }
 
@@ -138,7 +179,7 @@ export const createOrder = async (req, res) => {
 
     const requiresManualPaymentValidation = paymentInfo.method === 'bank_transfer';
 
-    const order = await Order.create({
+    const orderDoc = new Order({
       orderId: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       user: userId,
       customerName: user.name,
@@ -172,18 +213,21 @@ export const createOrder = async (req, res) => {
       }
     });
 
+    await orderDoc.save(sessionOpts);
+
     user.savedShippingAddress = {
       ...user.savedShippingAddress,
       ...normalizedShippingAddress,
       country: normalizedShippingAddress.country || user.savedShippingAddress?.country || 'México'
     };
-    await user.save();
+    await user.save(sessionOpts);
 
-    for (const item of products) {
-      await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
+    if (inTx && session.inTransaction()) {
+      await session.commitTransaction();
     }
+    await session.endSession();
 
-    const populatedOrder = await Order.findById(order._id).populate('products.product', 'name price');
+    const populatedOrder = await Order.findById(orderDoc._id).populate('products.product', 'name price');
 
     return sendSuccess(res, {
       status: 201,
@@ -191,6 +235,11 @@ export const createOrder = async (req, res) => {
       data: populatedOrder
     });
   } catch (err) {
+    if (inTx && session.inTransaction()) {
+      await session.abortTransaction();
+    }
+    await session.endSession();
+
     logger.error('Error creando orden', { message: err.message });
     return sendError(res, {
       status: 500,

@@ -17,7 +17,17 @@ export const searchSyscomProducts = async (req, res) => {
     });
 
     if (!result.success) {
-      return sendError(res, { status: 400, message: result.message });
+      if (result.isFallback || result.isTimeout) {
+        return sendSuccess(res, {
+          data: [],
+          total: 0,
+          page: parseInt(page) || 1,
+          source: 'fallback',
+          isFallback: true,
+          message: 'La API de SYSCOM no respondió a tiempo (Timeout 4s). Se activa el modo de degradación funcional.'
+        });
+      }
+      return sendError(res, { status: 400, message: result.message || result.error });
     }
 
     return sendSuccess(res, {
@@ -27,11 +37,15 @@ export const searchSyscomProducts = async (req, res) => {
       source: result.source
     });
   } catch (error) {
-    logger.error('Error searching SYSCOM', { message: error.message });
-    return sendError(res, {
-      status: 500,
-      message: 'Error al buscar en SYSCOM',
-      error: error.message
+    const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+    logger.error('Error en búsqueda de SYSCOM', { message: error.message, isTimeout });
+    return sendSuccess(res, {
+      data: [],
+      total: 0,
+      page: 1,
+      source: 'fallback',
+      isFallback: true,
+      message: 'Respuesta degradada: Proveedor SYSCOM temporalmente inaccesible.'
     });
   }
 };

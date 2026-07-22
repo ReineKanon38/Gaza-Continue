@@ -145,41 +145,35 @@ export const CartContext = createContext();
 // eslint-disable-next-line react-refresh/only-export-components
 export const CartDispatchContext = createContext();
 
+const initCartState = (defaultState) => {
+    if (typeof window === 'undefined') return defaultState;
+    const STORAGE_KEY = 'syscom-cart';
+    const savedCart = localStorage.getItem(STORAGE_KEY);
+    if (!savedCart) return defaultState;
+    try {
+        const parsedCart = JSON.parse(savedCart);
+        if (Array.isArray(parsedCart)) {
+            return { ...defaultState, items: parsedCart };
+        } else if (parsedCart.items && Array.isArray(parsedCart.items)) {
+            return {
+                ...defaultState,
+                items: parsedCart.items,
+                discount: parsedCart.discount || defaultState.discount,
+                shipping: parsedCart.shipping || defaultState.shipping
+            };
+        }
+    } catch (e) {
+        console.error('Error cargando carrito desde localStorage:', e);
+    }
+    return defaultState;
+};
+
 // Provider component
 export const CartProvider = ({ children }) => {
-    const [cart, dispatch] = useReducer(cartReducer, initialState);
+    const [cart, dispatch] = useReducer(cartReducer, initialState, initCartState);
     
     // Clave para localStorage
     const STORAGE_KEY = 'syscom-cart';
-  
-    // Persistir carrito en localStorage
-    useEffect(() => {
-        const savedCart = localStorage.getItem(STORAGE_KEY);
-        if (savedCart) {
-            try {
-                const parsedCart = JSON.parse(savedCart);
-                // Validar estructura del carrito guardado
-                if (Array.isArray(parsedCart)) {
-                    dispatch({ type: CART_ACTIONS.LOAD_CART, payload: parsedCart });
-                } else if (parsedCart.items && Array.isArray(parsedCart.items)) {
-                    // Cargar carrito completo con estado
-                    dispatch({ type: CART_ACTIONS.LOAD_CART, payload: parsedCart.items });
-                    
-                    // Cargar discount y shipping si existen
-                    if (parsedCart.discount) {
-                        dispatch({ type: CART_ACTIONS.APPLY_DISCOUNT, payload: parsedCart.discount });
-                    }
-                    if (parsedCart.shipping) {
-                        dispatch({ type: CART_ACTIONS.SET_SHIPPING, payload: parsedCart.shipping });
-                    }
-                }
-            } catch (error) {
-                console.error('Error cargando carrito desde localStorage:', error);
-                // Limpiar localStorage corrupto
-                localStorage.removeItem(STORAGE_KEY);
-            }
-        }
-    }, []);
   
     // Guardar en localStorage cuando cambie el carrito
     useEffect(() => {

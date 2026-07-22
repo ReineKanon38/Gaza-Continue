@@ -24,3 +24,6 @@ pnpm-debug.log*
 # Superpowers artifacts
 artifacts/
 
+# Test reports
+frontend/playwright-report/
+frontend/test-results/

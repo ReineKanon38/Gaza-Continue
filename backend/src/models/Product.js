@@ -42,4 +42,12 @@ const productSchema = new mongoose.Schema({
   timestamps: true // Esto agrega automáticamente 'createdAt' y 'updatedAt'
 });
 
+// ÍNDICES DE ALTO RENDIMIENTO (SRE Performance Optimization)
+// 1. Índice compuesto para filtrado por estado activo, categoría y ordenamiento por fecha
+productSchema.index({ active: 1, category: 1, createdAt: -1 });
+
+// 2. Índices B-tree para búsquedas rápidas por nombre y descripción
+productSchema.index({ active: 1, name: 1 });
+productSchema.index({ active: 1, description: 1 });
+
 export default mongoose.model("Product", productSchema);

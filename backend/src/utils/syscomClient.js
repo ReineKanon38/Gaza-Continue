@@ -8,7 +8,7 @@ class SyscomClient {
         this.baseURL = process.env.SYSCOM_API_URL || 'https://developers.syscom.mx/api/v1';
         this.clientId = process.env.SYSCOM_CLIENT_ID;
         this.clientSecret = process.env.SYSCOM_API_KEY;
-        this.timeoutMs = Number(process.env.SYSCOM_TIMEOUT_MS || 12000);
+        this.timeoutMs = Number(process.env.SYSCOM_TIMEOUT_MS || 4000); // 4000ms = 4 segundos timeout estricto
         this.maxRetries = Number(process.env.SYSCOM_MAX_RETRIES || 2);
         this.accessToken = null;
         this.tokenExpiry = null;
@@ -83,13 +83,14 @@ class SyscomClient {
                 if (response.data.access_token) {
                     this.accessToken = response.data.access_token;
                     this.tokenExpiry = Date.now() + (response.data.expires_in * 1000);
-                    logger.debug('Nuevo token SYSCOM obtenido');
+                    logger.debug('Nuevo token SYSCOM obtenido mediante OAuth');
                     return this.accessToken;
                 }
             } catch (error) {
-                logger.error('Error de autenticacion SYSCOM', { message: error.response?.data || error.message });
-                // Fallback: usar secret directamente (algunas llaves funcionan así)
-                return this.clientSecret;
+                // Si la llave provista es un Token de Acceso directo / Token de Desarrollador, usarlo como Bearer token
+                logger.info('OAuth SYSCOM no requerido o token directo detectado. Usando token de acceso configurado.');
+                this.accessToken = this.clientSecret;
+                return this.accessToken;
             } finally {
                 this.tokenPromise = null;
             }
@@ -173,8 +174,29 @@ class SyscomClient {
                 pagination: response.data.paginas || {}
             };
         } catch (error) {
-            logger.error('Error en peticion de productos SYSCOM', { message: error.response?.data || error.message });
-            return { success: false, error: error.message };
+            const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+            const isInvalidToken = error?.response?.status === 401 || error?.response?.data?.error === 'Token inválido';
+
+            if (isInvalidToken) {
+                this.accessToken = null;
+                this.tokenExpiry = null;
+            }
+
+            logger.warn('[SyscomClient] Fallback activado en búsqueda de productos SYSCOM', { 
+                message: error.response?.data || error.message,
+                isTimeout,
+                isInvalidToken
+            });
+
+            return { 
+                success: false, 
+                isFallback: true,
+                isTimeout,
+                isInvalidToken,
+                error: isTimeout ? 'Timeout de 4s excedido en la API de SYSCOM' : (isInvalidToken ? 'Token de SYSCOM inválido' : error.message),
+                data: { productos: [] },
+                pagination: { pagina: 1, paginas: 1, total: 0 }
+            };
         }
     }
 
@@ -190,7 +212,30 @@ class SyscomClient {
             );
             return { success: true, data: response.data };
         } catch (error) {
-            return { success: false, error: error.message };
+            const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+            const isInvalidToken = error?.response?.status === 401 || error?.response?.data?.error === 'Token inválido';
+
+            if (isInvalidToken) {
+                this.accessToken = null;
+                this.tokenExpiry = null;
+            }
+
+            logger.warn(`[SyscomClient] Fallback activado para producto ${productId}`, { isTimeout, isInvalidToken });
+            return { 
+                success: false, 
+                isFallback: true,
+                isTimeout,
+                isInvalidToken,
+                error: isTimeout ? 'La API de SYSCOM no respondió en 4 segundos' : (isInvalidToken ? 'Token de SYSCOM inválido' : error.message),
+                data: {
+                    producto_id: productId,
+                    titulo: 'Producto SYSCOM (Modo Degradado)',
+                    total_existencia: 0, // Fallback de resiliencia: 0 inventario para prevenir sobreventa
+                    precio_lista: 0,
+                    precio_descuento: 0,
+                    isFallback: true
+                }
+            };
         }
     }
 
@@ -237,8 +282,13 @@ class SyscomClient {
             );
             return { success: true, data: response.data };
         } catch (error) {
-            logger.error('Error obteniendo categorias SYSCOM', { message: error.response?.data || error.message });
-            return { success: false, error: error.message };
+            const isInvalidToken = error?.response?.status === 401 || error?.response?.data?.error === 'Token inválido';
+            if (isInvalidToken) {
+                this.accessToken = null;
+                this.tokenExpiry = null;
+            }
+            logger.warn('Error obteniendo categorias SYSCOM (Fallback activado)', { message: error.response?.data || error.message });
+            return { success: false, isFallback: true, error: error.message, data: [] };
         }
     }
 
@@ -260,8 +310,13 @@ class SyscomClient {
             );
             return { success: true, data: response.data };
         } catch (error) {
-            logger.error('Error obteniendo marcas SYSCOM', { message: error.response?.data || error.message });
-            return { success: false, error: error.message };
+            const isInvalidToken = error?.response?.status === 401 || error?.response?.data?.error === 'Token inválido';
+            if (isInvalidToken) {
+                this.accessToken = null;
+                this.tokenExpiry = null;
+            }
+            logger.warn('Error obteniendo marcas SYSCOM (Fallback activado)', { message: error.response?.data || error.message });
+            return { success: false, isFallback: true, error: error.message, data: [] };
         }
     }
 

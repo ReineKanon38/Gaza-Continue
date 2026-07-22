@@ -26,9 +26,10 @@ app.use(express.json());
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
+  limit: process.env.DISABLE_RATE_LIMIT === 'true' ? 0 : (process.env.RATE_LIMIT_MAX ? parseInt(process.env.RATE_LIMIT_MAX) : 100),
   standardHeaders: 'draft-7',
-  legacyHeaders: false
+  legacyHeaders: false,
+  skip: () => process.env.DISABLE_RATE_LIMIT === 'true'
 });
 app.use('/api', apiLimiter);
 
