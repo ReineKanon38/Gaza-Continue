@@ -211,8 +211,7 @@ function Catalog() {
                     page: currentPage,
                     limit: productsPerPage,
                     category: syscomCategoryFilter || undefined,
-                    query: debouncedSearchTerm || undefined,
-                    brand: debouncedSearchTerm || undefined
+                    query: debouncedSearchTerm || undefined
                 });
 
                 const list = (res.products || []).map((item) => normalizeSyscomProduct(item));

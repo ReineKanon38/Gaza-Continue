@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import { logger } from '../utils/logger.js';
 import syscomService from '../services/syscomService.js';
+import { sendShippingEmail } from '../services/emailService.js';
 
 const ORDER_STATUS_TRANSITIONS = {
   pending: ['processing', 'cancelled'],
@@ -618,11 +619,95 @@ export const getOrderStats = async (req, res) => {
     });
   } catch (err) {
     logger.error('Error obteniendo estadisticas de ordenes', { message: err.message });
-    return sendError(res, {
-      status: 500,
-      message: 'Error al obtener estadisticas',
-      error: err.message
+    return sendError(res, { status: 500, message: 'Error al obtener estadisticas', error: err.message });
+  }
+};
+
+// ----------------------------------------------------------------------
+// ENDPOINTS LOGÍSTICOS EXPLÍCITOS (TWO-HOP FULFILLMENT)
+// ----------------------------------------------------------------------
+
+export const markArrivedAtBodega = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+
+    if (!order) return sendError(res, { status: 404, message: 'Orden no encontrada' });
+    
+    // Status progresses to processing
+    order.status = 'processing';
+    order.fulfillmentTracking.stage = 'intermediary_processing';
+    order.fulfillmentTracking.history.push({
+      stage: 'intermediary_processing',
+      message: 'GAZA ha recibido tu pedido y lo está preparando',
+      timestamp: new Date()
     });
+
+    await order.save();
+    return sendSuccess(res, { message: 'Orden marcada como recibida en bodega GAZA', data: order });
+  } catch (err) {
+    logger.error('Error en markArrivedAtBodega', { message: err.message });
+    return sendError(res, { status: 500, message: 'Error interno' });
+  }
+};
+
+export const markShippedToCustomer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { trackingNumber } = req.body;
+    
+    if (!trackingNumber) {
+      return sendError(res, { status: 400, message: 'Se requiere un trackingNumber para enviar al cliente' });
+    }
+
+    const order = await Order.findById(id).populate('user', 'name email');
+    if (!order) return sendError(res, { status: 404, message: 'Orden no encontrada' });
+    
+    order.status = 'processing';
+    order.trackingNumber = trackingNumber;
+    order.fulfillmentTracking.stage = 'in_transit';
+    order.fulfillmentTracking.history.push({
+      stage: 'in_transit',
+      message: `Tu pedido va en camino. Guía: ${trackingNumber}`,
+      timestamp: new Date()
+    });
+
+    await order.save();
+    
+    // Enviar correo de notificación
+    if (order.user && order.user.email) {
+      await sendShippingEmail(order.user.email, order.user.name, order.orderId, trackingNumber);
+    } else {
+      await sendShippingEmail(order.customerEmail, order.customerName, order.orderId, trackingNumber);
+    }
+
+    return sendSuccess(res, { message: 'Orden marcada como enviada. Correo de notificación enviado.', data: order });
+  } catch (err) {
+    logger.error('Error en markShippedToCustomer', { message: err.message });
+    return sendError(res, { status: 500, message: 'Error interno' });
+  }
+};
+
+export const markDelivered = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+
+    if (!order) return sendError(res, { status: 404, message: 'Orden no encontrada' });
+    
+    order.status = 'completed';
+    order.fulfillmentTracking.stage = 'delivered';
+    order.fulfillmentTracking.history.push({
+      stage: 'delivered',
+      message: 'El paquete ha sido entregado exitosamente',
+      timestamp: new Date()
+    });
+
+    await order.save();
+    return sendSuccess(res, { message: 'Orden marcada como entregada', data: order });
+  } catch (err) {
+    logger.error('Error en markDelivered', { message: err.message });
+    return sendError(res, { status: 500, message: 'Error interno' });
   }
 };
 

@@ -11,7 +11,10 @@ import {
   deleteOrder,
   getOrderStats,
   approveOrderPayment,
-  rejectOrderPayment
+  rejectOrderPayment,
+  markArrivedAtBodega,
+  markShippedToCustomer,
+  markDelivered
 } from "../controllers/orderController.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authorize.js";
@@ -62,5 +65,15 @@ router.put("/:id", requireRole('admin'), validate(updateOrderSchema), updateOrde
 
 // DELETE /api/orders/:id - Eliminar orden (soft delete - solo admin)
 router.delete("/:id", requireRole('admin'), deleteOrder);
+
+// Rutas explícitas de logística (solo admin)
+// PUT /api/orders/:id/logistics/bodega - Marcar como recibido en bodega
+router.put("/:id/logistics/bodega", requireRole('admin'), markArrivedAtBodega);
+
+// PUT /api/orders/:id/logistics/ship - Marcar como enviado al cliente
+router.put("/:id/logistics/ship", requireRole('admin'), markShippedToCustomer);
+
+// PUT /api/orders/:id/logistics/deliver - Marcar como entregado
+router.put("/:id/logistics/deliver", requireRole('admin'), markDelivered);
 
 export default router;

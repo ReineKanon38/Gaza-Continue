@@ -77,3 +77,17 @@ export const sendPasswordResetEmail = async (email, resetUrl) => {
            <p>Si no fuiste tú, ignora este correo.</p>`
   });
 };
+
+export const sendShippingEmail = async (email, name, orderId, trackingNumber) => {
+  return await sendEmail({
+    to: email,
+    subject: '¡Tu pedido de SYSCOM-GAZA va en camino!',
+    text: `Hola ${name},\n\nNos emociona informarte que tu pedido #${orderId} ha sido enviado y va en camino hacia ti.\nTu número de guía es: ${trackingNumber}\n\nPuedes rastrear tu paquete utilizando este número en la página de la paquetería correspondiente.\n\n¡Gracias por tu compra!`,
+    html: `<h3>Hola ${name},</h3>
+           <p>Nos emociona informarte que tu pedido <strong>#${orderId}</strong> ha sido enviado y va en camino hacia ti.</p>
+           <p>Tu número de guía es: <br/><strong><span style="font-size: 18px;">${trackingNumber}</span></strong></p>
+           <p>Puedes rastrear tu paquete utilizando este número en la página de la paquetería correspondiente.</p>
+           <br/>
+           <p>¡Gracias por tu compra!</p>`
+  });
+};

@@ -55,6 +55,8 @@ describe('Auth Flow', () => {
     expect(res.status).toBe(409);
   });
 
+
+
   it('logs in user and returns token', async () => {
     const res = await request(app).post('/api/auth/login').send({
       email: 'test@example.com',
@@ -65,6 +67,32 @@ describe('Auth Flow', () => {
     expect(res.body.user).toHaveProperty('role', 'user');
     managedUserId = res.body.user._id;
     managedUserToken = res.body.token;
+  });
+
+  it('fails to verify 2FA with invalid token', async () => {
+    const res = await request(app).post('/api/auth/2fa/verify').set('Authorization', `Bearer ${managedUserToken}`).send({
+      token: '000000'
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('2FA Login Flow - step 1 returns preAuthToken', async () => {
+    const user = await User.findById(managedUserId);
+    user.twoFactorEnabled = true;
+    user.twoFactorSecret = 'JBSWY3DPEHPK3PXP'; // Base32 mock secret
+    await user.save();
+
+    const res = await request(app).post('/api/auth/login').send({
+      email: 'test@example.com',
+      password: 'secret123'
+    });
+
+    expect(res.status).toBe(202);
+    expect(res.body.requires2fa).toBe(true);
+    expect(res.body.preAuthToken).toBeDefined();
+    
+    user.twoFactorEnabled = false;
+    await user.save();
   });
 
   it('stats endpoints are admin-only', async () => {

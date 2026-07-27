@@ -344,6 +344,8 @@ class SyscomService {
       price: priceMXN, // Ahora en pesos mexicanos
       description: syscomProduct.descripcion || syscomProduct.titulo || '',
       category: platformCategory, // Ahora usa la categoría de la plataforma
+      brand: syscomProduct.marca || syscomProduct.brand || '',
+      model: syscomProduct.modelo || syscomProduct.model || '',
       image: syscomProduct.img_portada || syscomProduct.imagen || '',
       stock: parseInt(syscomProduct.existencia?.nuevo) || parseInt(syscomProduct.stock) || 0,
       syscomId: syscomProduct.producto_id || syscomProduct.id,

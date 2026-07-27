@@ -8,12 +8,16 @@ export const searchSyscomProducts = async (req, res) => {
     const { query, brand, distributor, category, page, limit } = req.query;
     const normalizedBrand = brand || distributor;
 
+    const parsedLimit = parseInt(limit) || 50;
+    // Forzar límite para evitar sobrecarga en el entorno de ejecución
+    const maxLimit = Math.min(parsedLimit, 100);
+
     const result = await syscomService.searchProducts({
       query,
       brand: normalizedBrand,
       category,
       page: parseInt(page) || 1,
-      limit: parseInt(limit) || 50
+      limit: maxLimit
     });
 
     if (!result.success) {
@@ -47,6 +51,39 @@ export const searchSyscomProducts = async (req, res) => {
       isFallback: true,
       message: 'Respuesta degradada: Proveedor SYSCOM temporalmente inaccesible.'
     });
+  }
+};
+
+// Consultar producto específico en SYSCOM por ID exacto
+export const getSyscomProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return sendError(res, { status: 400, message: 'El ID del producto es requerido' });
+    }
+
+    const result = await syscomService.getProduct(id);
+
+    if (!result.success) {
+      if (result.isFallback || result.isTimeout) {
+        return sendSuccess(res, {
+          data: result.data || null,
+          source: 'fallback',
+          isFallback: true,
+          message: 'La API de SYSCOM no respondió a tiempo. Se devuelve el fallback disponible.'
+        });
+      }
+      return sendError(res, { status: 404, message: result.message || result.error || 'Producto no encontrado en SYSCOM' });
+    }
+
+    return sendSuccess(res, {
+      data: result.data,
+      source: result.source || 'syscom_api'
+    });
+  } catch (error) {
+    const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout');
+    logger.error('Error al consultar producto específico en SYSCOM', { message: error.message, isTimeout });
+    return sendError(res, { status: 500, message: 'Error interno al consultar Syscom API' });
   }
 };
 

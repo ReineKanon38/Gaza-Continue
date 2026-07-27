@@ -24,6 +24,15 @@ const productSchema = new mongoose.Schema({
     type: String, 
     trim: true 
   },
+  brand: {
+    type: String,
+    trim: true,
+    index: true // Facilita búsquedas por marca
+  },
+  model: {
+    type: String,
+    trim: true
+  },
   stock: { 
     type: Number, 
     default: 0,
@@ -45,6 +54,9 @@ const productSchema = new mongoose.Schema({
 // ÍNDICES DE ALTO RENDIMIENTO (SRE Performance Optimization)
 // 1. Índice compuesto para filtrado por estado activo, categoría y ordenamiento por fecha
 productSchema.index({ active: 1, category: 1, createdAt: -1 });
+
+// 1.5 Índice compuesto para filtrado por estado activo, marca y ordenamiento
+productSchema.index({ active: 1, brand: 1, createdAt: -1 });
 
 // 2. Índices B-tree para búsquedas rápidas por nombre y descripción
 productSchema.index({ active: 1, name: 1 });
