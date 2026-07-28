@@ -80,16 +80,21 @@ class SyscomClient {
                     'Auth SYSCOM'
                 );
 
-                if (response.data.access_token) {
+                if (response.data && response.data.access_token) {
                     this.accessToken = response.data.access_token;
-                    this.tokenExpiry = Date.now() + (response.data.expires_in * 1000);
+                    const expiresIn = response.data.expires_in || 3600;
+                    this.tokenExpiry = Date.now() + Math.max((expiresIn - 60) * 1000, 10000);
                     logger.debug('Nuevo token SYSCOM obtenido');
                     return this.accessToken;
                 }
+                throw new Error('SYSCOM no devolvió access_token');
             } catch (error) {
-                logger.error('Error de autenticacion SYSCOM', { message: error.response?.data || error.message });
-                // Fallback: usar secret directamente (algunas llaves funcionan así)
-                return this.clientSecret;
+                const errData = error.response?.data;
+                const errMsg = typeof errData === 'object' ? JSON.stringify(errData) : (errData || error.message);
+                logger.error('Error de autenticacion SYSCOM', { message: errData || error.message });
+                this.accessToken = null;
+                this.tokenExpiry = null;
+                throw new Error(`Error de autenticación SYSCOM: ${errMsg}`);
             } finally {
                 this.tokenPromise = null;
             }
@@ -113,10 +118,15 @@ class SyscomClient {
             };
 
             const query = sanitize(params.query || params.busqueda);
-            const brand = sanitize(params.marca || params.brand);
+            let brand = sanitize(params.marca || params.brand);
             const category = sanitize(params.categoria || params.category);
             const page = params.pagina || params.page;
             const limit = params.limite || params.limit;
+
+            // Evitar duplicar query como marca si son idénticos
+            if (brand && query && brand.toLowerCase() === query.toLowerCase()) {
+                brand = '';
+            }
 
             // La API de SYSCOM requiere al menos un filtro: busqueda, marca o categoria.
             // Si no llega ninguno, usamos un término por defecto para evitar 422.
@@ -135,14 +145,19 @@ class SyscomClient {
                 queryParams.etiqueta = params.etiqueta;
             }
             
-            // Filtro por marca
+            // Filtro por marca (solo si es distinta a la busqueda)
             if (brand) {
                 queryParams.marca = brand;
             }
             
-            // Filtro por categoría
+            // Filtro por categoría (SYSCOM exige un ID numérico para 'categoria').
+            // Si llega un slug textual (ej. "videovigilancia"), lo usamos como búsqueda si no hay query.
             if (category) {
-                queryParams.categoria = category;
+                if (/^\d+$/.test(String(category).trim())) {
+                    queryParams.categoria = String(category).trim();
+                } else if (!queryParams.busqueda) {
+                    queryParams.busqueda = String(category).trim();
+                }
             }
             
             // Paginación
@@ -174,7 +189,15 @@ class SyscomClient {
             };
         } catch (error) {
             logger.error('Error en peticion de productos SYSCOM', { message: error.response?.data || error.message });
-            return { success: false, error: error.message };
+            if (error.response?.status === 401) {
+                this.accessToken = null;
+                this.tokenExpiry = null;
+            }
+            return {
+                success: false,
+                message: error.response?.data?.error_description || error.message,
+                error: error.message
+            };
         }
     }
 

@@ -1,6 +1,7 @@
 // src/controllers/productController.js
 import mongoose from "mongoose";
 import Product from "../models/Product.js";
+import syscomService from "../services/syscomService.js";
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 
 // Obtener todos los productos
@@ -12,17 +13,20 @@ export const getAllProducts = async (req, res) => {
       search, 
       active = true,
       page = 1,
-      limit = 20 // 20 productos por página por defecto
+      limit = 20
     } = req.query;
     
     // Construir el filtro
     const filter = {};
     
-    // Si hay búsqueda, buscar por nombre o descripción
+    // Si hay búsqueda, buscar por nombre, descripción, syscomId o categoría
     if (search) {
+      const searchRegex = new RegExp(String(search).trim(), 'i');
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } }, // 'i' = case insensitive
-        { description: { $regex: search, $options: 'i' } }
+        { name: searchRegex },
+        { description: searchRegex },
+        { syscomId: searchRegex },
+        { category: searchRegex }
       ];
     }
     
@@ -37,8 +41,8 @@ export const getAllProducts = async (req, res) => {
     }
     
     // Calcular skip para paginación
-    const pageNumber = parseInt(page);
-    const limitNumber = parseInt(limit);
+    const pageNumber = parseInt(page) || 1;
+    const limitNumber = parseInt(limit) || 20;
     const skip = (pageNumber - 1) * limitNumber;
     
     // Contar total de productos que coinciden con el filtro
@@ -46,7 +50,7 @@ export const getAllProducts = async (req, res) => {
     
     // Buscar productos con paginación
     const products = await Product.find(filter)
-      .sort({ createdAt: -1 }) // Más recientes primero
+      .sort({ createdAt: -1 })
       .limit(limitNumber)
       .skip(skip);
     
@@ -71,22 +75,38 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
-// Obtener un producto por ID
+// Obtener un producto por ID (Mongo _id o syscomId)
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // Validar que el ID tenga el formato correcto de ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return sendError(res, { status: 400, message: "ID de producto inválido" });
+    let product = null;
+
+    // 1. Si es un ObjectId válido de Mongo
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findById(id);
     }
-    
-    const product = await Product.findById(id);
-    
+
+    // 2. Si no se encontró por _id, buscar por syscomId
+    if (!product) {
+      product = await Product.findOne({ syscomId: id });
+    }
+
+    // 3. Si sigue sin encontrarse, intentar obtenerlo directamente desde SYSCOM API y sincronizar
+    if (!product && syscomService) {
+      try {
+        const syncRes = await syscomService.syncProduct(id);
+        if (syncRes && syncRes.product) {
+          product = syncRes.product;
+        }
+      } catch (syscomErr) {
+        // Si falla en SYSCOM, continuar para responder 404
+      }
+    }
+
     if (!product) {
       return sendError(res, { status: 404, message: "Producto no encontrado" });
     }
-    
+
     return sendSuccess(res, { data: product });
   } catch (err) {
     return sendError(res, {

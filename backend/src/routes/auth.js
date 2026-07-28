@@ -17,7 +17,8 @@ import {
 	updateUserRole,
 	updateUserStatus,
 	deleteUser,
-	sendPromoEmail
+	sendPromoEmail,
+	testEmailService
 } from "../controllers/authController.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authorize.js";
@@ -32,6 +33,7 @@ router.post("/register", validate(registerSchema), registerUser);
 router.post("/reset-password", validate(requestResetSchema), requestPasswordReset);
 router.post("/reset-password/:token", resetPassword);
 router.post('/refresh', validate(refreshSessionSchema), refreshSession);
+router.post('/test-email', testEmailService);
 
 // Rutas protegidas
 router.get('/me', requireAuth, getUserProfile);

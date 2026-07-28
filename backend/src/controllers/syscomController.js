@@ -17,7 +17,7 @@ export const searchSyscomProducts = async (req, res) => {
     });
 
     if (!result.success) {
-      return sendError(res, { status: 400, message: result.message });
+      return sendError(res, { status: 400, message: result.message || result.error || 'Error al buscar en SYSCOM' });
     }
 
     return sendSuccess(res, {
@@ -154,7 +154,7 @@ export const getSyscomCategories = async (req, res) => {
     const result = await syscomService.getCategories();
     
     if (!result.success) {
-      return sendError(res, { status: 400, message: result.message });
+      return sendError(res, { status: 400, message: result.message || result.error || 'Error al obtener categorías' });
     }
 
     return sendSuccess(res, { data: result.data });

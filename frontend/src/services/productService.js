@@ -25,7 +25,7 @@ function normalizeSyscomProductPrices(products) {
 function getCacheTtlMs(url) {
   if (url.includes('/api/syscom/categories')) return 10 * 60 * 1000;
   if (url.includes('/api/syscom/super-precio')) return 45 * 1000;
-  if (url.includes('/api/syscom/search')) return 25 * 1000;
+  if (url.includes('/api/syscom/search')) return 0;
   return 0;
 }
 
@@ -208,19 +208,27 @@ export const searchSyscomProducts = async (params = {}) => {
   const data = await cachedRequestJson(url);
 
   const rawData = data?.data;
-  const rawProducts = rawData?.productos || rawData?.data || (Array.isArray(rawData) ? rawData : []);
+  const rawProducts = Array.isArray(rawData)
+    ? rawData
+    : (Array.isArray(rawData?.productos)
+      ? rawData.productos
+      : (Array.isArray(rawData?.data)
+        ? rawData.data
+        : (Array.isArray(data?.products) ? data.products : [])));
+
   const products = normalizeSyscomProductPrices(rawProducts);
   const pagination = rawData?.paginas || data?.pagination || null;
   const total = Number(
-    pagination?.total ??
     data?.total ??
+    pagination?.total ??
+    pagination?.total_registros ??
     (Array.isArray(products) ? products.length : 0)
   );
 
   return {
     products,
     total,
-    page: Number(pagination?.pagina_actual || data?.page || params.page || 1),
+    page: Number(data?.page || pagination?.pagina_actual || params.page || 1),
     pagination,
     success: !!data?.success,
     source: data?.source || 'syscom'

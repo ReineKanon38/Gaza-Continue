@@ -303,6 +303,7 @@ class SyscomService {
   }
 
   isAllowedSyscomProduct(syscomProduct = {}) {
+    if (!syscomProduct) return false;
     const rawCategoryName = this.getPrimarySyscomCategoryName(syscomProduct);
 
     if (isBlockedSyscomCategoryName(rawCategoryName)) {
@@ -310,17 +311,17 @@ class SyscomService {
     }
 
     const mappedCategory = mapSyscomCategoryToPlatform(rawCategoryName);
-    if (!mappedCategory) {
+    if (mappedCategory && isBlockedPlatformCategory(mappedCategory)) {
       return false;
     }
 
-    return !isBlockedPlatformCategory(mappedCategory);
+    return true;
   }
 
   /**
    * Transformar producto de SYSCOM a nuestro schema
    */
-  transformSyscomProduct(syscomProduct) {
+  transformSyscomProduct(syscomProduct = {}) {
     // Mapeo inteligente de precios (en USD de SYSCOM)
     const priceUSD = this.extractPriceUSD(syscomProduct);
 
@@ -333,14 +334,20 @@ class SyscomService {
     // Mapear a categoría de la plataforma
     const platformCategory = mapSyscomCategoryToPlatform(syscomCategoryName);
 
+    const parsedStock = parseInt(syscomProduct.existencia?.nuevo) || parseInt(syscomProduct.existencia) || parseInt(syscomProduct.stock) || 10;
+    const productId = String(syscomProduct.producto_id || syscomProduct.id || syscomProduct.syscomId || '');
+
     return {
-      name: syscomProduct.titulo || syscomProduct.nombre || 'Sin nombre',
-      price: priceMXN, // Ahora en pesos mexicanos
+      _id: syscomProduct._id || (productId ? `syscom-${productId}` : `item-${Date.now()}`),
+      syscomId: productId,
+      name: syscomProduct.titulo || syscomProduct.nombre || syscomProduct.name || 'Producto SYSCOM',
+      price: priceMXN > 0 ? priceMXN : 0,
+      listPrice: priceMXN > 0 ? priceMXN : 0,
       description: syscomProduct.descripcion || syscomProduct.titulo || '',
-      category: platformCategory, // Ahora usa la categoría de la plataforma
-      image: syscomProduct.img_portada || syscomProduct.imagen || '',
-      stock: parseInt(syscomProduct.existencia?.nuevo) || parseInt(syscomProduct.stock) || 0,
-      syscomId: syscomProduct.producto_id || syscomProduct.id,
+      category: platformCategory || 'videovigilancia',
+      image: syscomProduct.img_portada || syscomProduct.imagen || syscomProduct.image || '',
+      stock: parsedStock > 0 ? parsedStock : 5,
+      distributor: syscomProduct.marca || syscomProduct.brand || syscomProduct.fabricante || '',
       active: true
     };
   }
@@ -378,19 +385,17 @@ class SyscomService {
 
     let directProduct = null;
     const queryStr = String(searchParams?.query || '').trim();
-    // Un ID de SYSCOM suele ser numérico (ej. 123456) o un modelo con letras, números y guiones.
-    // Para evitar buscar términos genéricos (como "camara") como si fueran IDs, exigimos que
-    // contenga al menos un número si no tiene espacios.
-    const looksLikeId = queryStr.length >= 3 && !queryStr.includes(' ') && /\d/.test(queryStr);
+    // Un ID de SYSCOM o modelo suele ser numérico (ej. 123456) o un código alfanumérico sin espacios (ej. DS-2CE56D0T).
+    const isSingleWordIdOrModel = queryStr.length >= 2 && !queryStr.includes(' ') && (/\d/.test(queryStr) || /^[A-Z0-9_-]+$/i.test(queryStr));
 
-    if (looksLikeId) {
+    if (isSingleWordIdOrModel) {
       try {
         const directRes = await syscomClient.getProduct(queryStr);
-        if (directRes.success && directRes.data) {
+        if (directRes.success && directRes.data && (directRes.data.producto_id || directRes.data.id)) {
           directProduct = directRes.data;
         }
       } catch (err) {
-        // Ignorar fallo de búsqueda directa
+        // Ignorar fallo de búsqueda directa si no existe
       }
     }
 
@@ -495,7 +500,9 @@ class SyscomService {
       source: 'syscom'
     };
 
-    this.setCachedValue(cacheKey, responsePayload);
+    if (transformedProducts.length > 0) {
+      this.setCachedValue(cacheKey, responsePayload);
+    }
 
     this.trackMetric('search', {
       success: true,

@@ -267,7 +267,7 @@ export const requestPasswordReset = async (req, res) => {
     
     if (!user) {
       // Evitar que atacantes descubran si el correo existe
-      return sendSuccess(res, { message: 'Si el correo está registrado, recibirás instrucciones.' });
+      return sendSuccess(res, { message: 'Si tu correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -276,16 +276,16 @@ export const requestPasswordReset = async (req, res) => {
     await user.save();
 
     const resetUrl = `${req.headers.origin || 'http://localhost:5173'}/reset/${resetToken}`;
-    await sendPasswordResetEmail(user.email, resetUrl);
+    const emailSent = await sendPasswordResetEmail(user.email, resetUrl);
 
     if (process.env.NODE_ENV !== 'production') {
       return sendSuccess(res, { 
-        message: 'Si tu correo está registrado, recibirás un enlace.',
-        data: { resetUrl }
+        message: 'Si tu correo está registrado, recibirás un enlace para restablecer tu contraseña.',
+        data: { resetUrl, emailSent }
       });
     }
 
-    return sendSuccess(res, { message: 'Si tu correo está registrado, recibirás un enlace.' });
+    return sendSuccess(res, { message: 'Si tu correo está registrado, recibirás un enlace para restablecer tu contraseña.' });
   } catch (error) {
     logger.error('Error en password reset', { message: error.message });
     return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
@@ -296,7 +296,12 @@ export const requestPasswordReset = async (req, res) => {
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { newPassword } = req.body;
+    const { newPassword, password } = req.body;
+    const targetPassword = newPassword || password;
+
+    if (!targetPassword) {
+      return sendError(res, { status: 400, message: 'La nueva contraseña es requerida' });
+    }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -309,7 +314,7 @@ export const resetPassword = async (req, res) => {
       return sendError(res, { status: 400, message: 'Token inválido o expirado' });
     }
 
-    user.password = newPassword;
+    user.password = targetPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
@@ -628,5 +633,23 @@ export const sendPromoEmail = async (req, res) => {
   } catch (error) {
     logger.error('Error enviando correos promocionales', { message: error.message });
     return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
+};
+
+// @desc    Probar servicio de correo de restablecimiento
+export const testEmailService = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const targetEmail = email || process.env.EMAIL_USER;
+    const testUrl = `${req.headers.origin || 'http://localhost:5173'}/reset/test_token_${Date.now()}`;
+    const sent = await sendPasswordResetEmail(targetEmail, testUrl);
+    if (sent) {
+      return sendSuccess(res, { message: `Correo de restablecimiento enviado exitosamente a ${targetEmail}` });
+    } else {
+      return sendError(res, { status: 500, message: 'Fallo al enviar el correo. Revisa las credenciales en .env o logs.' });
+    }
+  } catch (error) {
+    logger.error('Error en testEmailService', { message: error.message });
+    return sendError(res, { status: 500, message: error.message });
   }
 };

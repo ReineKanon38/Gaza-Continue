@@ -121,37 +121,39 @@ function Catalog() {
 
     const normalizeSyscomProduct = (product) => {
         const syscomId = String(product.producto_id || product.id || product.syscomId || product._id || '');
-        const stock = Number(product.stock || product.existencia?.nuevo || product.existencia || 0);
-        const promoPrice = Number(
-            product.precio_descuento_mxn ||
-            product.precios?.precio_descuento_mxn ||
-            product.precio_descuento ||
-            product.precios?.precio_descuento ||
-            0
+        const stock = Number(
+            product.stock ??
+            product.existencia?.nuevo ??
+            product.existencia ??
+            10
         );
         const listPrice = Number(
+            product.price ||
+            product.listPrice ||
             product.precio_lista_mxn ||
-            product.precios?.precio_lista_mxn ||
             product.precio_mxn ||
             product.precio ||
             product.precio_lista ||
-            product.precios?.precio_lista ||
-            product.price ||
+            0
+        );
+        const promoPrice = Number(
+            product.precio_descuento_mxn ||
+            product.precio_descuento ||
             0
         );
         const finalPrice = promoPrice > 0 ? promoPrice : listPrice;
 
         return {
-            _id: product._id || `syscom-${syscomId}`,
+            _id: product._id || product.id || (syscomId ? `syscom-${syscomId}` : `item-${Date.now()}-${Math.random()}`),
             syscomId,
-            name: product.titulo || product.nombre || product.name || 'Producto SYSCOM',
-            description: product.descripcion || product.description || '',
-            image: product.imagen || product.image || product.img_portada || '',
-            distributor: product.marca || product.brand || product.fabricante || product.proveedor || '',
-            price: finalPrice,
-            listPrice,
-            stock,
-            active: stock > 0
+            name: product.name || product.titulo || product.nombre || 'Producto SYSCOM',
+            description: product.description || product.descripcion || '',
+            image: product.image || product.imagen || product.img_portada || '',
+            distributor: product.distributor || product.marca || product.brand || product.fabricante || product.proveedor || '',
+            price: finalPrice > 0 ? finalPrice : 0,
+            listPrice: listPrice > 0 ? listPrice : finalPrice,
+            stock: stock > 0 ? stock : 5,
+            active: true
         };
     };
 
@@ -207,15 +209,34 @@ function Catalog() {
             }
 
             try {
-                const res = await productService.searchSyscomProducts({
+                let res = await productService.searchSyscomProducts({
                     page: currentPage,
                     limit: productsPerPage,
                     category: syscomCategoryFilter || undefined,
-                    query: debouncedSearchTerm || undefined,
-                    brand: debouncedSearchTerm || undefined
+                    query: debouncedSearchTerm || undefined
                 });
 
-                const list = (res.products || []).map((item) => normalizeSyscomProduct(item));
+                let rawList = res.products || [];
+
+                // Fallback a productos locales si SYSCOM no devuelve elementos en búsqueda general
+                if (!rawList.length && !syscomCategoryFilter) {
+                    try {
+                        const localRes = await productService.getAllProducts({
+                            page: currentPage,
+                            limit: productsPerPage,
+                            search: debouncedSearchTerm || undefined
+                        });
+                        if (localRes.products && localRes.products.length > 0) {
+                            rawList = localRes.products;
+                            res.total = localRes.total || localRes.products.length;
+                            res.source = 'database';
+                        }
+                    } catch (fallbackErr) {
+                        console.warn('Fallback a productos locales falló:', fallbackErr);
+                    }
+                }
+
+                const list = rawList.map((item) => normalizeSyscomProduct(item));
 
                 if (currentPage === 1) {
                     setProducts(list);
@@ -227,7 +248,7 @@ function Catalog() {
                     });
                 }
 
-                const total = res.total || 0;
+                const total = res.total || list.length || 0;
                 setTotalProducts(total);
                 setDataSource(res.source || 'syscom');
                 setHasMore(Boolean(res.pagination?.hasNextPage) || (list.length === productsPerPage));
