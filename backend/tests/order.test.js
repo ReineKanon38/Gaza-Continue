@@ -191,4 +191,51 @@ describe('Order Flow', () => {
     expect(secondReject.status).toBe(409);
     expect(secondReject.body.message || secondReject.body.error).toContain('ya fue rechazado');
   });
+
+  it('prevents race condition when two users purchase the last available stock simultaneously', async () => {
+    // 1. Create a product with exactly stock = 1
+    const prodRes = await request(app)
+      .post('/api/products')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ name: 'Race Condition Item', price: 99, stock: 1 });
+    const singleStockProductId = prodRes.body.data._id;
+
+    // 2. Dispatch two simultaneous order requests for the same product
+    const orderPayload = {
+      products: [{ productId: singleStockProductId, quantity: 1 }],
+      shippingAddress: {
+        street: 'Concurrent St',
+        number: '100',
+        neighborhood: 'Center',
+        city: 'CDMX',
+        state: 'CDMX',
+        zipCode: '01234'
+      },
+      paymentInfo: {
+        method: 'credit_card',
+        cardType: 'visa',
+        cardLastFour: '4242'
+      }
+    };
+
+    const req1 = request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send(orderPayload);
+
+    const req2 = request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send(orderPayload);
+
+    const [res1, res2] = await Promise.all([req1, req2]);
+
+    const statuses = [res1.status, res2.status].sort();
+    // Exactly one request must succeed (201) and the other fail (400)
+    expect(statuses).toEqual([201, 400]);
+
+    // 3. Confirm remaining stock is 0 (NOT negative)
+    const checkProd = await request(app).get(`/api/products/${singleStockProductId}`);
+    expect(checkProd.body.data.stock).toBe(0);
+  });
 });

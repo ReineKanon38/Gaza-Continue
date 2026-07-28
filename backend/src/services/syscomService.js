@@ -14,7 +14,12 @@ import { logger } from '../utils/logger.js';
 class SyscomService {
   constructor() {
     this.responseCache = new Map();
-    this.cacheTtlMs = Number(process.env.SYSCOM_CACHE_TTL_MS || 120000);
+    // TTL para productos y búsquedas (5 minutos por defecto)
+    this.productCacheTtlMs = Number(process.env.SYSCOM_PRODUCT_CACHE_TTL_MS || 300000);
+    // TTL para metadatos estáticos (24 horas por defecto)
+    this.metadataCacheTtlMs = Number(process.env.SYSCOM_METADATA_CACHE_TTL_MS || 86400000);
+    // Compatibilidad retrospectiva
+    this.cacheTtlMs = Number(process.env.SYSCOM_CACHE_TTL_MS || this.productCacheTtlMs);
     this.metrics = {
       search: this.createEmptyMetricBucket(),
       superPrecio: this.createEmptyMetricBucket(),
@@ -236,14 +241,15 @@ class SyscomService {
     return `${prefix}:${JSON.stringify(normalized)}`;
   }
 
-  getCachedValue(cacheKey) {
+  getCachedValue(cacheKey, customTtl) {
     const entry = this.responseCache.get(cacheKey);
     if (!entry) return null;
 
+    const ttl = customTtl !== undefined ? customTtl : this.cacheTtlMs;
     const ageMs = Date.now() - entry.timestamp;
     return {
       data: entry.data,
-      isFresh: ageMs <= this.cacheTtlMs,
+      isFresh: ageMs <= ttl,
       ageMs
     };
   }
@@ -345,9 +351,12 @@ class SyscomService {
       listPrice: priceMXN > 0 ? priceMXN : 0,
       description: syscomProduct.descripcion || syscomProduct.titulo || '',
       category: platformCategory || 'videovigilancia',
+      brand: syscomProduct.marca || syscomProduct.brand || '',
+      model: syscomProduct.modelo || syscomProduct.model || '',
       image: syscomProduct.img_portada || syscomProduct.imagen || syscomProduct.image || '',
       stock: parsedStock > 0 ? parsedStock : 5,
       distributor: syscomProduct.marca || syscomProduct.brand || syscomProduct.fabricante || '',
+      syscomId: productId,
       active: true
     };
   }
@@ -355,37 +364,12 @@ class SyscomService {
   /**
    * Buscar productos en SYSCOM
    */
-  async searchProducts(searchParams) {
-    const startTime = Date.now();
-    if (!syscomClient.isConfigured()) {
-      return {
-        success: false,
-        message: 'SYSCOM API no configurada. Agregue SYSCOM_CLIENT_ID y SYSCOM_API_KEY al .env',
-        data: []
-      };
-    }
-
-    const cacheKey = this.getCacheKey('search', searchParams);
-    const cached = this.getCachedValue(cacheKey);
-
-    if (cached?.isFresh) {
-      const response = {
-        ...cached.data,
-        source: 'cache'
-      };
-
-      this.trackMetric('search', {
-        success: true,
-        source: 'cache',
-        latencyMs: Date.now() - startTime
-      });
-
-      return response;
-    }
-
+  /**
+   * Fetch core logic from SYSCOM (sin caché)
+   */
+  async fetchSearchFromSyscom(searchParams) {
     let directProduct = null;
     const queryStr = String(searchParams?.query || '').trim();
-    // Un ID de SYSCOM o modelo suele ser numérico (ej. 123456) o un código alfanumérico sin espacios (ej. DS-2CE56D0T).
     const isSingleWordIdOrModel = queryStr.length >= 2 && !queryStr.includes(' ') && (/\d/.test(queryStr) || /^[A-Z0-9_-]+$/i.test(queryStr));
 
     if (isSingleWordIdOrModel) {
@@ -402,41 +386,7 @@ class SyscomService {
     const result = await syscomClient.searchProducts(searchParams);
     
     if (!result.success) {
-      if (cached?.data) {
-        logger.debug('SYSCOM search fallo, devolviendo cache previo', {
-          cacheKey,
-          cacheAgeMs: cached.ageMs,
-          error: result.error
-        });
-
-        const response = {
-          ...cached.data,
-          source: 'stale-cache',
-          warning: 'Mostrando resultados previos por fallo temporal de SYSCOM'
-        };
-
-        this.trackMetric('search', {
-          success: true,
-          source: 'stale-cache',
-          latencyMs: Date.now() - startTime,
-          error: result.error
-        });
-
-        return response;
-      }
-
-      this.trackMetric('search', {
-        success: false,
-        source: 'syscom',
-        latencyMs: Date.now() - startTime,
-        error: result.error
-      });
-
-      return {
-        success: false,
-        message: result.error,
-        data: []
-      };
+      return result;
     }
 
     const pagination = result.pagination || result.data?.paginas || {};
@@ -451,7 +401,7 @@ class SyscomService {
       filteredProducts.unshift(directProduct);
     }
 
-    // Fallback: si query textual no devolvio resultados, intentamos como marca/distribuidor.
+    // Fallback: si query textual no devolvió resultados, intentamos como marca/distribuidor.
     if (
       filteredProducts.length === 0 &&
       searchParams?.query &&
@@ -491,7 +441,7 @@ class SyscomService {
         };
 
     const inferredTotal = filteredProducts.length;
-    const responsePayload = {
+    return {
       success: true,
       data: filteredData,
       total: Number(pagination.total || pagination.total_registros || inferredTotal || 0),
@@ -499,10 +449,107 @@ class SyscomService {
       pagination,
       source: 'syscom'
     };
+  }
 
-    if (transformedProducts.length > 0) {
-      this.setCachedValue(cacheKey, responsePayload);
+  /**
+   * Buscar productos en SYSCOM (Con soporte Stale-While-Revalidate)
+   */
+  async searchProducts(searchParams) {
+    const startTime = Date.now();
+    if (!syscomClient.isConfigured()) {
+      return {
+        success: false,
+        message: 'SYSCOM API no configurada. Agregue SYSCOM_CLIENT_ID y SYSCOM_API_KEY al .env',
+        data: []
+      };
     }
+
+    const cacheKey = this.getCacheKey('search', searchParams);
+    const cached = this.getCachedValue(cacheKey, this.productCacheTtlMs);
+
+    if (cached) {
+      // 1. Si está fresco, devolver del caché de inmediato
+      if (cached.isFresh) {
+        this.trackMetric('search', {
+          success: true,
+          source: 'cache',
+          latencyMs: Date.now() - startTime
+        });
+        return {
+          ...cached.data,
+          source: 'cache'
+        };
+      }
+
+      // 2. Si está expirado (stale) pero tenemos datos guardados, devolverlos inmediatamente (lag 0ms)
+      // e iniciar revalidación asíncrona en segundo plano para refrescar caché
+      const STALE_LIMIT_MS = 60 * 60 * 1000; // Permitir reuso de caché stale hasta por 1 hora
+      if (cached.data && cached.ageMs <= STALE_LIMIT_MS) {
+        logger.debug('SYSCOM search: Sirviendo cache stale, actualizando en segundo plano', { cacheKey });
+        
+        // Revalidar en segundo plano de forma no bloqueante
+        this.fetchSearchFromSyscom(searchParams).then((freshPayload) => {
+          if (freshPayload.success) {
+            this.setCachedValue(cacheKey, freshPayload);
+          }
+        }).catch((err) => {
+          logger.warn('Fallo revalidación de búsqueda en segundo plano', { error: err.message });
+        });
+
+        this.trackMetric('search', {
+          success: true,
+          source: 'stale-cache',
+          latencyMs: Date.now() - startTime
+        });
+
+        return {
+          ...cached.data,
+          source: 'stale-cache',
+          warning: 'Mostrando resultados rápidos (actualizando en segundo plano)'
+        };
+      }
+    }
+
+    // 3. Si no hay caché o superó el tiempo stale, hacer petición síncrona real
+    const result = await this.fetchSearchFromSyscom(searchParams);
+    
+    if (!result.success) {
+      if (cached?.data) {
+        logger.debug('SYSCOM search fallo, devolviendo cache previo', {
+          cacheKey,
+          cacheAgeMs: cached.ageMs,
+          error: result.error
+        });
+
+        this.trackMetric('search', {
+          success: true,
+          source: 'stale-cache',
+          latencyMs: Date.now() - startTime,
+          error: result.error
+        });
+
+        return {
+          ...cached.data,
+          source: 'stale-cache',
+          warning: 'Mostrando resultados previos por fallo temporal de SYSCOM'
+        };
+      }
+
+      this.trackMetric('search', {
+        success: false,
+        source: 'syscom',
+        latencyMs: Date.now() - startTime,
+        error: result.error
+      });
+
+      return {
+        success: false,
+        message: result.error || 'Error al buscar en SYSCOM',
+        data: []
+      };
+    }
+
+    this.setCachedValue(cacheKey, result);
 
     this.trackMetric('search', {
       success: true,
@@ -510,7 +557,7 @@ class SyscomService {
       latencyMs: Date.now() - startTime
     });
 
-    return responsePayload;
+    return result;
   }
 
   /**
@@ -757,36 +804,9 @@ class SyscomService {
   }
 
   /**
-   * Obtener productos de Súper Precio
+   * Fetch core logic for Super Precio (sin caché)
    */
-  async getSuperPrecioProducts(params = {}) {
-    const startTime = Date.now();
-    if (!syscomClient.isConfigured()) {
-      return {
-        success: false,
-        message: 'SYSCOM API no configurada',
-        data: []
-      };
-    }
-
-    const cacheKey = this.getCacheKey('super-precio', params);
-    const cached = this.getCachedValue(cacheKey);
-
-    if (cached?.isFresh) {
-      const response = {
-        ...cached.data,
-        source: 'cache'
-      };
-
-      this.trackMetric('superPrecio', {
-        success: true,
-        source: 'cache',
-        latencyMs: Date.now() - startTime
-      });
-
-      return response;
-    }
-
+  async fetchSuperPrecioFromSyscom(params = {}) {
     const result = await syscomClient.getSuperPrecioProducts({
       pagina: params.page || 1,
       limite: params.limit || 50,
@@ -795,41 +815,7 @@ class SyscomService {
     });
 
     if (!result.success) {
-      if (cached?.data) {
-        logger.debug('SYSCOM super-precio fallo, devolviendo cache previo', {
-          cacheKey,
-          cacheAgeMs: cached.ageMs,
-          error: result.error
-        });
-
-        const response = {
-          ...cached.data,
-          source: 'stale-cache',
-          warning: 'Mostrando resultados previos por fallo temporal de SYSCOM'
-        };
-
-        this.trackMetric('superPrecio', {
-          success: true,
-          source: 'stale-cache',
-          latencyMs: Date.now() - startTime,
-          error: result.error
-        });
-
-        return response;
-      }
-
-      this.trackMetric('superPrecio', {
-        success: false,
-        source: 'syscom',
-        latencyMs: Date.now() - startTime,
-        error: result.error
-      });
-
-      return {
-        success: false,
-        message: result.error,
-        data: []
-      };
+      return result;
     }
 
     const baseProducts = Array.isArray(result.data?.productos)
@@ -846,14 +832,112 @@ class SyscomService {
           ...(Array.isArray(result.data?.productos) ? { productos: transformedProducts } : {})
         };
 
-    const responsePayload = {
+    return {
       success: true,
       data: filteredData,
       pagination: result.pagination,
       source: 'syscom'
     };
+  }
 
-    this.setCachedValue(cacheKey, responsePayload);
+  /**
+   * Obtener productos de Súper Precio (Con soporte Stale-While-Revalidate)
+   */
+  async getSuperPrecioProducts(params = {}) {
+    const startTime = Date.now();
+    if (!syscomClient.isConfigured()) {
+      return {
+        success: false,
+        message: 'SYSCOM API no configurada',
+        data: []
+      };
+    }
+
+    const cacheKey = this.getCacheKey('super-precio', params);
+    const cached = this.getCachedValue(cacheKey, this.productCacheTtlMs);
+
+    if (cached) {
+      // 1. Si está fresco, retornar del caché directamente
+      if (cached.isFresh) {
+        this.trackMetric('superPrecio', {
+          success: true,
+          source: 'cache',
+          latencyMs: Date.now() - startTime
+        });
+        return {
+          ...cached.data,
+          source: 'cache'
+        };
+      }
+
+      // 2. Si está stale pero tenemos datos, retornar de inmediato (lag 0ms)
+      // y revalidar asíncronamente en segundo plano
+      const STALE_LIMIT_MS = 60 * 60 * 1000; // Permitir reuso de caché stale hasta por 1 hora
+      if (cached.data && cached.ageMs <= STALE_LIMIT_MS) {
+        logger.debug('SYSCOM super-precio: Sirviendo cache stale, actualizando en segundo plano', { cacheKey });
+
+        this.fetchSuperPrecioFromSyscom(params).then((freshPayload) => {
+          if (freshPayload.success) {
+            this.setCachedValue(cacheKey, freshPayload);
+          }
+        }).catch((err) => {
+          logger.warn('Fallo revalidación de super precio en segundo plano', { error: err.message });
+        });
+
+        this.trackMetric('superPrecio', {
+          success: true,
+          source: 'stale-cache',
+          latencyMs: Date.now() - startTime
+        });
+
+        return {
+          ...cached.data,
+          source: 'stale-cache',
+          warning: 'Mostrando resultados rápidos (actualizando en segundo plano)'
+        };
+      }
+    }
+
+    // 3. Si no hay caché o superó el tiempo stale, hacer petición síncrona real
+    const result = await this.fetchSuperPrecioFromSyscom(params);
+
+    if (!result.success) {
+      if (cached?.data) {
+        logger.debug('SYSCOM super-precio fallo, devolviendo cache previo', {
+          cacheKey,
+          cacheAgeMs: cached.ageMs,
+          error: result.error
+        });
+
+        this.trackMetric('superPrecio', {
+          success: true,
+          source: 'stale-cache',
+          latencyMs: Date.now() - startTime,
+          error: result.error
+        });
+
+        return {
+          ...cached.data,
+          source: 'stale-cache',
+          warning: 'Mostrando resultados previos por fallo temporal de SYSCOM'
+        };
+      }
+
+      this.trackMetric('superPrecio', {
+        success: false,
+        source: 'syscom',
+        latencyMs: Date.now() - startTime,
+        error: result.error
+      });
+
+      return {
+        success: false,
+        message: result.error || 'Error al obtener productos de Súper Precio',
+        data: []
+      };
+    }
+
+    this.setCachedValue(cacheKey, result);
 
     this.trackMetric('superPrecio', {
       success: true,
@@ -861,7 +945,7 @@ class SyscomService {
       latencyMs: Date.now() - startTime
     });
 
-    return responsePayload;
+    return result;
   }
 
   /**
@@ -931,6 +1015,19 @@ class SyscomService {
    */
   async getCategories() {
     const startTime = Date.now();
+    
+    // Buscar en caché (24 horas)
+    const cacheKey = 'metadata:categories';
+    const cached = this.getCachedValue(cacheKey, this.metadataCacheTtlMs);
+    if (cached?.isFresh) {
+      this.trackMetric('categories', {
+        success: true,
+        source: 'cache',
+        latencyMs: Date.now() - startTime
+      });
+      return { ...cached.data, source: 'cache' };
+    }
+
     if (!syscomClient.isConfigured()) {
       this.trackMetric('categories', {
         success: false,
@@ -955,8 +1052,13 @@ class SyscomService {
 
     const response = {
       ...result,
-      data: Array.isArray(result?.data) ? filteredCategories : result?.data
+      data: Array.isArray(result?.data) ? filteredCategories : result?.data,
+      source: 'syscom'
     };
+
+    if (response.success) {
+      this.setCachedValue(cacheKey, response);
+    }
 
     this.trackMetric('categories', {
       success: !!response.success,
@@ -973,6 +1075,19 @@ class SyscomService {
    */
   async getBrands() {
     const startTime = Date.now();
+    
+    // Buscar en caché (24 horas)
+    const cacheKey = 'metadata:brands';
+    const cached = this.getCachedValue(cacheKey, this.metadataCacheTtlMs);
+    if (cached?.isFresh) {
+      this.trackMetric('brands', {
+        success: true,
+        source: 'cache',
+        latencyMs: Date.now() - startTime
+      });
+      return { ...cached.data, source: 'cache' };
+    }
+
     if (!syscomClient.isConfigured()) {
       this.trackMetric('brands', {
         success: false,
@@ -989,14 +1104,23 @@ class SyscomService {
     }
 
     const result = await syscomClient.getBrands();
+    const response = {
+      ...result,
+      source: 'syscom'
+    };
+
+    if (response.success) {
+      this.setCachedValue(cacheKey, response);
+    }
+
     this.trackMetric('brands', {
-      success: !!result.success,
+      success: !!response.success,
       source: 'syscom',
       latencyMs: Date.now() - startTime,
-      error: result.error
+      error: response.error
     });
 
-    return result;
+    return response;
   }
 
   /**
@@ -1004,6 +1128,19 @@ class SyscomService {
    */
   async getTags() {
     const startTime = Date.now();
+    
+    // Buscar en caché (24 horas)
+    const cacheKey = 'metadata:tags';
+    const cached = this.getCachedValue(cacheKey, this.metadataCacheTtlMs);
+    if (cached?.isFresh) {
+      this.trackMetric('tags', {
+        success: true,
+        source: 'cache',
+        latencyMs: Date.now() - startTime
+      });
+      return { ...cached.data, source: 'cache' };
+    }
+
     if (!syscomClient.isConfigured()) {
       this.trackMetric('tags', {
         success: false,
@@ -1020,6 +1157,15 @@ class SyscomService {
     }
 
     const result = await syscomClient.getTags();
+    const response = {
+      ...result,
+      source: 'syscom'
+    };
+
+    if (response.success) {
+      this.setCachedValue(cacheKey, response);
+    }
+
     this.trackMetric('tags', {
       success: !!result.success,
       source: 'syscom',
@@ -1027,7 +1173,7 @@ class SyscomService {
       error: result.error
     });
 
-    return result;
+    return response;
   }
 
   /**

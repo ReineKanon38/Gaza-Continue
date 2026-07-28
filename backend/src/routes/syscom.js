@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   searchSyscomProducts,
+  getSyscomProductById,
   syncSingleProduct,
   syncMultipleProducts,
   updateProductStock,
@@ -27,6 +28,7 @@ const requireAdmin = [requireAuth, requireRole('admin')];
 
 // Búsqueda y consulta de productos
 router.get('/search', searchSyscomProducts);
+router.get('/products/:id', getSyscomProductById);
 router.get('/categories', getSyscomCategories);
 router.get('/brands', getSyscomBrands);
 router.get('/tags', getSyscomTags);

@@ -4,9 +4,21 @@ import Product from "../models/Product.js";
 import syscomService from "../services/syscomService.js";
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 
+// Cache en memoria para consultas de catálogo (SRE Performance Cache)
+const catalogCache = new Map();
+const CACHE_TTL_MS = 15000; // 15 segundos
+
+export const invalidateCatalogCache = () => catalogCache.clear();
+
 // Obtener todos los productos
 export const getAllProducts = async (req, res) => {
   try {
+    const cacheKey = req.originalUrl || JSON.stringify(req.query);
+    const cached = catalogCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+      return sendSuccess(res, cached.payload);
+    }
+
     // Filtros y paginación desde query params
     const { 
       category, 
@@ -45,16 +57,17 @@ export const getAllProducts = async (req, res) => {
     const limitNumber = parseInt(limit) || 20;
     const skip = (pageNumber - 1) * limitNumber;
     
-    // Contar total de productos que coinciden con el filtro
-    const totalProducts = await Product.countDocuments(filter);
+    // Ejecutar la cuenta total y la consulta de productos en PARALELO en MongoDB usando .lean() para máximo rendimiento SRE
+    const [totalProducts, products] = await Promise.all([
+      Product.countDocuments(filter),
+      Product.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNumber)
+        .lean()
+    ]);
     
-    // Buscar productos con paginación
-    const products = await Product.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(limitNumber)
-      .skip(skip);
-    
-    return sendSuccess(res, {
+    const payload = {
       data: products,
       count: products.length,
       total: totalProducts,
@@ -65,7 +78,10 @@ export const getAllProducts = async (req, res) => {
         hasNextPage: pageNumber < Math.ceil(totalProducts / limitNumber),
         hasPrevPage: pageNumber > 1
       }
-    });
+    };
+
+    catalogCache.set(cacheKey, { timestamp: Date.now(), payload });
+    return sendSuccess(res, payload);
   } catch (err) {
     return sendError(res, {
       status: 500,
@@ -144,6 +160,7 @@ export const createProduct = async (req, res) => {
       active: true
     });
     
+    invalidateCatalogCache();
     return sendSuccess(res, {
       status: 201,
       message: "Producto creado exitosamente",
@@ -178,6 +195,7 @@ export const updateProduct = async (req, res) => {
       return sendError(res, { status: 404, message: "Producto no encontrado" });
     }
 
+    invalidateCatalogCache();
     return sendSuccess(res, { message: "Producto actualizado", data: product });
   } catch (err) {
     if (err.code === 11000) {
@@ -201,6 +219,7 @@ export const deleteProduct = async (req, res) => {
       return sendError(res, { status: 404, message: "Producto no encontrado" });
     }
 
+    invalidateCatalogCache();
     return sendSuccess(res, { message: "Producto eliminado" });
   } catch (err) {
     return sendError(res, { status: 500, message: "Error al eliminar el producto", error: err.message });

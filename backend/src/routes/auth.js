@@ -2,6 +2,7 @@
 import express from "express";
 import {
 	loginUser,
+	loginWith2fa,
 	registerUser,
 	getUserProfile,
 	updateProfile,
@@ -29,6 +30,7 @@ const router = express.Router();
 
 // Rutas públicas
 router.post("/login", validate(loginSchema), loginUser);
+router.post("/login/2fa", loginWith2fa);
 router.post("/register", validate(registerSchema), registerUser);
 router.post("/reset-password", validate(requestResetSchema), requestPasswordReset);
 router.post("/reset-password/:token", resetPassword);

@@ -42,7 +42,7 @@ function ResetConfirm() {
 
                 const result = await requestJson(`/api/auth/reset-password/${token}`, {
                     method: 'POST',
-                    body: JSON.stringify({ password })
+                    body: JSON.stringify({ password, newPassword: password })
                 });
 
                 setMessage(result.message || 'Contraseña actualizada con éxito.');

@@ -126,7 +126,7 @@ export const registerUser = async (req, res) => {
 // @desc    Autenticar usuario y obtener token
 export const loginUser = async (req, res) => {
     try {
-        const { email, password, twoFactorToken } = req.body;
+        const { email, password } = req.body;
         const normalizedEmail = normalizeEmail(email);
         const user = await User.findOne({ email: normalizedEmail });
 
@@ -136,13 +136,18 @@ export const loginUser = async (req, res) => {
             }
 
             if (user.twoFactorEnabled) {
-              if (!twoFactorToken) {
-                return sendSuccess(res, { status: 202, message: 'A2F Requerido', requires2fa: true });
-              }
-              const isValid = authenticator.verify({ token: twoFactorToken, secret: user.twoFactorSecret });
-              if (!isValid) {
-                return sendError(res, { status: 401, message: 'Código A2F inválido' });
-              }
+              const preAuthToken = jwt.sign(
+                { sub: user._id.toString(), type: 'pre-auth' },
+                getAccessTokenSecret(),
+                { expiresIn: '5m' }
+              );
+              
+              return sendSuccess(res, { 
+                status: 202, 
+                message: 'A2F Requerido', 
+                requires2fa: true,
+                preAuthToken
+              });
             }
 
             const { accessToken, refreshToken } = await issueTokenPair(user);
@@ -162,6 +167,51 @@ export const loginUser = async (req, res) => {
         logger.error('Error en login', { message: error.message });
         return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
     }
+};
+
+// @desc    Completar login usando preAuthToken y código 2FA
+export const loginWith2fa = async (req, res) => {
+  try {
+    const { preAuthToken, twoFactorToken } = req.body;
+    if (!preAuthToken || !twoFactorToken) {
+      return sendError(res, { status: 400, message: 'Faltan credenciales de A2F' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(preAuthToken, getAccessTokenSecret());
+    } catch (err) {
+      return sendError(res, { status: 401, message: 'Token temporal expirado o inválido' });
+    }
+
+    if (decoded.type !== 'pre-auth') {
+      return sendError(res, { status: 401, message: 'Token inválido' });
+    }
+
+    const user = await User.findById(decoded.sub);
+    if (!user || user.isBlocked) {
+      return sendError(res, { status: 401, message: 'Usuario inválido o bloqueado' });
+    }
+
+    const isValid = authenticator.verify({ token: twoFactorToken, secret: user.twoFactorSecret });
+    if (!isValid) {
+      return sendError(res, { status: 401, message: 'Código A2F inválido' });
+    }
+
+    const { accessToken, refreshToken } = await issueTokenPair(user);
+
+    return sendSuccess(res, {
+      status: 200,
+      message: 'Sesion iniciada correctamente con A2F',
+      token: accessToken,
+      accessToken,
+      refreshToken,
+      user: sanitizeUser(user)
+    });
+  } catch (error) {
+    logger.error('Error en login 2FA', { message: error.message });
+    return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
+  }
 };
 
 // @desc    Obtener perfil del usuario
@@ -296,11 +346,19 @@ export const requestPasswordReset = async (req, res) => {
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { newPassword, password } = req.body;
+    const { newPassword, password } = req.body || {};
     const targetPassword = newPassword || password;
 
+    if (!token) {
+      return sendError(res, { status: 400, message: 'Token de recuperación no proporcionado.' });
+    }
+
     if (!targetPassword) {
-      return sendError(res, { status: 400, message: 'La nueva contraseña es requerida' });
+      return sendError(res, { status: 400, message: 'La nueva contraseña es requerida.' });
+    }
+
+    if (String(targetPassword).trim().length < 6) {
+      return sendError(res, { status: 400, message: 'La contraseña debe tener al menos 6 caracteres.' });
     }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
@@ -311,7 +369,7 @@ export const resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return sendError(res, { status: 400, message: 'Token inválido o expirado' });
+      return sendError(res, { status: 400, message: 'El enlace es inválido o ha expirado.' });
     }
 
     user.password = targetPassword;
@@ -319,7 +377,7 @@ export const resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    return sendSuccess(res, { message: 'Contraseña actualizada correctamente' });
+    return sendSuccess(res, { message: 'Contraseña actualizada correctamente.' });
   } catch (error) {
     logger.error('Error en reset password confirm', { message: error.message });
     return sendError(res, { status: 500, message: 'Error en el servidor', error: error.message });
