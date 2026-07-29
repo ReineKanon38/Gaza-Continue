@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'syscom-gaza-backend',
       script: './index.js',
-      instances: 'max', // Utiliza todos los núcleos de CPU disponibles (Cluster Mode)
+      instances: 1, // En AWS Free Tier (1 vCPU) usamos 1 instancia
       exec_mode: 'cluster',
       env_production: {
         NODE_ENV: 'production',
@@ -19,7 +19,7 @@ module.exports = {
       merge_logs: true,
       autorestart: true, // Se reinicia automáticamente si falla
       watch: false, // En producción no se debe "observar" archivos
-      max_memory_restart: '1G' // Se reinicia si usa más de 1GB de RAM
+      max_memory_restart: '400M' // Reinicia si usa más de 400MB para no colapsar la t2.micro (1GB RAM)
     }
   ]
 };

@@ -6,14 +6,23 @@ Este documento detalla los pasos necesarios para llevar la aplicación web de en
 
 Para que el sistema esté disponible en internet de manera segura y escalable, se deben configurar los siguientes elementos:
 
-### 1.1 Infraestructura (VPS o Cloud)
-Se recomienda un servidor virtual (VPS) en proveedores como **DigitalOcean, AWS, Linode o Google Cloud**.
+### 1.1 Infraestructura (AWS EC2 Capa Gratuita)
+El sistema puede correr perfectamente en una instancia **AWS EC2 t2.micro o t3.micro (Capa Gratuita)**, la cual incluye 1 vCPU y 1 GB de RAM. Sin embargo, debes tomar estas precauciones críticas debido a la poca memoria RAM:
+
+- **Memoria Swap (CRÍTICO):** 1 GB de RAM no es suficiente para compilar el frontend (React/Vite). Debes crear al menos 2 GB de memoria Swap en Ubuntu:
+  ```bash
+  sudo fallocate -l 2G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  ```
+  *(Asegúrate de hacerlo persistente agregándolo a `/etc/fstab`).*
 - **Backend (Node.js):**
-  - Utilizar `PM2` para mantener el proceso de Node.js corriendo en segundo plano y reiniciar automáticamente si hay fallos.
-  - Comando: `pm2 start src/index.js --name "gaza-backend"`
+  - Utilizar `PM2` para mantener el proceso corriendo. Ya dejamos configurado `ecosystem.config.cjs` para que limite el uso de RAM a 400MB y no colapse el servidor.
+  - Comando: `npm run start:prod` (dentro de la carpeta `backend`).
 - **Frontend (React/Vite):**
-  - Generar el build de producción: `npm run build`
-  - Servir los archivos estáticos generados en la carpeta `dist/` usando **Nginx** o alojarlos en **Vercel / Netlify** para mayor rendimiento mediante CDN.
+  - Generar el build: `npm run build` (Solo después de configurar la memoria Swap).
+  - Servir la carpeta `dist/` usando **Nginx** (ya configurado en `nginx/nginx.conf`).
 
 ### 1.2 Dominio y SSL (HTTPS)
 SYSCOM y Stripe **exigen** que el sitio funcione bajo `HTTPS` por seguridad.
