@@ -113,6 +113,7 @@ function Catalog() {
     const [categories, setCategories] = useState([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    const [brandFilter, setBrandFilter] = useState('');
     const [dataSource, setDataSource] = useState('syscom');
     const hasLoadedOnceRef = useRef(false);
     const productsPerPage = 20;
@@ -168,10 +169,10 @@ function Catalog() {
         return categories.find(c => c.id === syscomCategoryFilter);
     };
 
-    // Resetear página cuando cambia búsqueda o categoría
+    // Resetear página cuando cambia búsqueda, categoría o marca
     useEffect(() => {
         setCurrentPage(1);
-    }, [syscomCategoryFilter, searchTerm]);
+    }, [syscomCategoryFilter, searchTerm, brandFilter]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -211,7 +212,8 @@ function Catalog() {
                     page: currentPage,
                     limit: productsPerPage,
                     category: syscomCategoryFilter || undefined,
-                    query: debouncedSearchTerm || undefined
+                    query: debouncedSearchTerm || undefined,
+                    brand: brandFilter || undefined
                 });
 
                 const list = (res.products || []).map((item) => normalizeSyscomProduct(item));
@@ -434,7 +436,24 @@ function Catalog() {
                                     )}
                                 </div>
                             </Col>
-                            <Col md={3}>
+                            <Col md={2}>
+                                <Form.Select
+                                    className="bg-transparent border-0 shadow-none search-group-modern text-muted"
+                                    value={brandFilter}
+                                    onChange={(e) => setBrandFilter(e.target.value)}
+                                >
+                                    <option value="">Todas las Marcas</option>
+                                    <option value="HIKVISION">HIKVISION</option>
+                                    <option value="DAHUA">DAHUA</option>
+                                    <option value="EPCOM">EPCOM</option>
+                                    <option value="UBIQUITI">UBIQUITI</option>
+                                    <option value="TP-LINK">TP-LINK</option>
+                                    <option value="SAXXON">SAXXON</option>
+                                    <option value="ZKTECO">ZKTECO</option>
+                                    <option value="SYSCOM">SYSCOM</option>
+                                </Form.Select>
+                            </Col>
+                            <Col md={2}>
                                 <InputGroup className="search-group-modern">
                                     <InputGroup.Text className="bg-transparent border-0"><BsCurrencyDollar /></InputGroup.Text>
                                     <Form.Control
@@ -446,7 +465,7 @@ function Catalog() {
                                     />
                                 </InputGroup>
                             </Col>
-                            <Col md={4} className="d-flex justify-content-end">
+                            <Col md={3} className="d-flex justify-content-end">
                                 <ButtonGroup>
                                     <Button variant={viewMode === 'grid' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('grid')}><BsGrid3X3Gap /></Button>
                                     <Button variant={viewMode === 'list' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('list')}><BsListUl /></Button>
