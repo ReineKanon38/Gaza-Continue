@@ -6,6 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
+    "start:prod": "pm2 start ecosystem.config.cjs --env production",
+    "pm2:stop": "pm2 stop syscom-gaza-backend",
+    "pm2:logs": "pm2 logs syscom-gaza-backend",
     "dev": "nodemon index.js",
     "seed-users": "node scripts/seedUsers.js",
     "test": "vitest"
