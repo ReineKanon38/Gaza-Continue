@@ -200,7 +200,7 @@ export const createOrder = async (req, res) => {
         cardHolder: paymentInfo.cardHolder || user.name || 'Cliente'
       },
       paymentStatus: requiresManualPaymentValidation ? 'pending_validation' : 'approved',
-      status: 'pending',
+      status: requiresManualPaymentValidation ? 'pending' : 'processing',
       fulfillmentTracking: {
         supplier: 'SYSCOM',
         intermediary: 'GAZA',

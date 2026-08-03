@@ -50,6 +50,13 @@ export const rejectOrderPayment = async (orderId, payload) => {
   });
 };
 
+export const markShippedToCustomer = async (orderId, payload) => {
+  return requestJson(`/api/orders/${orderId}/logistics/ship`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+  });
+};
+
 export const getUserOrders = async () => {
   const data = await requestJson('/api/orders');
   return data.data ? { orders: data.data, pagination: data.pagination } : data;
@@ -63,5 +70,6 @@ export default {
   updateOrderStatus,
   approveOrderPayment,
   rejectOrderPayment,
+  markShippedToCustomer,
   getUserOrders,
 };

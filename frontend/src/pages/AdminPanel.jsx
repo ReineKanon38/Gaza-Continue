@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Table, Button, Badge, Nav, Alert, Modal, Form } from 'react-bootstrap';
-import { FiUsers, FiShoppingCart, FiPackage, FiBarChart2, FiSettings, FiTrendingUp, FiDollarSign, FiCheck, FiX, FiEye, FiEdit, FiTrash2, FiPlus, FiDownload } from 'react-icons/fi';
+import { FiUsers, FiShoppingCart, FiPackage, FiBarChart2, FiSettings, FiTrendingUp, FiDollarSign, FiCheck, FiX, FiEye, FiEdit, FiTrash2, FiPlus, FiDownload, FiTruck } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
@@ -580,6 +580,22 @@ export default function AdminPanel() {
     } catch (error) {
       console.error('Error completando orden:', error);
       alert('Error al completar la orden');
+    }
+  };
+
+  const handleShipOrder = async (orderId) => {
+    const trackingNumber = window.prompt('Ingresa el número de guía (tracking) para enviar al cliente:');
+    if (!trackingNumber) return;
+
+    try {
+      await orderService.markShippedToCustomer(orderId, { trackingNumber });
+      await loadOrders(selectedPaymentFilter, selectedOrderStatusFilter);
+      await loadOrderPaymentSummary();
+      setShowOrderModal(false);
+      alert('Orden marcada como enviada y correo enviado al cliente');
+    } catch (error) {
+      console.error('Error enviando orden:', error);
+      alert('Error al enviar la orden: ' + error.message);
     }
   };
 
@@ -1192,6 +1208,11 @@ export default function AdminPanel() {
                 <FiCheck /> Aprobar pago y procesar
               </Button>
             </>
+          )}
+          {(selectedOrder?.status === 'pending' || selectedOrder?.status === 'processing') && selectedOrder?.paymentStatus === 'approved' && (
+            <Button variant="info" className="text-white" onClick={() => handleShipOrder(selectedOrder._id)}>
+              <FiTruck /> Marcar como Enviada
+            </Button>
           )}
           {selectedOrder?.status === 'processing' && (
             <Button variant="success" onClick={() => handleCompleteOrder(selectedOrder._id)}>
