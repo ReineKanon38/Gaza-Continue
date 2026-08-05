@@ -62,10 +62,14 @@ export const createPaymentSession = async (req, res) => {
     // 🛡️ REGLA DE SEGURIDAD: Nunca confiar en el amount enviado por el cliente.
     let secureAmount = 0;
     if (items && Array.isArray(items) && items.length > 0) {
+      const mongoose = (await import('mongoose')).default;
       for (const item of items) {
-        const id = item.productId || item._id || item.product;
+        let id = item.productId || item._id || item.product;
         const qty = item.quantity || 1;
-        if (id) {
+        
+        // Si es un producto syscom que no ha sido sincronizado en BD local, intentamos extraer su precio del fallback?
+        // En realidad, un pago no debería proceder si el producto ni siquiera existe en BD.
+        if (id && mongoose.isValidObjectId(id)) {
           const product = await Product.findById(id);
           if (product && product.price) {
             secureAmount += product.price * qty;

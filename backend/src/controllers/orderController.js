@@ -140,6 +140,13 @@ export const createOrder = async (req, res) => {
         } catch (error) {
           logger.warn(`Could not sync syscom product ${syscomId} on the fly: ${error.message}`);
         }
+
+        // Si falló la sincronización y sigue siendo 'syscom-', rechazar orden para evitar CastError
+        if (String(productId).startsWith('syscom-')) {
+          if (inTx && session.inTransaction()) await session.abortTransaction();
+          await session.endSession();
+          return sendError(res, { status: 400, message: `El producto con ID ${syscomId} no está disponible actualmente.` });
+        }
       }
 
       // Decrement stock ATOMICALLY using findOneAndUpdate with condition { stock: { $gte: quantity } }
