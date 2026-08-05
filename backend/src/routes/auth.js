@@ -25,12 +25,19 @@ import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authorize.js";
 import { validate } from "../middleware/validate.js";
 import { registerSchema, loginSchema, updateProfileSchema, requestResetSchema, shippingAddressSchema, refreshSessionSchema, logoutSessionSchema } from "../validation/schemas.js";
+import rateLimit from "express-rate-limit";
 
 const router = express.Router();
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // Limita cada IP a 10 peticiones de login por ventana
+  message: { success: false, error: 'Demasiados intentos de inicio de sesión, intenta de nuevo en 15 minutos.' }
+});
+
 // Rutas públicas
-router.post("/login", validate(loginSchema), loginUser);
-router.post("/login/2fa", loginWith2fa);
+router.post("/login", loginLimiter, validate(loginSchema), loginUser);
+router.post("/login/2fa", loginLimiter, loginWith2fa);
 router.post("/register", validate(registerSchema), registerUser);
 router.post("/reset-password", validate(requestResetSchema), requestPasswordReset);
 router.post("/reset-password/:token", resetPassword);

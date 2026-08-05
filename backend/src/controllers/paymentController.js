@@ -42,14 +42,16 @@ const getAllowedProviders = () => PAYMENT_METHODS.map((method) => method.provide
 
 const buildPaymentReference = () => `PAY-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
+import Product from '../models/Product.js';
+
 export const createPaymentSession = async (req, res) => {
   try {
-    const { amount, currency = 'mxn', orderId, items, provider } = req.body;
+    const { amount: clientAmount, currency = 'mxn', orderId, items, provider } = req.body;
     const selectedProvider = String(provider || '').toLowerCase();
     const allowedProviders = getAllowedProviders();
 
     logger.debug('[payment] createPaymentSession payload', {
-      amount,
+      clientAmount,
       currency,
       orderId,
       provider: selectedProvider,
@@ -57,13 +59,39 @@ export const createPaymentSession = async (req, res) => {
       userId: req.user?.sub || req.user?._id || 'guest'
     });
 
-    if (!amount || amount <= 0) {
+    // 🛡️ REGLA DE SEGURIDAD: Nunca confiar en el amount enviado por el cliente.
+    let secureAmount = 0;
+    if (items && Array.isArray(items) && items.length > 0) {
+      for (const item of items) {
+        const id = item.productId || item._id || item.product;
+        const qty = item.quantity || 1;
+        if (id) {
+          const product = await Product.findById(id);
+          if (product && product.price) {
+            secureAmount += product.price * qty;
+          }
+        }
+      }
+      
+      // Aplicar misma regla de envío del frontend
+      if (secureAmount > 0) {
+        const shippingCost = secureAmount >= 2500 ? 0 : 185;
+        secureAmount += shippingCost;
+      }
+    } else if (clientAmount && clientAmount > 0) {
+      // Fallback estricto solo para tests o compatibilidad, idealmente debe removerse en producción pura.
+      secureAmount = clientAmount; 
+    }
+
+    if (!secureAmount || secureAmount <= 0) {
       return sendError(res, {
         status: 400,
-        message: 'Monto inválido',
+        message: 'Monto inválido o carrito vacío',
         error: 'Monto inválido'
       });
     }
+
+    const amount = secureAmount;
 
     if (!selectedProvider || !allowedProviders.includes(selectedProvider)) {
       return sendError(res, {
