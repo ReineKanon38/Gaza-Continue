@@ -77,7 +77,7 @@ return (
     <Container fluid className="px-4">
         <Navbar.Brand 
         as={Link}
-        to="/"
+        to={user ? "/catalog" : "/"}
         className="d-flex align-items-center brand-hover"
         style={{ cursor: 'pointer' }}
         >
