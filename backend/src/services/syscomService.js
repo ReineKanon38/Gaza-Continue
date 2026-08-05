@@ -343,8 +343,7 @@ class SyscomService {
     const parsedStock = parseInt(syscomProduct.existencia?.nuevo) || parseInt(syscomProduct.existencia) || parseInt(syscomProduct.stock) || 10;
     const productId = String(syscomProduct.producto_id || syscomProduct.id || syscomProduct.syscomId || '');
 
-    return {
-      _id: syscomProduct._id || (productId ? `syscom-${productId}` : `item-${Date.now()}`),
+    const productToReturn = {
       syscomId: productId,
       name: syscomProduct.titulo || syscomProduct.nombre || syscomProduct.name || 'Producto SYSCOM',
       price: priceMXN > 0 ? priceMXN : 0,
@@ -359,6 +358,12 @@ class SyscomService {
       syscomId: productId,
       active: true
     };
+    
+    if (syscomProduct._id) {
+      productToReturn._id = syscomProduct._id;
+    }
+    
+    return productToReturn;
   }
 
   /**
