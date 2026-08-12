@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Container, Card, Form, Button, InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { BsEnvelopeFill, BsLockFill } from 'react-icons/bs';
+import { BsEnvelopeFill, BsLockFill, BsEye, BsEyeSlash } from 'react-icons/bs';
 import { FiLogIn } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
@@ -11,6 +11,7 @@ function Login() {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [twoFactorToken, setTwoFactorToken] = useState('');
   const [requires2FA, setRequires2FA] = useState(false);
   const [error, setError] = useState('');
@@ -117,12 +118,24 @@ function Login() {
                       <BsLockFill />
                     </InputGroup.Text>
                     <Form.Control 
-                      type="password" 
+                      type={showPassword ? 'text' : 'password'}
                       placeholder="Contraseña" 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={loading}
                     />
+                    <Button
+                      variant="outline-secondary"
+                      tabIndex={-1}
+                      onMouseDown={(e) => { e.preventDefault(); setShowPassword(true); }}
+                      onMouseUp={() => setShowPassword(false)}
+                      onMouseLeave={() => setShowPassword(false)}
+                      onTouchStart={(e) => { e.preventDefault(); setShowPassword(true); }}
+                      onTouchEnd={() => setShowPassword(false)}
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {showPassword ? <BsEyeSlash /> : <BsEye />}
+                    </Button>
                   </InputGroup>
                 </Form.Group>
               </>

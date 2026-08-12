@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Button, Navbar, Nav, Container, Image, Badge, NavDropdown, Offcanvas } from 'react-bootstrap';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { Button, Navbar, Nav, Container, Image, Badge } from 'react-bootstrap';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { BsPersonCircle, BsShop, BsCart, BsGrid3X3Gap, BsStars, BsSearch } from 'react-icons/bs';
-// Importación de los nuevos iconos de Feather Icons
-import { 
-    FiArrowLeft, FiHome, FiLogOut, FiMenu, FiSettings, FiShoppingCart
-} from 'react-icons/fi';
+import {
+    BsPersonCircle, BsCart3, BsGrid3X3Gap, BsStars, BsSearch, BsChevronDown,
+    BsShieldLock
+} from 'react-icons/bs';
+import { FiLogOut, FiSettings, FiMenu, FiX } from 'react-icons/fi';
 import logo from '../assets/images/SG.jpg';
 import { useCartHelpers } from '../hooks/useCartHooks';
 import { useAuth } from '../context/AuthContext';
@@ -13,177 +13,341 @@ import productService from '../services/productService';
 import './AppNavbar.css';
 
 function AppNavbar() {
-const navigate = useNavigate();
-const { totalItems } = useCartHelpers();
-const { user, logout, isAdmin } = useAuth();
-const [searchParams] = useSearchParams();
-const [categories, setCategories] = useState([]);
-const [menuQuery, setMenuQuery] = useState('');
-const currentCategory = searchParams.get('syscomCategory');
+    const navigate = useNavigate();
+    const { totalItems } = useCartHelpers();
+    const { user, logout, isAdmin } = useAuth();
+    const [searchParams] = useSearchParams();
+    const [categories, setCategories] = useState([]);
+    const [menuQuery, setMenuQuery] = useState('');
+    const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const megaMenuRef = useRef(null);
+    const currentCategory = searchParams.get('syscomCategory');
 
-const visibleCategories = useMemo(() => {
-    const normalized = String(menuQuery || '').trim().toLowerCase();
+    /* ── Logo destination ── */
+    const logoTo = !user ? '/' : isAdmin() ? '/admin' : '/catalog';
 
-    const sorted = [...categories].sort((a, b) => {
-        const levelA = Number(a?.level || 0);
-        const levelB = Number(b?.level || 0);
-        if (levelA !== levelB) return levelA - levelB;
-        return String(a?.name || '').localeCompare(String(b?.name || ''), 'es', { sensitivity: 'base' });
-    });
+    /* ── Categories ── */
+    const visibleCategories = useMemo(() => {
+        const normalized = String(menuQuery || '').trim().toLowerCase();
+        const sorted = [...categories].sort((a, b) =>
+            String(a?.name || '').localeCompare(String(b?.name || ''), 'es', { sensitivity: 'base' })
+        );
+        if (!normalized) return sorted;
+        return sorted.filter((cat) => String(cat?.name || '').toLowerCase().includes(normalized));
+    }, [categories, menuQuery]);
 
-    if (!normalized) return sorted;
+    const halfLen = Math.ceil(visibleCategories.length / 2);
+    const leftCats = visibleCategories.slice(0, halfLen);
+    const rightCats = visibleCategories.slice(halfLen);
 
-    return sorted.filter((cat) => String(cat?.name || '').toLowerCase().includes(normalized));
-}, [categories, menuQuery]);
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await productService.getSyscomCategories();
+                setCategories(res.categories || []);
+            } catch {
+                setCategories([]);
+            }
+        };
+        load();
+    }, []);
 
-const splitIndex = Math.ceil(visibleCategories.length / 2);
-const leftColumnCategories = visibleCategories.slice(0, splitIndex);
-const rightColumnCategories = visibleCategories.slice(splitIndex);
+    /* ── Close mega-menu on outside click ── */
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (megaMenuRef.current && !megaMenuRef.current.contains(e.target)) {
+                setMegaMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
 
-useEffect(() => {
-    const loadCategories = async () => {
-        try {
-            const response = await productService.getSyscomCategories();
-            setCategories(response.categories || []);
-        } catch (error) {
-            console.error('No fue posible cargar categorías de SYSCOM en navbar:', error);
-            setCategories([]);
+    const handleCategoryClick = (catId) => {
+        navigate(`/catalog?syscomCategory=${catId}`);
+        setMenuQuery('');
+        setMegaMenuOpen(false);
+        setMobileMenuOpen(false);
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchTerm.trim()) {
+            navigate(`/catalog?search=${encodeURIComponent(searchTerm.trim())}`);
+            setSearchTerm('');
         }
     };
 
-    loadCategories();
-}, []);
+    const handleLogout = () => {
+        logout();
+        setMobileMenuOpen(false);
+    };
 
-const handleLogout = () => {
-    logout();
-};
-
-const handleCategoryClick = (categoryValue) => {
-    navigate(`/catalog?syscomCategory=${categoryValue}`);
-    setMenuQuery('');
-};
-
-const handleBack = () => {
-    if (window.history.length > 1) {
-        navigate(-1);
-        return;
-    }
-
-    navigate('/catalog');
-};
-
-return (
-    <Navbar expand={false} className="navbar-custom shadow-sm" sticky="top">
-    <Container fluid className="px-4">
-        <Navbar.Brand 
-        as={Link}
-        to={user ? "/catalog" : "/"}
-        className="d-flex align-items-center brand-hover"
-        style={{ cursor: 'pointer' }}
-        >
-        <Image
-          src={logo}
-          alt="SYSCOM-GAZA Logo"
-          style={{ height: '45px', marginRight: '12px' }}
-          className="d-inline-block align-top logo-img"
-        />
-        <div className="d-flex flex-column">
-            <span className="fw-bold brand-name">SYSCOM-GAZA</span>
-            <small style={{ fontSize: '0.7rem', marginTop: '-4px', color: '#ffd4c4', fontWeight: '500', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
-                Infraestructura TI
-            </small>
-        </div>
-        </Navbar.Brand>
-        
-        {/* Carrito directo en la barra principal para acceso rápido */}
-        <div className="d-flex align-items-center ms-auto me-3">
-            <Button variant="link" onClick={() => navigate('/cart')} className="position-relative text-white p-0 nav-link-custom">
-                <BsCart style={{ fontSize: '1.5rem' }} />
-                {totalItems > 0 && (
-                    <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle" style={{ fontSize: '0.65rem' }}>
-                        {totalItems > 99 ? '99+' : totalItems}
-                    </Badge>
-                )}
-            </Button>
-        </div>
-
-        <Navbar.Toggle aria-controls="offcanvasNavbar" className="minimal-hamburger-toggle" aria-label="Abrir menú">
-            <FiMenu />
-        </Navbar.Toggle>
-        
-        <Navbar.Offcanvas
-            id="offcanvasNavbar"
-            aria-labelledby="offcanvasNavbarLabel"
-            placement="end"
-            className="offcanvas-custom"
-        >
-            <Offcanvas.Header closeButton>
-                <Offcanvas.Title id="offcanvasNavbarLabel" className="fw-bold">
-                    Menú
-                </Offcanvas.Title>
-            </Offcanvas.Header>
-            <Offcanvas.Body className="d-flex flex-column">
-                <Nav className="flex-column mb-auto">
-                    
-                    <Nav.Link as={Link} to="/profile" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
-                        <BsPersonCircle className="me-3" /> Perfil de {user?.name || 'Usuario'}
-                    </Nav.Link>
-
-                    {isAdmin() && (
-                        <Nav.Link as={Link} to="/admin" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
-                            <FiSettings className="me-3" /> Administración
-                        </Nav.Link>
-                    )}
-
-                    <hr />
-
-                    <Nav.Link as={Link} to="/catalog" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
-                        <BsShop className="me-3" /> Catálogo Completo
-                    </Nav.Link>
-
-                    <Nav.Link as={Link} to="/super-precio" className="d-flex align-items-center mb-3 fs-5 nav-offcanvas-link">
-                        <BsStars className="me-3" /> Súper Precio
-                    </Nav.Link>
-
-                    {/* Categorías integradas en el menú */}
-                    <div className="mt-3">
-                        <div className="fw-bold text-muted mb-2 ps-2">CATEGORÍAS</div>
-                        <div className="syscom-mega-search mb-2 mx-2">
-                            <BsSearch />
-                            <input
-                                type="text"
-                                value={menuQuery}
-                                onChange={(e) => setMenuQuery(e.target.value)}
-                                placeholder="Buscar categoría..."
-                                className="form-control"
-                            />
+    return (
+        <header className="navbar-wrapper">
+            {/* ═══════════ FILA 1: Top bar ═══════════ */}
+            <div className="navbar-top-bar">
+                <Container fluid className="navbar-top-inner px-3 px-md-4">
+                    {/* Logo */}
+                    <Link to={logoTo} className="navbar-brand-link">
+                        <Image
+                            src={logo}
+                            alt="SYSCOM-GAZA Logo"
+                            className="navbar-logo-img"
+                        />
+                        <div className="navbar-brand-text">
+                            <span className="navbar-brand-name">SYSCOM-GAZA</span>
+                            <small className="navbar-brand-sub">Infraestructura TI</small>
                         </div>
-                        <div style={{ maxHeight: '30vh', overflowY: 'auto' }} className="px-2">
-                            {visibleCategories.map(cat => (
-                                <Button 
-                                    key={cat.id} 
-                                    variant="link" 
-                                    className={`d-block w-100 text-start text-decoration-none py-2 ${currentCategory === cat.id ? 'fw-bold text-primary' : 'text-body'}`}
-                                    onClick={() => handleCategoryClick(cat.id)}
-                                >
-                                    {cat.name}
-                                </Button>
-                            ))}
-                            {visibleCategories.length === 0 && <div className="text-muted small">Sin resultados.</div>}
-                        </div>
+                    </Link>
+
+                    {/* Buscador central (desktop) */}
+                    <form className="navbar-search-form d-none d-md-flex" onSubmit={handleSearch}>
+                        <BsSearch className="navbar-search-icon" />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Buscar producto, marca o ID..."
+                            className="navbar-search-input"
+                        />
+                        <button type="submit" className="navbar-search-btn">Buscar</button>
+                    </form>
+
+                    {/* Iconos de acción (desktop) */}
+                    <div className="navbar-actions">
+                        {/* Carrito */}
+                        <button
+                            className="navbar-action-btn"
+                            onClick={() => navigate('/cart')}
+                            aria-label="Ver carrito"
+                        >
+                            <BsCart3 />
+                            {totalItems > 0 && (
+                                <span className="navbar-action-badge">
+                                    {totalItems > 99 ? '99+' : totalItems}
+                                </span>
+                            )}
+                        </button>
+
+                        {/* Perfil */}
+                        <button
+                            className="navbar-action-btn"
+                            onClick={() => navigate('/profile')}
+                            aria-label="Mi cuenta"
+                        >
+                            <BsPersonCircle />
+                        </button>
+
+                        {/* Admin (solo si es admin) */}
+                        {isAdmin() && (
+                            <button
+                                className="navbar-action-btn navbar-action-admin"
+                                onClick={() => navigate('/admin')}
+                                aria-label="Panel de administración"
+                            >
+                                <BsShieldLock />
+                            </button>
+                        )}
+
+                        {/* Salir */}
+                        <button
+                            className="navbar-action-btn navbar-action-logout d-none d-md-flex"
+                            onClick={handleLogout}
+                            aria-label="Cerrar sesión"
+                        >
+                            <FiLogOut />
+                        </button>
+
+                        {/* Hamburguesa mobile */}
+                        <button
+                            className="navbar-hamburger d-flex d-md-none"
+                            onClick={() => setMobileMenuOpen(true)}
+                            aria-label="Abrir menú"
+                        >
+                            <FiMenu />
+                        </button>
                     </div>
-                </Nav>
+                </Container>
+            </div>
 
-                <div className="mt-auto pt-4">
-                    <Button onClick={handleLogout} variant="danger" className="w-100 d-flex align-items-center justify-content-center">
-                        <FiLogOut className="me-2" /> Salir
-                    </Button>
+            {/* ═══════════ FILA 2: Nav bar (desktop) ═══════════ */}
+            <div className="navbar-bottom-bar d-none d-md-flex">
+                <Container fluid className="navbar-bottom-inner px-3 px-md-4">
+                    <nav className="navbar-nav-links">
+                        {/* Catálogo */}
+                        <Link to="/catalog" className={`navbar-nav-link ${!currentCategory ? 'active' : ''}`}>
+                            <BsGrid3X3Gap className="me-1" /> Catálogo
+                        </Link>
+
+                        {/* Super Precio */}
+                        <Link to="/super-precio" className="navbar-nav-link">
+                            <BsStars className="me-1" /> Súper Precio
+                        </Link>
+
+                        {/* Mega-menú Categorías */}
+                        <div className="navbar-mega-wrapper" ref={megaMenuRef}>
+                            <button
+                                className={`navbar-nav-link navbar-nav-btn ${megaMenuOpen ? 'active' : ''}`}
+                                onClick={() => setMegaMenuOpen((v) => !v)}
+                                onMouseEnter={() => setMegaMenuOpen(true)}
+                                aria-expanded={megaMenuOpen}
+                            >
+                                Categorías <BsChevronDown className={`mega-chevron ${megaMenuOpen ? 'open' : ''}`} />
+                            </button>
+
+                            {megaMenuOpen && (
+                                <div
+                                    className="navbar-mega-menu"
+                                    onMouseLeave={() => setMegaMenuOpen(false)}
+                                >
+                                    {/* Buscador interno */}
+                                    <div className="mega-search-wrap">
+                                        <BsSearch className="mega-search-icon" />
+                                        <input
+                                            type="text"
+                                            value={menuQuery}
+                                            onChange={(e) => setMenuQuery(e.target.value)}
+                                            placeholder="Buscar categoría..."
+                                            className="mega-search-input"
+                                            autoFocus
+                                        />
+                                    </div>
+
+                                    {/* Grid 2 columnas */}
+                                    <div className="mega-grid">
+                                        <div className="mega-col">
+                                            {leftCats.map((cat) => (
+                                                <button
+                                                    key={cat.id}
+                                                    className={`mega-item ${currentCategory === cat.id ? 'active' : ''}`}
+                                                    onClick={() => handleCategoryClick(cat.id)}
+                                                >
+                                                    {cat.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="mega-col">
+                                            {rightCats.map((cat) => (
+                                                <button
+                                                    key={cat.id}
+                                                    className={`mega-item ${currentCategory === cat.id ? 'active' : ''}`}
+                                                    onClick={() => handleCategoryClick(cat.id)}
+                                                >
+                                                    {cat.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {visibleCategories.length === 0 && (
+                                            <div className="mega-empty">Sin resultados.</div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </nav>
+
+                    {/* Buscador mobile (fila 2 en tablet) */}
+                    <form className="navbar-search-form d-flex d-md-none" onSubmit={handleSearch}>
+                        <BsSearch className="navbar-search-icon" />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Buscar..."
+                            className="navbar-search-input"
+                        />
+                    </form>
+                </Container>
+            </div>
+
+            {/* ═══════════ MENÚ MOBILE (Offcanvas) ═══════════ */}
+            {mobileMenuOpen && (
+                <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)}>
+                    <aside className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+                        <div className="mobile-menu-header">
+                            <span className="mobile-menu-title">Menú</span>
+                            <button className="mobile-close-btn" onClick={() => setMobileMenuOpen(false)}>
+                                <FiX />
+                            </button>
+                        </div>
+
+                        <div className="mobile-menu-body">
+                            {/* Buscador */}
+                            <form className="mobile-search-form" onSubmit={handleSearch}>
+                                <BsSearch />
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Buscar producto..."
+                                />
+                                <button type="submit">Ir</button>
+                            </form>
+
+                            {/* Links principales */}
+                            <nav className="mobile-nav">
+                                <Link to="/catalog" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                    <BsGrid3X3Gap /> Catálogo completo
+                                </Link>
+                                <Link to="/super-precio" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                    <BsStars /> Súper Precio
+                                </Link>
+                                <Link to="/profile" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                    <BsPersonCircle /> Mi cuenta ({user?.name || 'Usuario'})
+                                </Link>
+                                <Link to="/cart" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                    <BsCart3 /> Carrito
+                                    {totalItems > 0 && <span className="mobile-cart-badge">{totalItems}</span>}
+                                </Link>
+                                {isAdmin() && (
+                                    <Link to="/admin" className="mobile-nav-link mobile-nav-admin" onClick={() => setMobileMenuOpen(false)}>
+                                        <FiSettings /> Administración
+                                    </Link>
+                                )}
+                            </nav>
+
+                            {/* Categorías */}
+                            <div className="mobile-cats-section">
+                                <div className="mobile-cats-title">CATEGORÍAS</div>
+                                <div className="mobile-search-form" style={{ marginBottom: '0.5rem' }}>
+                                    <BsSearch />
+                                    <input
+                                        type="text"
+                                        value={menuQuery}
+                                        onChange={(e) => setMenuQuery(e.target.value)}
+                                        placeholder="Buscar categoría..."
+                                    />
+                                </div>
+                                <div className="mobile-cats-list">
+                                    {visibleCategories.map((cat) => (
+                                        <button
+                                            key={cat.id}
+                                            className={`mobile-cat-item ${currentCategory === cat.id ? 'active' : ''}`}
+                                            onClick={() => handleCategoryClick(cat.id)}
+                                        >
+                                            {cat.name}
+                                        </button>
+                                    ))}
+                                    {visibleCategories.length === 0 && (
+                                        <div className="mobile-cats-empty">Sin resultados.</div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mobile-menu-footer">
+                            <button className="mobile-logout-btn" onClick={handleLogout}>
+                                <FiLogOut /> Cerrar sesión
+                            </button>
+                        </div>
+                    </aside>
                 </div>
-            </Offcanvas.Body>
-        </Navbar.Offcanvas>
-    </Container>
-    </Navbar>
-);
+            )}
+        </header>
+    );
 }
 
 export default AppNavbar;

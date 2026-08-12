@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 // --- 1. IMPORTAR EL GUARDIÁN ---
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -37,18 +37,21 @@ function App() {
       {/* --- Rutas Protegidas --- */}
       {/* Usamos el guardián. Solo se puede acceder si 'userLoggedIn' es 'true' */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/catalog" element={<Catalog />} />
+        {/* ── Rutas principales (URL limpias y profesionales) ── */}
+        <Route path="/tienda" element={<Catalog />} />
+        <Route path="/ofertas" element={<SuperPrecio />} />
+        <Route path="/mi-cuenta" element={<Profile />} />
+        <Route path="/mis-pedidos/:id" element={<OrderTracking />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/product/:productId" element={<ProductDetailPage />} />
-        <Route path="/catalogo" element={<Dashboard />} />
-        <Route path="/super-precio" element={<SuperPrecio />} />
-        <Route path="/orders/:id" element={<OrderTracking />} />
-        {/* Si tuvieras más rutas de admin, irían aquí dentro.
-        <Route path="/app/perfil" element={<Perfil />} />
-        <Route path="/app/configuracion" element={<Configuracion />} /> 
-        */}
+        <Route path="/categorias" element={<Dashboard />} />
+        {/* ── Redirecciones desde URLs antiguas (backwards compat) ── */}
+        <Route path="/catalog" element={<Navigate replace to="/tienda" />} />
+        <Route path="/super-precio" element={<Navigate replace to="/ofertas" />} />
+        <Route path="/profile" element={<Navigate replace to="/mi-cuenta" />} />
+        <Route path="/orders/:id" element={<Navigate replace to="/mis-pedidos/:id" />} />
+        <Route path="/catalogo" element={<Navigate replace to="/categorias" />} />
       </Route>
       
       {/* Opcional: Una ruta "catch-all" para páginas no encontradas */}

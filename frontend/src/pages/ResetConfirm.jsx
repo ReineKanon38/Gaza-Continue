@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, InputGroup, Alert } from 'react-bootstrap';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { BsLockFill, BsCheckCircle } from 'react-icons/bs';
+import { BsLockFill, BsCheckCircle, BsEye, BsEyeSlash } from 'react-icons/bs';
 import { FiSave, FiArrowLeft } from 'react-icons/fi';
 import { requestJson } from '../services/httpClient';
 
@@ -11,6 +11,8 @@ function ResetConfirm() {
     
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -85,11 +87,23 @@ function ResetConfirm() {
                                         <InputGroup>
                                             <InputGroup.Text><BsLockFill /></InputGroup.Text>
                                             <Form.Control 
-                                                type="password" 
+                                                type={showPassword ? 'text' : 'password'}
                                                 placeholder="Mínimo 6 caracteres" 
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                             />
+                                            <Button
+                                                variant="outline-secondary"
+                                                tabIndex={-1}
+                                                onMouseDown={(e) => { e.preventDefault(); setShowPassword(true); }}
+                                                onMouseUp={() => setShowPassword(false)}
+                                                onMouseLeave={() => setShowPassword(false)}
+                                                onTouchStart={(e) => { e.preventDefault(); setShowPassword(true); }}
+                                                onTouchEnd={() => setShowPassword(false)}
+                                                aria-label="Mostrar contraseña"
+                                            >
+                                                {showPassword ? <BsEyeSlash /> : <BsEye />}
+                                            </Button>
                                         </InputGroup>
                                     </Form.Group>
 
@@ -98,11 +112,23 @@ function ResetConfirm() {
                                         <InputGroup>
                                             <InputGroup.Text><BsLockFill /></InputGroup.Text>
                                             <Form.Control 
-                                                type="password" 
+                                                type={showConfirm ? 'text' : 'password'}
                                                 placeholder="Repite tu contraseña" 
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                             />
+                                            <Button
+                                                variant="outline-secondary"
+                                                tabIndex={-1}
+                                                onMouseDown={(e) => { e.preventDefault(); setShowConfirm(true); }}
+                                                onMouseUp={() => setShowConfirm(false)}
+                                                onMouseLeave={() => setShowConfirm(false)}
+                                                onTouchStart={(e) => { e.preventDefault(); setShowConfirm(true); }}
+                                                onTouchEnd={() => setShowConfirm(false)}
+                                                aria-label="Mostrar confirmación"
+                                            >
+                                                {showConfirm ? <BsEyeSlash /> : <BsEye />}
+                                            </Button>
                                         </InputGroup>
                                     </Form.Group>
 

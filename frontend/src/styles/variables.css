@@ -3,78 +3,89 @@
    ============================================ */
 
 :root {
-  /* Colores Primarios - Identidad de Marca (Mejorado con Mayor Contraste) */
-  --primary-dark: #0f1929;
-  --primary-blue: #1565c0;
-  --primary-orange: #ff6b35;
-  --primary-orange-hover: #e85a24;
+  /* Colores Primarios - Identidad de Marca */
+  --primary-dark: #0f172a;
+  --primary-blue: #1e3a8a;          /* Azul oscuro profundo */
+  --primary-violet: #7C3AED;        /* Violeta suave */
+  --primary-violet-hover: #6D28D9;  /* Violeta hover */
   --primary-color: var(--primary-blue);
-  --primary-hover: var(--primary-blue); /* fallback to avoid orange on standard primary hover if not wanted, or orange for contrast */
-  --primary-light: #42a5f5;
-  
-  /* Colores Secundarios - Acentos Premium */
-  --secondary-accent: #00bcd4;
-  --secondary-accent-dark: #00838f;
-  
+  --primary-hover: var(--primary-violet);
+  --primary-light: #818cf8;         /* Indigo claro */
+
+  /* Acentos Turquesa */
+  --accent-turquesa: #0ABFBF;
+  --accent-turquesa-dark: #0891b2;
+  --accent-turquesa-light: #67e8f9;
+
+  /* Compatibilidad — mantener nombres legacy pero apuntan a violeta */
+  --primary-orange: #7C3AED;
+  --primary-orange-hover: #6D28D9;
+
+  /* Colores Secundarios */
+  --secondary-accent: #0ABFBF;
+  --secondary-accent-dark: #0891b2;
+
   /* Colores de Fondo */
   --bg-light: #f8f9fa;
-  --bg-lighter: #e3f2fd;
+  --bg-lighter: #ede9fe;
   --bg-white: #ffffff;
   --bg-card: #ffffff;
-  --bg-dark: #0f1929;
-  
+  --bg-dark: #0f172a;
+
   /* Colores de Texto */
-  --text-primary: #0f1929;
-  --text-secondary: #546e7a;
-  --text-muted: #90a4ae;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
   --text-white: #ffffff;
-  --text-light: #eceff1;
+  --text-light: #e2e8f0;
   --text-strong: #0b1220;
   --text-soft: #475569;
 
   /* Superficies de alto contraste */
   --surface-0: #ffffff;
-  --surface-1: #f8fbff;
-  --surface-2: #edf3fb;
-  --surface-dark-1: #0b1930;
-  --surface-dark-2: #102845;
+  --surface-1: #f8f9ff;
+  --surface-2: #ede9fe;
+  --surface-dark-1: #0f172a;
+  --surface-dark-2: #1e1b4b;
 
   /* Focus / accesibilidad */
-  --focus-ring: rgba(0, 188, 212, 0.38);
-  
+  --focus-ring: rgba(10, 191, 191, 0.38);
+
   /* Colores de Estado */
   --success: #2e7d32;
   --success-light: #e8f5e9;
-  --warning: #f57f17;
-  --warning-light: #fff3e0;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
   --danger: #c62828;
   --danger-light: #ffebee;
-  --info: #0277bd;
-  --info-light: #e1f5fe;
-  
+  --info: #0891b2;
+  --info-light: #e0f7fa;
+
   /* Bordes y Sombras */
   --border-radius: 10px;
   --border-radius-sm: 8px;
   --border-radius-lg: 15px;
   --border-radius-full: 50px;
-  
-  --border-color: #cfd8dc;
-  --border-color-dark: #90a4ae;
-  --border-strong: #94a3b8;
-  
+
+  --border-color: #e2e8f0;
+  --border-color-dark: #94a3b8;
+  --border-strong: #7C3AED;
+
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.1);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.15);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.18);
   --shadow-xl: 0 10px 28px rgba(0, 0, 0, 0.22);
-  
-  /* Gradientes Mejorados */
-  --gradient-primary: linear-gradient(135deg, #0f1929 0%, #1565c0 100%);
-  --gradient-orange: linear-gradient(135deg, #ff6b35 0%, #e85a24 100%);
-  --gradient-cyan: linear-gradient(135deg, #00bcd4 0%, #00838f 100%);
-  --gradient-bg: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
-  --gradient-card: linear-gradient(90deg, #fff3e0 0%, #ffffff 100%);
-  --gradient-dark: linear-gradient(135deg, #0f1929 0%, #1a3a52 100%);
-  
+
+  /* Gradientes — Azul oscuro → Violeta */
+  --gradient-primary: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #7C3AED 100%);
+  --gradient-orange: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+  --gradient-violet: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+  --gradient-turquesa: linear-gradient(135deg, #0ABFBF 0%, #0891b2 100%);
+  --gradient-cyan: linear-gradient(135deg, #0ABFBF 0%, #0891b2 100%);
+  --gradient-bg: linear-gradient(135deg, #f8f9fa 0%, #ede9fe 100%);
+  --gradient-card: linear-gradient(90deg, #ede9fe 0%, #ffffff 100%);
+  --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+
   /* Espaciado */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -82,7 +93,7 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  
+
   /* Tipografía */
   --font-family: 'Poppins', sans-serif;
   --font-size-xs: 0.75rem;
@@ -92,18 +103,18 @@
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 2rem;
-  
+
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
-  
+
   /* Transiciones */
   --transition-fast: 0.15s ease;
   --transition-base: 0.3s ease;
   --transition-slow: 0.5s ease;
-  
+
   /* Z-index */
   --z-dropdown: 1000;
   --z-sticky: 1020;
@@ -124,25 +135,34 @@
 [data-theme="dark"] {
   /* Colores Primarios */
   --primary-dark: #070d14;
-  --primary-blue: #64b5f6;
-  --primary-orange: #ff8a65;
-  --primary-orange-hover: #ff7043;
-  --primary-color: var(--primary-blue);
-  --primary-hover: #42a5f5;
-  --primary-light: #1e88e5;
-  
+  --primary-blue: #818cf8;
+  --primary-violet: #a78bfa;
+  --primary-violet-hover: #7C3AED;
+  --primary-color: var(--primary-violet);
+  --primary-hover: #c4b5fd;
+  --primary-light: #c4b5fd;
+
+  /* Acentos */
+  --accent-turquesa: #22d3ee;
+  --accent-turquesa-dark: #0ABFBF;
+  --accent-turquesa-light: #67e8f9;
+
+  /* Compatibilidad */
+  --primary-orange: #a78bfa;
+  --primary-orange-hover: #7C3AED;
+
   /* Colores Secundarios */
-  --secondary-accent: #4dd0e1;
-  --secondary-accent-dark: #00bcd4;
-  
-  /* Colores de Fondo (Invertidos) */
-  --bg-light: #121826;
-  --bg-lighter: #1e293b;
+  --secondary-accent: #22d3ee;
+  --secondary-accent-dark: #0ABFBF;
+
+  /* Colores de Fondo */
+  --bg-light: #0f172a;
+  --bg-lighter: #1e1b4b;
   --bg-white: #0f172a;
   --bg-card: #1e293b;
   --bg-dark: #070d14;
-  
-  /* Colores de Texto (Invertidos) */
+
+  /* Colores de Texto */
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
@@ -151,23 +171,26 @@
   --text-strong: #ffffff;
   --text-soft: #cbd5e1;
 
-  /* Superficies de alto contraste */
+  /* Superficies */
   --surface-0: #0f172a;
   --surface-1: #1e293b;
   --surface-2: #334155;
   --surface-dark-1: #070d14;
-  --surface-dark-2: #0b1930;
+  --surface-dark-2: #1e1b4b;
 
   /* Bordes */
   --border-color: #334155;
   --border-color-dark: #475569;
-  --border-strong: #64748b;
-  
+  --border-strong: #a78bfa;
+
   /* Gradientes */
-  --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  --gradient-card: linear-gradient(90deg, #1e293b 0%, #334155 100%);
-  
-  /* Bootstrap overrides for dark mode */
+  --gradient-primary: linear-gradient(135deg, #070d14 0%, #1e1b4b 60%, #7C3AED 100%);
+  --gradient-orange: linear-gradient(135deg, #a78bfa 0%, #7C3AED 100%);
+  --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  --gradient-card: linear-gradient(90deg, #1e1b4b 0%, #334155 100%);
+  --gradient-dark: linear-gradient(135deg, #070d14 0%, #1e1b4b 100%);
+
+  /* Bootstrap overrides */
   --bs-body-bg: var(--bg-light);
   --bs-body-color: var(--text-primary);
   --bs-dark: var(--bg-card);

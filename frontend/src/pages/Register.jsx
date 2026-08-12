@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Container, Card, Form, Button, InputGroup, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 // Importamos los iconos
-import { BsPersonFill, BsEnvelopeFill, BsLockFill } from 'react-icons/bs';
+import { BsPersonFill, BsEnvelopeFill, BsLockFill, BsEye, BsEyeSlash } from 'react-icons/bs';
 import { FiUserPlus } from 'react-icons/fi';
 import { requestJson } from '../services/httpClient';
 
@@ -11,6 +11,7 @@ function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -112,11 +113,23 @@ function Register() {
                   <BsLockFill />
                 </InputGroup.Text>
                 <Form.Control 
-                  type="password" 
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Contraseña" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <Button
+                  variant="outline-secondary"
+                  tabIndex={-1}
+                  onMouseDown={(e) => { e.preventDefault(); setShowPassword(true); }}
+                  onMouseUp={() => setShowPassword(false)}
+                  onMouseLeave={() => setShowPassword(false)}
+                  onTouchStart={(e) => { e.preventDefault(); setShowPassword(true); }}
+                  onTouchEnd={() => setShowPassword(false)}
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <BsEyeSlash /> : <BsEye />}
+                </Button>
               </InputGroup>
             </Form.Group>
 

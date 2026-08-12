@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Alert, Badge, Spinner, Modal, InputGroup } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
-import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare, BsTruck, BsShieldLock, BsMoonFill, BsSunFill } from 'react-icons/bs';
+import { BsPersonCircle, BsEnvelopeFill, BsLockFill, BsPencilSquare, BsTruck, BsShieldLock, BsMoonFill, BsSunFill, BsEye, BsEyeSlash } from 'react-icons/bs';
 import { useTheme } from '../context/ThemeContext';
 import orderService from '../services/orderService';
 import authService from '../services/authService';
@@ -24,6 +24,9 @@ function Profile() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showCurrentPass, setShowCurrentPass] = useState(false);
+    const [showNewPass, setShowNewPass] = useState(false);
+    const [showConfirmPass, setShowConfirmPass] = useState(false);
     const { theme, toggleTheme } = useTheme();
 
     // 2FA states
@@ -338,12 +341,25 @@ function Profile() {
                                                     Contraseña Actual:
                                                 </Form.Label>
                                                 <Col sm="8">
-                                                    <Form.Control 
-                                                        type="password"
-                                                        value={editData.currentPassword}
-                                                        onChange={(e) => handleInputChange('currentPassword', e.target.value)}
-                                                        placeholder="Ingresa tu contraseña actual"
-                                                    />
+                                                    <InputGroup>
+                                                        <Form.Control 
+                                                            type={showCurrentPass ? 'text' : 'password'}
+                                                            value={editData.currentPassword}
+                                                            onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                                                            placeholder="Ingresa tu contraseña actual"
+                                                        />
+                                                        <Button
+                                                            variant="outline-secondary"
+                                                            tabIndex={-1}
+                                                            onMouseDown={(e) => { e.preventDefault(); setShowCurrentPass(true); }}
+                                                            onMouseUp={() => setShowCurrentPass(false)}
+                                                            onMouseLeave={() => setShowCurrentPass(false)}
+                                                            onTouchStart={(e) => { e.preventDefault(); setShowCurrentPass(true); }}
+                                                            onTouchEnd={() => setShowCurrentPass(false)}
+                                                        >
+                                                            {showCurrentPass ? <BsEyeSlash /> : <BsEye />}
+                                                        </Button>
+                                                    </InputGroup>
                                                 </Col>
                                             </Form.Group>
 
@@ -352,12 +368,25 @@ function Profile() {
                                                     Nueva Contraseña:
                                                 </Form.Label>
                                                 <Col sm="8">
-                                                    <Form.Control 
-                                                        type="password"
-                                                        value={editData.newPassword}
-                                                        onChange={(e) => handleInputChange('newPassword', e.target.value)}
-                                                        placeholder="Nueva contraseña (mín. 6 caracteres)"
-                                                    />
+                                                    <InputGroup>
+                                                        <Form.Control 
+                                                            type={showNewPass ? 'text' : 'password'}
+                                                            value={editData.newPassword}
+                                                            onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                                                            placeholder="Nueva contraseña (mín. 6 caracteres)"
+                                                        />
+                                                        <Button
+                                                            variant="outline-secondary"
+                                                            tabIndex={-1}
+                                                            onMouseDown={(e) => { e.preventDefault(); setShowNewPass(true); }}
+                                                            onMouseUp={() => setShowNewPass(false)}
+                                                            onMouseLeave={() => setShowNewPass(false)}
+                                                            onTouchStart={(e) => { e.preventDefault(); setShowNewPass(true); }}
+                                                            onTouchEnd={() => setShowNewPass(false)}
+                                                        >
+                                                            {showNewPass ? <BsEyeSlash /> : <BsEye />}
+                                                        </Button>
+                                                    </InputGroup>
                                                 </Col>
                                             </Form.Group>
 
@@ -366,12 +395,25 @@ function Profile() {
                                                     Confirmar:
                                                 </Form.Label>
                                                 <Col sm="8">
-                                                    <Form.Control 
-                                                        type="password"
-                                                        value={editData.confirmPassword}
-                                                        onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                                                        placeholder="Repite la nueva contraseña"
-                                                    />
+                                                    <InputGroup>
+                                                        <Form.Control 
+                                                            type={showConfirmPass ? 'text' : 'password'}
+                                                            value={editData.confirmPassword}
+                                                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                                                            placeholder="Repite la nueva contraseña"
+                                                        />
+                                                        <Button
+                                                            variant="outline-secondary"
+                                                            tabIndex={-1}
+                                                            onMouseDown={(e) => { e.preventDefault(); setShowConfirmPass(true); }}
+                                                            onMouseUp={() => setShowConfirmPass(false)}
+                                                            onMouseLeave={() => setShowConfirmPass(false)}
+                                                            onTouchStart={(e) => { e.preventDefault(); setShowConfirmPass(true); }}
+                                                            onTouchEnd={() => setShowConfirmPass(false)}
+                                                        >
+                                                            {showConfirmPass ? <BsEyeSlash /> : <BsEye />}
+                                                        </Button>
+                                                    </InputGroup>
                                                 </Col>
                                             </Form.Group>
                                         </>
