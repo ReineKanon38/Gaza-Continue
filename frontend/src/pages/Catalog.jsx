@@ -382,13 +382,38 @@ function Catalog() {
                                 <div>
                                     <Badge className="badge-premium-tag">PRODUCTOS PREMIUM</Badge>
                                     <h2 style={{ color: '#00d4ff', textShadow: '0 0 20px rgba(0, 212, 255, 0.5)' }}>{getCurrentCategoryInfo().name}</h2>
-                                    <p className="catalog-status-text" style={{ color: 'rgba(255,255,255,0.95)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                                        <span>CATÁLOGO</span> {totalProducts} productos disponibles. Mostrando {displayedProducts.length} de {totalProducts}.
-                                    </p>
                                 </div>
                             </div>
                         )}
 
+                        {/* ── CATEGORÍAS DESTACADAS (ARRIBA) ── */}
+                        {showHomeSections && categories.length > 0 && (
+                            <div className="home-sections-wrapper mb-4">
+                                <section className="home-section">
+                                    <div className="home-section-header">
+                                        <span className="home-section-tag cats-tag">📂 CATEGORÍAS DESTACADAS</span>
+                                    </div>
+                                    <div className="home-cats-grid">
+                                        {categories.slice(0, 12).map((cat) => {
+                                            const CatIcon = getCategoryIcon(cat.name);
+                                            return (
+                                                <button
+                                                    key={cat.id}
+                                                    className="home-cat-card"
+                                                    onClick={() => handleCategoryChange(cat.id)}
+                                                >
+                                                    <div className="home-cat-icon-wrap">
+                                                        <CatIcon />
+                                                    </div>
+                                                    <span className="home-cat-name">{cat.name}</span>
+                                                    <span className="home-cat-arrow">→</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </section>
+                            </div>
+                        )}
 
                         <Row className="mb-4 g-3 align-items-center filter-row-custom shadow-sm p-3 mx-0">
                             <Col md={12} className="d-flex justify-content-end align-items-center">
@@ -613,32 +638,7 @@ function Catalog() {
                                     </div>
                                 </section>
 
-                                {/* ── CATEGORÍAS DESTACADAS ── */}
-                                {categories.length > 0 && (
-                                    <section className="home-section">
-                                        <div className="home-section-header">
-                                            <span className="home-section-tag cats-tag">📂 CATEGORÍAS DESTACADAS</span>
-                                        </div>
-                                        <div className="home-cats-grid">
-                                            {categories.slice(0, 12).map((cat) => {
-                                                const CatIcon = getCategoryIcon(cat.name);
-                                                return (
-                                                    <button
-                                                        key={cat.id}
-                                                        className="home-cat-card"
-                                                        onClick={() => handleCategoryChange(cat.id)}
-                                                    >
-                                                        <div className="home-cat-icon-wrap">
-                                                            <CatIcon />
-                                                        </div>
-                                                        <span className="home-cat-name">{cat.name}</span>
-                                                        <span className="home-cat-arrow">→</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </section>
-                                )}
+
                             </div>
                         )}
                     </>
