@@ -102,9 +102,6 @@ function Catalog() {
     const [products, setProducts] = useState([]);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const searchRef = useRef(null);
     const [priceFilter, setPriceFilter] = useState('');
     const [viewMode, setViewMode] = useState('grid');
     const [searchParams, setSearchParams] = useSearchParams();
@@ -113,13 +110,13 @@ function Catalog() {
     const [hasMore, setHasMore] = useState(true);
     const [categories, setCategories] = useState([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [brandFilter, setBrandFilter] = useState('');
     const [dataSource, setDataSource] = useState('syscom');
     const hasLoadedOnceRef = useRef(false);
     const productsPerPage = 20;
 
     const syscomCategoryFilter = searchParams.get('syscomCategory') || '';
+    const urlSearchTerm = searchParams.get('search') || '';
 
     const normalizeSyscomProduct = (product) => {
         const syscomId = String(product.producto_id || product.id || product.syscomId || product._id || '');
@@ -175,7 +172,7 @@ function Catalog() {
     // Resetear página cuando cambia búsqueda, categoría o marca
     useEffect(() => {
         setCurrentPage(1);
-    }, [syscomCategoryFilter, searchTerm, brandFilter]);
+    }, [syscomCategoryFilter, urlSearchTerm, brandFilter]);
 
     // Guardar última categoría visitada para la sección "Para Ti"
     useEffect(() => {
@@ -183,14 +180,6 @@ function Catalog() {
             localStorage.setItem('lastVisitedCategory', syscomCategoryFilter);
         }
     }, [syscomCategoryFilter]);
-
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-        }, 350);
-
-        return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
 
     useEffect(() => {
         const loadCategories = async () => {
@@ -222,7 +211,7 @@ function Catalog() {
                     page: currentPage,
                     limit: productsPerPage,
                     category: syscomCategoryFilter || undefined,
-                    query: debouncedSearchTerm || undefined,
+                    query: urlSearchTerm || undefined,
                     brand: brandFilter || undefined
                 });
 
@@ -234,7 +223,7 @@ function Catalog() {
                         const localRes = await productService.getAllProducts({
                             page: currentPage,
                             limit: productsPerPage,
-                            search: debouncedSearchTerm || undefined
+                            search: urlSearchTerm || undefined
                         });
                         if (localRes.products && localRes.products.length > 0) {
                             rawList = localRes.products;
@@ -314,31 +303,6 @@ function Catalog() {
         return searchRankedProducts.filter((p) => p.price <= maxPrice);
     }, [searchRankedProducts, priceFilter]);
 
-    const suggestions = useMemo(() => {
-        const cleanTerm = String(searchTerm || '').trim().toLowerCase();
-        if (!cleanTerm) return [];
-
-        return products
-            .filter((p) => {
-                const name = String(p.name || '').toLowerCase();
-                const brand = String(p.distributor || '').toLowerCase();
-                const syscomId = String(p.syscomId || '').toLowerCase();
-                const modelo = String(p.modelo || '').toLowerCase();
-                return name.includes(cleanTerm) || brand.includes(cleanTerm) || syscomId.includes(cleanTerm) || modelo.includes(cleanTerm);
-            })
-            .slice(0, 6);
-    }, [products, searchTerm]);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setShowSuggestions(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
     const loadMoreProducts = () => {
         if (hasMore && !isRefreshing) {
             setCurrentPage(prev => prev + 1);
@@ -346,7 +310,7 @@ function Catalog() {
     };
 
     /* ── Secciones de Home ── */
-    const showHomeSections = !syscomCategoryFilter && !debouncedSearchTerm && !brandFilter && !isInitialLoading;
+    const showHomeSections = !syscomCategoryFilter && !urlSearchTerm && !brandFilter && !isInitialLoading;
     const lastVisitedCategoryId = localStorage.getItem('lastVisitedCategory') || '';
     const lastVisitedCategory = categories.find(c => c.id === lastVisitedCategoryId);
 
@@ -427,57 +391,7 @@ function Catalog() {
                                 <Badge bg="success">Precios en MXN</Badge>
                                 {isRefreshing && <Badge bg="secondary" className="ms-2">Actualizando...</Badge>}
                             </Col>
-                            <Col md={5}>
-                                <div className="search-container-relative" ref={searchRef}>
-                                    <InputGroup className="search-group-modern">
-                                        <InputGroup.Text className="bg-transparent border-0"><BsSearch /></InputGroup.Text>
-                                        <Form.Control
-                                            className="bg-transparent border-0 shadow-none"
-                                            placeholder="Buscar por producto, marca o ID..."
-                                            value={searchTerm}
-                                            onChange={(e) => {
-                                                setSearchTerm(e.target.value);
-                                                setShowSuggestions(true);
-                                            }}
-                                            onFocus={() => setShowSuggestions(true)}
-                                        />
-                                    </InputGroup>
-
-                                    {showSuggestions && suggestions.length > 0 && (
-                                        <div className="search-suggestions-dropdown">
-                                            {suggestions.map((item) => (
-                                                <div
-                                                    key={item._id}
-                                                    className="suggestion-item d-flex align-items-center gap-3"
-                                                    style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}
-                                                    onMouseOver={(e) => e.currentTarget.style.background = 'var(--surface-1)'}
-                                                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
-                                                    onClick={() => {
-                                                        setSearchTerm(item.name);
-                                                        setShowSuggestions(false);
-                                                    }}
-                                                >
-                                                    <div style={{ width: '45px', height: '45px', flexShrink: 0, background: '#fff', borderRadius: '4px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                        {item.image ? (
-                                                            <img src={item.image} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="" />
-                                                        ) : (
-                                                            <span style={{ fontSize: '1.2rem' }}>📦</span>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <span className="suggestion-name d-block" style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>{item.name}</span>
-                                                        <div className="suggestion-meta text-muted" style={{ fontSize: '0.8rem' }}>
-                                                            <span className="suggestion-brand text-primary fw-bold me-2">{item.distributor}</span>
-                                                            <span className="suggestion-id">{item.modelo ? `Mod: ${item.modelo}` : `ID: ${item.syscomId}`}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </Col>
-                            <Col md={2}>
+                            <Col md={4}>
                                 <Form.Select
                                     className="bg-transparent border-0 shadow-none search-group-modern text-muted"
                                     value={brandFilter}
@@ -494,7 +408,7 @@ function Catalog() {
                                     <option value="SYSCOM">SYSCOM</option>
                                 </Form.Select>
                             </Col>
-                            <Col md={2}>
+                            <Col md={4}>
                                 <InputGroup className="search-group-modern">
                                     <InputGroup.Text className="bg-transparent border-0"><BsCurrencyDollar /></InputGroup.Text>
                                     <Form.Control
@@ -506,7 +420,7 @@ function Catalog() {
                                     />
                                 </InputGroup>
                             </Col>
-                            <Col md={3} className="d-flex justify-content-end">
+                            <Col md={4} className="d-flex justify-content-end">
                                 <ButtonGroup>
                                     <Button variant={viewMode === 'grid' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('grid')}><BsGrid3X3Gap /></Button>
                                     <Button variant={viewMode === 'list' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('list')}><BsListUl /></Button>

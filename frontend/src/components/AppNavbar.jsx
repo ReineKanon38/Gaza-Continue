@@ -22,7 +22,10 @@ function AppNavbar() {
     const [megaMenuOpen, setMegaMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const megaMenuRef = useRef(null);
+    const searchRef = useRef(null);
     const currentCategory = searchParams.get('syscomCategory');
 
     /* ── Logo destination ── */
@@ -60,6 +63,9 @@ function AppNavbar() {
             if (megaMenuRef.current && !megaMenuRef.current.contains(e.target)) {
                 setMegaMenuOpen(false);
             }
+            if (searchRef.current && !searchRef.current.contains(e.target)) {
+                setShowSuggestions(false);
+            }
         };
         document.addEventListener('mousedown', handleClick);
         return () => document.removeEventListener('mousedown', handleClick);
@@ -76,9 +82,32 @@ function AppNavbar() {
         e.preventDefault();
         if (searchTerm.trim()) {
             navigate(`/tienda?search=${encodeURIComponent(searchTerm.trim())}`);
-            setSearchTerm('');
+            setShowSuggestions(false);
         }
     };
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            const term = searchTerm.trim();
+            if (term.length >= 3) {
+                try {
+                    const res = await productService.searchSyscomProducts({ query: term, limit: 6 });
+                    if (res && res.products) {
+                        setSuggestions(res.products.slice(0, 6));
+                        setShowSuggestions(true);
+                    }
+                } catch (error) {
+                    console.error("Error fetching suggestions:", error);
+                }
+            } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            }
+        };
+
+        const timeoutId = setTimeout(fetchSuggestions, 500);
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
 
     const handleLogout = () => {
         logout();
@@ -104,17 +133,59 @@ function AppNavbar() {
                     </Link>
 
                     {/* Buscador central (desktop) */}
-                    <form className="navbar-search-form d-none d-md-flex" onSubmit={handleSearch}>
-                        <BsSearch className="navbar-search-icon" />
-                        <input
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Buscar producto, marca o ID..."
-                            className="navbar-search-input"
-                        />
-                        <button type="submit" className="navbar-search-btn">Buscar</button>
-                    </form>
+                    <div className="navbar-search-container position-relative d-none d-md-flex w-100" ref={searchRef} style={{ maxWidth: '600px', margin: '0 2rem' }}>
+                        <form className="navbar-search-form w-100" onSubmit={handleSearch}>
+                            <BsSearch className="navbar-search-icon" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    if(e.target.value.trim().length > 0) setShowSuggestions(true);
+                                }}
+                                onFocus={() => {
+                                    if(suggestions.length > 0) setShowSuggestions(true);
+                                }}
+                                placeholder="Buscar producto, marca o ID..."
+                                className="navbar-search-input w-100"
+                            />
+                            <button type="submit" className="navbar-search-btn">Buscar</button>
+                        </form>
+
+                        {showSuggestions && suggestions.length > 0 && (
+                            <div className="search-suggestions-dropdown position-absolute" style={{ top: '100%', left: 0, right: 0, zIndex: 1050, marginTop: '0.5rem', background: 'var(--surface-0)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
+                                {suggestions.map((item) => (
+                                    <div
+                                        key={item._id || item.syscomId}
+                                        className="suggestion-item d-flex align-items-center gap-3"
+                                        style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}
+                                        onMouseOver={(e) => e.currentTarget.style.background = 'var(--surface-1)'}
+                                        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                                        onClick={() => {
+                                            setSearchTerm(item.name);
+                                            setShowSuggestions(false);
+                                            navigate(`/tienda?search=${encodeURIComponent(item.name)}`);
+                                        }}
+                                    >
+                                        <div style={{ width: '45px', height: '45px', flexShrink: 0, background: '#fff', borderRadius: '4px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {item.image ? (
+                                                <img src={item.image} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="" />
+                                            ) : (
+                                                <span style={{ fontSize: '1.2rem' }}>📦</span>
+                                            )}
+                                        </div>
+                                        <div style={{ overflow: 'hidden' }}>
+                                            <span className="suggestion-name d-block" style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{item.name}</span>
+                                            <div className="suggestion-meta text-muted" style={{ fontSize: '0.8rem' }}>
+                                                <span className="suggestion-brand text-primary fw-bold me-2">{item.distributor || item.marca}</span>
+                                                <span className="suggestion-id">{item.modelo ? `Mod: ${item.modelo}` : `ID: ${item.syscomId}`}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Iconos de acción (desktop) */}
                     <div className="navbar-actions">
