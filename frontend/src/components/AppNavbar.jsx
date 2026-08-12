@@ -66,7 +66,7 @@ function AppNavbar() {
     }, []);
 
     const handleCategoryClick = (catId) => {
-        navigate(`/catalog?syscomCategory=${catId}`);
+        navigate(`/tienda?syscomCategory=${catId}`);
         setMenuQuery('');
         setMegaMenuOpen(false);
         setMobileMenuOpen(false);
@@ -75,7 +75,7 @@ function AppNavbar() {
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchTerm.trim()) {
-            navigate(`/catalog?search=${encodeURIComponent(searchTerm.trim())}`);
+            navigate(`/tienda?search=${encodeURIComponent(searchTerm.trim())}`);
             setSearchTerm('');
         }
     };
