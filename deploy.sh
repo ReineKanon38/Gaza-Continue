@@ -49,7 +49,7 @@ log "Dependencias backend listas"
 # ── 3. Build del frontend ────────────────────────────────────
 log "Construyendo frontend (React + Vite)..."
 cd $FRONTEND_DIR
-npm install --omit=dev
+npm install
 npm run build
 log "Build frontend completado"
 
