@@ -2,16 +2,17 @@
 # ============================================================
 #  deploy.sh — Script de deploy para SYSCOM-GAZA en AWS
 #  Uso: bash deploy.sh [rama]
-#  Ejemplo: bash deploy.sh Jerzain
+#  Sin argumento: usa la rama actual automáticamente
 # ============================================================
 
 set -e  # Detener si cualquier comando falla
 
-BRANCH=${1:-Jerzain}          # Rama por defecto: Jerzain
+BRANCH=${1:-$(git -C ~/Gaza-Continue rev-parse --abbrev-ref HEAD)}  # Auto-detecta la rama actual
 REPO_DIR=~/Gaza-Continue
 FRONTEND_DIR=$REPO_DIR/frontend
 BACKEND_DIR=$REPO_DIR/backend
 NGINX_ROOT=/var/www/gaza
+
 
 # ── Colores para output ──────────────────────────────────────
 GREEN='\033[0;32m'
