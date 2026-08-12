@@ -362,22 +362,6 @@ function Catalog() {
             <AppNavbar />
             <PromoModal />
 
-            <div className="promo-banner-container">
-                <div className="promo-banner-wrapper">
-                    <div className="banner-bg-static"></div>
-                    <div className="banner-overlay-tech"></div>
-                    <div className="banner-content-premium">
-                        <h1 className="main-headline">
-                            <span className="text-cyan-bright">
-                                Infraestructura Tecnológica <br /> de Alto Nivel
-                            </span>
-                        </h1>
-                        <p className="lead">Líderes en distribución de tecnología y seguridad electrónica.</p>
-                        <Button className="explore-btn">EXPLORAR CATÁLOGO</Button>
-                    </div>
-                </div>
-            </div>
-
             <Container fluid className="px-4 pb-4">
                 {isInitialLoading ? (
                     <div className="text-center py-5"><Spinner animation="border" variant="info" /></div>
@@ -405,145 +389,6 @@ function Catalog() {
                             </div>
                         )}
 
-                        <div className="category-scroll-wrapper">
-                            <div
-                                className={`category-glass-card ${!syscomCategoryFilter ? 'active' : ''}`}
-                                onClick={() => handleCategoryChange('')}
-                            >
-                                <div className="cat-icon-box"><FiGrid /></div>
-                                <span>Todos</span>
-                            </div>
-
-                            {!isLoadingCategories && categories.map((cat) => {
-                                const CategoryIcon = getCategoryIcon(cat.name);
-                                return (
-                                    <div
-                                        key={cat.id}
-                                        className={`category-glass-card ${syscomCategoryFilter === cat.id ? 'active' : ''}`}
-                                        onClick={() => handleCategoryChange(cat.id)}
-                                    >
-                                        <div className="cat-icon-box">
-                                            <CategoryIcon aria-hidden="true" />
-                                        </div>
-                                        <span>{cat.name}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* ════ SECCIONES HOME ════ */}
-                        {showHomeSections && (
-                            <div className="home-sections-wrapper">
-
-                                {/* ── EN TENDENCIA ── */}
-                                {trendingProducts.length > 0 && (
-                                    <section className="home-section">
-                                        <div className="home-section-header">
-                                            <span className="home-section-tag trending-tag">🔥 EN TENDENCIA</span>
-                                            <button
-                                                className="home-section-view-all"
-                                                onClick={() => handleCategoryChange('')}
-                                            >
-                                                Ver todo →
-                                            </button>
-                                        </div>
-                                        <div className="home-products-row">
-                                            {trendingProducts.map((product) => (
-                                                <div key={product._id || product.id} className="home-product-mini-card">
-                                                    <div className="home-prod-img-wrap">
-                                                        {product.image ? (
-                                                            <img src={product.image} alt={product.name} className="home-prod-img" />
-                                                        ) : (
-                                                            <div className="home-prod-img-placeholder">📦</div>
-                                                        )}
-                                                    </div>
-                                                    <div className="home-prod-info">
-                                                        <span className="home-prod-brand">{product.distributor || 'SYSCOM'}</span>
-                                                        <p className="home-prod-name">{product.name}</p>
-                                                        <span className="home-prod-price">
-                                                            ${(product.price || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </section>
-                                )}
-
-                                {/* ── PARA TI ── */}
-                                <section className="home-section">
-                                    <div className="home-section-header">
-                                        <span className="home-section-tag para-ti-tag">⭐ PARA TI</span>
-                                        {lastVisitedCategory && (
-                                            <span className="home-section-sub">
-                                                Basado en: <strong>{lastVisitedCategory.name}</strong>
-                                            </span>
-                                        )}
-                                        <button
-                                            className="home-section-view-all"
-                                            onClick={() => lastVisitedCategoryId
-                                                ? handleCategoryChange(lastVisitedCategoryId)
-                                                : handleCategoryChange('')
-                                            }
-                                        >
-                                            Ver todo →
-                                        </button>
-                                    </div>
-                                    <div className="home-products-row">
-                                        {forYouProducts.map((product) => (
-                                            <div key={`fyi-${product._id || product.id}`} className="home-product-mini-card">
-                                                <div className="home-prod-img-wrap">
-                                                    {product.image ? (
-                                                        <img src={product.image} alt={product.name} className="home-prod-img" />
-                                                    ) : (
-                                                        <div className="home-prod-img-placeholder">📦</div>
-                                                    )}
-                                                </div>
-                                                <div className="home-prod-info">
-                                                    <span className="home-prod-brand">{product.distributor || 'SYSCOM'}</span>
-                                                    <p className="home-prod-name">{product.name}</p>
-                                                    <span className="home-prod-price">
-                                                        ${(product.price || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {forYouProducts.length === 0 && (
-                                            <div className="home-section-empty">
-                                                Explora el catálogo para ver recomendaciones personalizadas.
-                                            </div>
-                                        )}
-                                    </div>
-                                </section>
-
-                                {/* ── CATEGORÍAS DESTACADAS ── */}
-                                {categories.length > 0 && (
-                                    <section className="home-section">
-                                        <div className="home-section-header">
-                                            <span className="home-section-tag cats-tag">📂 CATEGORÍAS DESTACADAS</span>
-                                        </div>
-                                        <div className="home-cats-grid">
-                                            {categories.slice(0, 12).map((cat) => {
-                                                const CatIcon = getCategoryIcon(cat.name);
-                                                return (
-                                                    <button
-                                                        key={cat.id}
-                                                        className="home-cat-card"
-                                                        onClick={() => handleCategoryChange(cat.id)}
-                                                    >
-                                                        <div className="home-cat-icon-wrap">
-                                                            <CatIcon />
-                                                        </div>
-                                                        <span className="home-cat-name">{cat.name}</span>
-                                                        <span className="home-cat-arrow">→</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </section>
-                                )}
-                            </div>
-                        )}
 
                         <Row className="mb-4 g-3 align-items-center filter-row-custom shadow-sm p-3 mx-0">
                             <Col md={12} className="d-flex justify-content-end align-items-center">
@@ -682,8 +527,123 @@ function Catalog() {
                                 <p className="text-muted mt-2">Cargando más productos...</p>
                             </div>
                         )}
+
+                        {/* ════ SECCIONES HOME (Movidasa al final) ════ */}
+                        {showHomeSections && (
+                            <div className="home-sections-wrapper mt-5 pt-4" style={{ borderTop: '1px solid #e2e8f0' }}>
+
+                                {/* ── EN TENDENCIA ── */}
+                                {trendingProducts.length > 0 && (
+                                    <section className="home-section">
+                                        <div className="home-section-header">
+                                            <span className="home-section-tag trending-tag">🔥 EN TENDENCIA</span>
+                                            <button
+                                                className="home-section-view-all"
+                                                onClick={() => handleCategoryChange('')}
+                                            >
+                                                Ver todo →
+                                            </button>
+                                        </div>
+                                        <div className="home-products-row">
+                                            {trendingProducts.map((product) => (
+                                                <div key={product._id || product.id} className="home-product-mini-card">
+                                                    <div className="home-prod-img-wrap">
+                                                        {product.image ? (
+                                                            <img src={product.image} alt={product.name} className="home-prod-img" />
+                                                        ) : (
+                                                            <div className="home-prod-img-placeholder">📦</div>
+                                                        )}
+                                                    </div>
+                                                    <div className="home-prod-info">
+                                                        <span className="home-prod-brand">{product.distributor || 'SYSCOM'}</span>
+                                                        <p className="home-prod-name">{product.name}</p>
+                                                        <span className="home-prod-price">
+                                                            ${(product.price || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
+
+                                {/* ── PARA TI ── */}
+                                <section className="home-section">
+                                    <div className="home-section-header">
+                                        <span className="home-section-tag para-ti-tag">⭐ PARA TI</span>
+                                        {lastVisitedCategory && (
+                                            <span className="home-section-sub">
+                                                Basado en: <strong>{lastVisitedCategory.name}</strong>
+                                            </span>
+                                        )}
+                                        <button
+                                            className="home-section-view-all"
+                                            onClick={() => lastVisitedCategoryId
+                                                ? handleCategoryChange(lastVisitedCategoryId)
+                                                : handleCategoryChange('')
+                                            }
+                                        >
+                                            Ver todo →
+                                        </button>
+                                    </div>
+                                    <div className="home-products-row">
+                                        {forYouProducts.map((product) => (
+                                            <div key={`fyi-${product._id || product.id}`} className="home-product-mini-card">
+                                                <div className="home-prod-img-wrap">
+                                                    {product.image ? (
+                                                        <img src={product.image} alt={product.name} className="home-prod-img" />
+                                                    ) : (
+                                                        <div className="home-prod-img-placeholder">📦</div>
+                                                    )}
+                                                </div>
+                                                <div className="home-prod-info">
+                                                    <span className="home-prod-brand">{product.distributor || 'SYSCOM'}</span>
+                                                    <p className="home-prod-name">{product.name}</p>
+                                                    <span className="home-prod-price">
+                                                        ${(product.price || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {forYouProducts.length === 0 && (
+                                            <div className="home-section-empty">
+                                                Explora el catálogo para ver recomendaciones personalizadas.
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
+
+                                {/* ── CATEGORÍAS DESTACADAS ── */}
+                                {categories.length > 0 && (
+                                    <section className="home-section">
+                                        <div className="home-section-header">
+                                            <span className="home-section-tag cats-tag">📂 CATEGORÍAS DESTACADAS</span>
+                                        </div>
+                                        <div className="home-cats-grid">
+                                            {categories.slice(0, 12).map((cat) => {
+                                                const CatIcon = getCategoryIcon(cat.name);
+                                                return (
+                                                    <button
+                                                        key={cat.id}
+                                                        className="home-cat-card"
+                                                        onClick={() => handleCategoryChange(cat.id)}
+                                                    >
+                                                        <div className="home-cat-icon-wrap">
+                                                            <CatIcon />
+                                                        </div>
+                                                        <span className="home-cat-name">{cat.name}</span>
+                                                        <span className="home-cat-arrow">→</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </section>
+                                )}
+                            </div>
+                        )}
                     </>
                 )}
+
             </Container>
         </div>
     );
