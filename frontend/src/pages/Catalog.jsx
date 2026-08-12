@@ -323,7 +323,8 @@ function Catalog() {
                 const name = String(p.name || '').toLowerCase();
                 const brand = String(p.distributor || '').toLowerCase();
                 const syscomId = String(p.syscomId || '').toLowerCase();
-                return name.includes(cleanTerm) || brand.includes(cleanTerm) || syscomId.includes(cleanTerm);
+                const modelo = String(p.modelo || '').toLowerCase();
+                return name.includes(cleanTerm) || brand.includes(cleanTerm) || syscomId.includes(cleanTerm) || modelo.includes(cleanTerm);
             })
             .slice(0, 6);
     }, [products, searchTerm]);
@@ -447,16 +448,28 @@ function Catalog() {
                                             {suggestions.map((item) => (
                                                 <div
                                                     key={item._id}
-                                                    className="suggestion-item"
+                                                    className="suggestion-item d-flex align-items-center gap-3"
+                                                    style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}
+                                                    onMouseOver={(e) => e.currentTarget.style.background = 'var(--surface-1)'}
+                                                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                                     onClick={() => {
                                                         setSearchTerm(item.name);
                                                         setShowSuggestions(false);
                                                     }}
                                                 >
-                                                    <span className="suggestion-name">{item.name}</span>
-                                                    <div className="suggestion-meta">
-                                                        <span className="suggestion-brand">{item.distributor}</span>
-                                                        <span className="suggestion-id">ID: {item.syscomId}</span>
+                                                    <div style={{ width: '45px', height: '45px', flexShrink: 0, background: '#fff', borderRadius: '4px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {item.image ? (
+                                                            <img src={item.image} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="" />
+                                                        ) : (
+                                                            <span style={{ fontSize: '1.2rem' }}>📦</span>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <span className="suggestion-name d-block" style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>{item.name}</span>
+                                                        <div className="suggestion-meta text-muted" style={{ fontSize: '0.8rem' }}>
+                                                            <span className="suggestion-brand text-primary fw-bold me-2">{item.distributor}</span>
+                                                            <span className="suggestion-id">{item.modelo ? `Mod: ${item.modelo}` : `ID: ${item.syscomId}`}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}

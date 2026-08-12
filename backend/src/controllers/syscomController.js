@@ -8,12 +8,46 @@ export const searchSyscomProducts = async (req, res) => {
     const { query, brand, distributor, category, page, limit } = req.query;
     const normalizedBrand = brand || distributor;
 
+    // --- SYNONYMS DICTIONARY ---
+    let optimizedQuery = query;
+    if (query) {
+      const qLower = query.toLowerCase().trim();
+      const synonyms = {
+        'camara para afuera': 'bala exterior',
+        'cámara para afuera': 'bala exterior',
+        'camara de afuera': 'bala exterior',
+        'camara exterior': 'bala exterior',
+        'cámara exterior': 'bala exterior',
+        'camara para interior': 'domo interior',
+        'cámara para interior': 'domo interior',
+        'cable de internet': 'cable utp',
+        'cable para internet': 'cable utp',
+        'camara 360': 'ptz',
+        'cámara 360': 'ptz',
+        'disco duro para camara': 'disco duro videovigilancia',
+        'disco duro para cámara': 'disco duro videovigilancia',
+        'dvr 4 canales': 'dvr 4 ch',
+        'dvr 8 canales': 'dvr 8 ch',
+        'dvr 16 canales': 'dvr 16 ch',
+        'nvr 4 canales': 'nvr 4 ch',
+        'nvr 8 canales': 'nvr 8 ch',
+        'nvr 16 canales': 'nvr 16 ch',
+      };
+      
+      for (const [key, value] of Object.entries(synonyms)) {
+        if (qLower.includes(key)) {
+          optimizedQuery = optimizedQuery.toLowerCase().replace(key, value);
+        }
+      }
+    }
+    // ---------------------------
+
     const parsedLimit = parseInt(limit) || 50;
     // Forzar límite para evitar sobrecarga en el entorno de ejecución
     const maxLimit = Math.min(parsedLimit, 100);
 
     const result = await syscomService.searchProducts({
-      query,
+      query: optimizedQuery,
       brand: normalizedBrand,
       category,
       page: parseInt(page) || 1,

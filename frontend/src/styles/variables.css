@@ -132,7 +132,7 @@
 /* ============================================
    TEMA OSCURO (DARK MODE)
    ============================================ */
-[data-theme="dark"] {
+[data-theme="dark"], [data-bs-theme="dark"] {
   /* Colores Primarios */
   --primary-dark: #070d14;
   --primary-blue: #818cf8;

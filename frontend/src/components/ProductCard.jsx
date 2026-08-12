@@ -32,7 +32,7 @@ function ProductCard({ product, matchMeta = null }) {
   const hasLowStock = stock > 0 && stock <= 5;
   const isOutOfStock = stock <= 0;
   const productBenefits = generateProductBenefits(product);
-  const productCode = product.syscomId || product._id || product.id || product.code || product.codigo || '';
+  const productCode = product.modelo || product.syscomId || product._id || product.id || product.code || product.codigo || '';
   const productSlug = encodeURIComponent(productCode || product.name || `item-${Date.now()}`);
 
   return (
@@ -81,6 +81,9 @@ function ProductCard({ product, matchMeta = null }) {
           {isOutOfStock && <span className="badge text-bg-secondary">Sin stock</span>}
         </div>
         <div className="product-title-wrapper">
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: '600' }}>
+            {product.modelo || product.syscomId ? `Modelo: ${product.modelo || product.syscomId}` : 'Código N/A'}
+          </div>
           <Card.Title className="mb-2 product-title" style={{ 
               fontSize: '1.1rem', 
               fontWeight: '600',
