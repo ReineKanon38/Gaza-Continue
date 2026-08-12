@@ -264,10 +264,10 @@ function Catalog() {
             }
         };
         loadProducts();
-    }, [syscomCategoryFilter, currentPage, debouncedSearchTerm]);
+    }, [syscomCategoryFilter, currentPage, urlSearchTerm]);
 
     const searchRankedProducts = useMemo(() => {
-        const normalizedTerm = normalizeText(debouncedSearchTerm);
+        const normalizedTerm = normalizeText(urlSearchTerm);
         if (!normalizedTerm) {
             return products.map((product) => ({
                 ...product,
@@ -287,7 +287,7 @@ function Catalog() {
             })
             .filter((product) => product._matchScore > 0)
             .sort((a, b) => b._matchScore - a._matchScore);
-    }, [products, debouncedSearchTerm]);
+    }, [products, urlSearchTerm]);
 
     // Filtrar por precio localmente (filtro adicional)
     const displayedProducts = useMemo(() => {
