@@ -101,8 +101,6 @@ function Catalog() {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [priceFilter, setPriceFilter] = useState('');
     const [viewMode, setViewMode] = useState('grid');
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentPage, setCurrentPage] = useState(1);
@@ -110,13 +108,14 @@ function Catalog() {
     const [hasMore, setHasMore] = useState(true);
     const [categories, setCategories] = useState([]);
     const [isLoadingCategories, setIsLoadingCategories] = useState(true);
-    const [brandFilter, setBrandFilter] = useState('');
     const [dataSource, setDataSource] = useState('syscom');
     const hasLoadedOnceRef = useRef(false);
     const productsPerPage = 20;
 
     const syscomCategoryFilter = searchParams.get('syscomCategory') || '';
     const urlSearchTerm = searchParams.get('search') || '';
+    const brandFilter = searchParams.get('brand') || '';
+    const maxPriceUrl = searchParams.get('maxPrice') || '';
 
     const normalizeSyscomProduct = (product) => {
         const syscomId = String(product.producto_id || product.id || product.syscomId || product._id || '');
@@ -291,17 +290,17 @@ function Catalog() {
 
     // Filtrar por precio localmente (filtro adicional)
     const displayedProducts = useMemo(() => {
-        if (!priceFilter) {
+        if (!maxPriceUrl) {
             return searchRankedProducts;
         }
 
-        const maxPrice = parseFloat(priceFilter);
+        const maxPrice = parseFloat(maxPriceUrl);
         if (Number.isNaN(maxPrice)) {
             return searchRankedProducts;
         }
 
         return searchRankedProducts.filter((p) => p.price <= maxPrice);
-    }, [searchRankedProducts, priceFilter]);
+    }, [searchRankedProducts, maxPriceUrl]);
 
     const loadMoreProducts = () => {
         if (hasMore && !isRefreshing) {
@@ -381,46 +380,17 @@ function Catalog() {
                             </div>
                         )}
 
-                        <Row className="mb-4 g-3 align-items-center filter-row-custom shadow-sm p-3 mx-0">
-                            <Col md={12} className="d-flex justify-content-end align-items-center">
+                        <Row className="mb-3 g-2 align-items-center filter-row-custom shadow-sm p-2 mx-0" style={{ background: 'var(--surface-0)', borderRadius: '12px' }}>
+                            <Col className="d-flex align-items-center gap-2">
                                 {dataSource === 'cache' || dataSource === 'stale-cache' ? (
-                                    <Badge bg="info" className="me-2 text-dark">
+                                    <Badge bg="info" className="text-dark">
                                         ⚡ Caché Optimizada
                                     </Badge>
                                 ) : null}
-                                <Badge bg="success">Precios en MXN</Badge>
-                                {isRefreshing && <Badge bg="secondary" className="ms-2">Actualizando...</Badge>}
+                                {isRefreshing && <Badge bg="secondary">Actualizando...</Badge>}
                             </Col>
-                            <Col md={4}>
-                                <Form.Select
-                                    className="bg-transparent border-0 shadow-none search-group-modern text-muted"
-                                    value={brandFilter}
-                                    onChange={(e) => setBrandFilter(e.target.value)}
-                                >
-                                    <option value="">Todas las Marcas</option>
-                                    <option value="HIKVISION">HIKVISION</option>
-                                    <option value="DAHUA">DAHUA</option>
-                                    <option value="EPCOM">EPCOM</option>
-                                    <option value="UBIQUITI">UBIQUITI</option>
-                                    <option value="TP-LINK">TP-LINK</option>
-                                    <option value="SAXXON">SAXXON</option>
-                                    <option value="ZKTECO">ZKTECO</option>
-                                    <option value="SYSCOM">SYSCOM</option>
-                                </Form.Select>
-                            </Col>
-                            <Col md={4}>
-                                <InputGroup className="search-group-modern">
-                                    <InputGroup.Text className="bg-transparent border-0"><BsCurrencyDollar /></InputGroup.Text>
-                                    <Form.Control
-                                        className="bg-transparent border-0 shadow-none"
-                                        type="number"
-                                        placeholder="Precio Máximo"
-                                        value={priceFilter}
-                                        onChange={(e) => setPriceFilter(e.target.value)}
-                                    />
-                                </InputGroup>
-                            </Col>
-                            <Col md={4} className="d-flex justify-content-end">
+                            <Col xs="auto" className="d-flex justify-content-end align-items-center gap-3">
+                                <Badge bg="success" style={{ fontSize: '0.9rem', padding: '0.5rem 0.8rem' }}>Precios en MXN</Badge>
                                 <ButtonGroup>
                                     <Button variant={viewMode === 'grid' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('grid')}><BsGrid3X3Gap /></Button>
                                     <Button variant={viewMode === 'list' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('list')}><BsListUl /></Button>

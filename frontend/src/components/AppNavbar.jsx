@@ -21,7 +21,9 @@ function AppNavbar() {
     const [menuQuery, setMenuQuery] = useState('');
     const [megaMenuOpen, setMegaMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+    const [brandFilter, setBrandFilter] = useState(searchParams.get('brand') || '');
+    const [maxPriceFilter, setMaxPriceFilter] = useState(searchParams.get('maxPrice') || '');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const megaMenuRef = useRef(null);
@@ -57,6 +59,12 @@ function AppNavbar() {
         load();
     }, []);
 
+    useEffect(() => {
+        setSearchTerm(searchParams.get('search') || '');
+        setBrandFilter(searchParams.get('brand') || '');
+        setMaxPriceFilter(searchParams.get('maxPrice') || '');
+    }, [searchParams]);
+
     /* ── Close mega-menu on outside click ── */
     useEffect(() => {
         const handleClick = (e) => {
@@ -80,10 +88,19 @@ function AppNavbar() {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if (searchTerm.trim()) {
-            navigate(`/tienda?search=${encodeURIComponent(searchTerm.trim())}`);
-            setShowSuggestions(false);
-        }
+        const params = new URLSearchParams(searchParams);
+        
+        if (searchTerm.trim()) params.set('search', searchTerm.trim());
+        else params.delete('search');
+        
+        if (brandFilter) params.set('brand', brandFilter);
+        else params.delete('brand');
+        
+        if (maxPriceFilter) params.set('maxPrice', maxPriceFilter);
+        else params.delete('maxPrice');
+        
+        navigate(`/tienda?${params.toString()}`);
+        setShowSuggestions(false);
     };
 
     useEffect(() => {
@@ -133,22 +150,54 @@ function AppNavbar() {
                     </Link>
 
                     {/* Buscador central (desktop) */}
-                    <div className="navbar-search-container position-relative d-none d-md-flex w-100" ref={searchRef} style={{ maxWidth: '600px', margin: '0 2rem' }}>
-                        <form className="navbar-search-form w-100" onSubmit={handleSearch}>
-                            <BsSearch className="navbar-search-icon" />
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => {
-                                    setSearchTerm(e.target.value);
-                                    if(e.target.value.trim().length > 0) setShowSuggestions(true);
-                                }}
-                                onFocus={() => {
-                                    if(suggestions.length > 0) setShowSuggestions(true);
-                                }}
-                                placeholder="Buscar producto, marca o ID..."
-                                className="navbar-search-input w-100"
-                            />
+                    <div className="navbar-search-container position-relative d-none d-md-flex w-100" ref={searchRef} style={{ maxWidth: '750px', margin: '0 2rem' }}>
+                        <form className="navbar-search-form w-100" onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', padding: 0 }}>
+                            <select
+                                className="navbar-search-select d-none d-lg-block"
+                                value={brandFilter}
+                                onChange={(e) => setBrandFilter(e.target.value)}
+                                style={{ width: '135px', border: 'none', background: 'transparent', padding: '0 10px 0 15px', color: 'var(--text-primary)', outline: 'none', borderRight: '1px solid var(--border-color)', height: '100%', cursor: 'pointer', fontSize: '0.9rem' }}
+                            >
+                                <option value="">Todas las Marcas</option>
+                                <option value="HIKVISION">HIKVISION</option>
+                                <option value="DAHUA">DAHUA</option>
+                                <option value="EPCOM">EPCOM</option>
+                                <option value="UBIQUITI">UBIQUITI</option>
+                                <option value="TP-LINK">TP-LINK</option>
+                                <option value="SAXXON">SAXXON</option>
+                                <option value="ZKTECO">ZKTECO</option>
+                                <option value="SYSCOM">SYSCOM</option>
+                            </select>
+
+                            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', height: '100%' }}>
+                                <BsSearch className="navbar-search-icon" style={{ position: 'absolute', left: '15px' }} />
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        if(e.target.value.trim().length > 0) setShowSuggestions(true);
+                                    }}
+                                    onFocus={() => {
+                                        if(suggestions.length > 0) setShowSuggestions(true);
+                                    }}
+                                    placeholder="Buscar producto, marca o ID..."
+                                    className="navbar-search-input w-100"
+                                    style={{ paddingLeft: '40px', border: 'none', height: '100%', background: 'transparent' }}
+                                />
+                            </div>
+
+                            <div className="d-none d-lg-flex" style={{ alignItems: 'center', borderLeft: '1px solid var(--border-color)', padding: '0 10px', height: '100%' }}>
+                                <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>$</span>
+                                <input
+                                    type="number"
+                                    placeholder="Máximo"
+                                    value={maxPriceFilter}
+                                    onChange={(e) => setMaxPriceFilter(e.target.value)}
+                                    style={{ width: '80px', border: 'none', background: 'transparent', outline: 'none', paddingLeft: '5px', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                                />
+                            </div>
+
                             <button type="submit" className="navbar-search-btn">Buscar</button>
                         </form>
 
