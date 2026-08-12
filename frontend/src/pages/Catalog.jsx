@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Form, InputGroup, Spinner, Badge, Button, ButtonGroup } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
 import ProductCard from '../components/ProductCard';
@@ -98,6 +98,7 @@ const getApproximateMatch = (product, term) => {
 };
 
 function Catalog() {
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -564,14 +565,19 @@ function Catalog() {
                                             <span className="home-section-tag trending-tag">🔥 EN TENDENCIA</span>
                                             <button
                                                 className="home-section-view-all"
-                                                onClick={() => handleCategoryChange('')}
+                                                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                                             >
-                                                Ver todo →
+                                                Subir al catálogo ↑
                                             </button>
                                         </div>
                                         <div className="home-products-row">
                                             {trendingProducts.map((product) => (
-                                                <div key={product._id || product.id} className="home-product-mini-card">
+                                                <div 
+                                                    key={product._id || product.id} 
+                                                    className="home-product-mini-card"
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => navigate(`/product/${product._id || product.syscomId || product.id}`)}
+                                                >
                                                     <div className="home-prod-img-wrap">
                                                         {product.image ? (
                                                             <img src={product.image} alt={product.name} className="home-prod-img" />
@@ -613,7 +619,12 @@ function Catalog() {
                                     </div>
                                     <div className="home-products-row">
                                         {forYouProducts.map((product) => (
-                                            <div key={`fyi-${product._id || product.id}`} className="home-product-mini-card">
+                                            <div 
+                                                key={`fyi-${product._id || product.id}`} 
+                                                className="home-product-mini-card"
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => navigate(`/product/${product._id || product.syscomId || product.id}`)}
+                                            >
                                                 <div className="home-prod-img-wrap">
                                                     {product.image ? (
                                                         <img src={product.image} alt={product.name} className="home-prod-img" />
