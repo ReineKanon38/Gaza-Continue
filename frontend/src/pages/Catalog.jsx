@@ -101,6 +101,7 @@ function Catalog() {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [viewMode, setViewMode] = useState('grid');
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentPage, setCurrentPage] = useState(1);
