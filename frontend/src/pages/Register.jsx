@@ -57,29 +57,32 @@ function Register() {
       fluid
       className="d-flex vh-100 justify-content-center align-items-center bg-page-content fade-in-up"
     >
-      <Card className="w-100 p-4 shadow-sm" style={{ maxWidth: '400px' }}>
-        <Card.Body>
+      <Card className="w-100 p-4 auth-card border-0" style={{ maxWidth: '420px' }}>
+        <Card.Body className="p-sm-3">
           
-          <h2 className="text-center fw-bold mb-4">Crear Cuenta</h2>
+          <div className="text-center mb-4">
+            <h2 className="auth-title mb-2">Crear Cuenta</h2>
+            <p className="text-muted">¡Únete a SYSCOM-GAZA hoy!</p>
+          </div>
           
           <Form onSubmit={handleRegistro}>
 
             {/* Alerta de error (si existe) */}
             {error && (
-              <Alert variant="danger" onClose={() => setError('')} dismissible>
+              <Alert variant="danger" className="border-0 shadow-sm" onClose={() => setError('')} dismissible>
                 {error}
               </Alert>
             )}
             {success && (
-              <Alert variant="success" onClose={() => setSuccess('')} dismissible>
+              <Alert variant="success" className="border-0 shadow-sm" onClose={() => setSuccess('')} dismissible>
                 {success}
               </Alert>
             )}
             
-            <Form.Group className="mb-3" controlId="formBasicUsername">
-              <Form.Label>Nombre de usuario</Form.Label>
-              <InputGroup>
-                <InputGroup.Text>
+            <Form.Group className="mb-4" controlId="formBasicUsername">
+              <Form.Label className="text-muted fw-semibold">Nombre de usuario</Form.Label>
+              <InputGroup className="search-group-modern shadow-sm">
+                <InputGroup.Text className="bg-transparent border-0 text-muted ps-3">
                   <BsPersonFill />
                 </InputGroup.Text>
                 <Form.Control 
@@ -87,14 +90,15 @@ function Register() {
                   placeholder="Ingresa tu nombre de usuario" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  className="bg-transparent border-0 shadow-none py-2"
                 />
               </InputGroup>
             </Form.Group>
             
-            <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Correo electrónico</Form.Label>
-              <InputGroup>
-                <InputGroup.Text>
+            <Form.Group className="mb-4" controlId="formBasicEmail">
+              <Form.Label className="text-muted fw-semibold">Correo electrónico</Form.Label>
+              <InputGroup className="search-group-modern shadow-sm">
+                <InputGroup.Text className="bg-transparent border-0 text-muted ps-3">
                   <BsEnvelopeFill />
                 </InputGroup.Text>
                 <Form.Control 
@@ -102,14 +106,15 @@ function Register() {
                   placeholder="Ingresa tu correo" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-transparent border-0 shadow-none py-2"
                 />
               </InputGroup>
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formBasicPassword">
-              <Form.Label>Contraseña</Form.Label>
-              <InputGroup>
-                <InputGroup.Text>
+            <Form.Group className="mb-4" controlId="formBasicPassword">
+              <Form.Label className="text-muted fw-semibold">Contraseña</Form.Label>
+              <InputGroup className="search-group-modern shadow-sm">
+                <InputGroup.Text className="bg-transparent border-0 text-muted ps-3">
                   <BsLockFill />
                 </InputGroup.Text>
                 <Form.Control 
@@ -117,9 +122,11 @@ function Register() {
                   placeholder="Contraseña" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="bg-transparent border-0 shadow-none py-2"
                 />
                 <Button
-                  variant="outline-secondary"
+                  variant="link"
+                  className="text-muted text-decoration-none pe-3"
                   tabIndex={-1}
                   onMouseDown={(e) => { e.preventDefault(); setShowPassword(true); }}
                   onMouseUp={() => setShowPassword(false)}
@@ -133,22 +140,19 @@ function Register() {
               </InputGroup>
             </Form.Group>
 
-            {/* CAMBIO AQUÍ:
-              Quitamos 'variant="primary"'
-              Añadimos 'className="btn-custom-primary"' 
-            */}
             <Button 
               type="submit" 
-              className="w-100 mt-3 d-flex align-items-center justify-content-center btn-custom-primary"
+              className="w-100 mt-2 py-3 d-flex align-items-center justify-content-center btn-custom-primary rounded-pill shadow"
               size="lg"
               disabled={loading}
+              style={{ fontWeight: '600' }}
             >
-              <FiUserPlus className="me-2" />
+              <FiUserPlus className="me-2 fs-5" />
               {loading ? 'Registrando...' : 'Registrarse'}
             </Button>
             
-            <div className="text-center mt-4">
-              <Link to="/login">
+            <div className="text-center mt-4 pt-2">
+              <Link to="/login" className="auth-link d-block">
                 ¿Ya tienes cuenta? Inicia sesión
               </Link>
             </div>

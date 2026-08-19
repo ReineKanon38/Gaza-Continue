@@ -65,38 +65,38 @@ return (
     <Container className="d-flex vh-100 justify-content-center align-items-center fade-in-up">
         <Row className="justify-content-center w-100">
         <Col md={8} lg={6} xl={4}>
-            <Card className="shadow-sm border-0">
+            <Card className="auth-card border-0">
             <Card.Body className="p-4 p-md-5">
                 
-                <h2 className="fw-bold text-center mb-3">
-                Restaurar Contraseña
-                </h2>
-                <p className="text-center text-muted mb-4">
-                Ingresa tu correo y te enviaremos un enlace para 
-                restablecer tu contraseña.
-                </p>
+                <div className="text-center mb-4">
+                  <h2 className="auth-title mb-2">Restaurar Contraseña</h2>
+                  <p className="text-muted">
+                    Ingresa tu correo y te enviaremos un enlace para 
+                    restablecer tu contraseña.
+                  </p>
+                </div>
 
                 <Form onSubmit={handleSubmit}>
 
                   {/* Mensaje de Éxito (Verde) */}
                 {message && (
-                    <Alert variant="success">
+                    <Alert variant="success" className="border-0 shadow-sm">
                     {message}
                     </Alert>
                 )}
 
                   {/* Mensaje de Error (Rojo) */}
                 {error && (
-                    <Alert variant="danger" onClose={() => setError('')} dismissible>
+                    <Alert variant="danger" className="border-0 shadow-sm" onClose={() => setError('')} dismissible>
                     {error}
                     </Alert>
                 )}
 
                   {/* Campo de Correo */}
-                <Form.Group className="mb-3" controlId="formBasicEmail">
-                    <Form.Label>Correo electrónico</Form.Label>
-                    <InputGroup>
-                    <InputGroup.Text>
+                <Form.Group className="mb-4" controlId="formBasicEmail">
+                    <Form.Label className="text-muted fw-semibold">Correo electrónico</Form.Label>
+                    <InputGroup className="search-group-modern shadow-sm">
+                    <InputGroup.Text className="bg-transparent border-0 text-muted ps-3">
                         <BsEnvelopeFill />
                     </InputGroup.Text>
                     <Form.Control 
@@ -104,6 +104,7 @@ return (
                         placeholder="Ingresa tu correo" 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        className="bg-transparent border-0 shadow-none py-2"
                     />
                     </InputGroup>
                 </Form.Group>
@@ -111,9 +112,10 @@ return (
                     {/* Botón de Enviar */}
                     <Button 
                         type="submit" 
-                        className="btn-custom-primary w-100 d-flex align-items-center justify-content-center"
+                        className="w-100 mt-2 py-3 d-flex align-items-center justify-content-center btn-custom-primary rounded-pill shadow"
                         size="lg"
                         disabled={isLoading}
+                        style={{ fontWeight: '600' }}
                     >
                         {isLoading ? (
                             <>
@@ -124,7 +126,7 @@ return (
                             </>
                         ) : (
                             <>
-                                <FiSend className="me-2" />
+                                <FiSend className="me-2 fs-5" />
                                 Enviar enlace
                             </>
                         )}
@@ -132,14 +134,11 @@ return (
                     </Form>
 
                     {/* Enlace de regreso a Login con mejor diseño */}
-                    <div className="text-center mt-4">
-                        <Link to="/login" className="d-flex align-items-center justify-content-center text-decoration-none">
+                    <div className="text-center mt-4 pt-2">
+                        <Link to="/login" className="auth-link d-flex align-items-center justify-content-center mb-2">
                             <FiArrowLeft className="me-2" />
                             Volver al inicio de sesión
                         </Link>
-                        <p className="mt-2 text-muted">
-                            ¿Ya recuerdas tu contraseña? Inicia sesión
-                        </p>
                     </div>
 
                 </Card.Body>

@@ -62,38 +62,42 @@ function ResetConfirm() {
             <Container className="d-flex vh-100 justify-content-center align-items-center fade-in-up">
                 <Row className="justify-content-center w-100">
                     <Col md={8} lg={6} xl={4}>
-                        <Card className="shadow-sm border-0">
+                        <Card className="auth-card border-0">
                             <Card.Body className="p-4 p-md-5">
-                                <h2 className="fw-bold text-center mb-3">Nueva Contraseña</h2>
-                                <p className="text-center text-muted mb-4">
-                                    Ingresa tu nueva contraseña para acceder a tu cuenta.
-                                </p>
+                                <div className="text-center mb-4">
+                                  <h2 className="auth-title mb-2">Nueva Contraseña</h2>
+                                  <p className="text-muted">
+                                      Ingresa tu nueva contraseña para acceder a tu cuenta.
+                                  </p>
+                                </div>
 
                                 <Form onSubmit={handleSubmit}>
                                     {message && (
-                                        <Alert variant="success" className="d-flex align-items-center">
+                                        <Alert variant="success" className="d-flex align-items-center border-0 shadow-sm">
                                             <BsCheckCircle className="me-2" /> {message}
                                         </Alert>
                                     )}
 
                                     {error && (
-                                        <Alert variant="danger" onClose={() => setError('')} dismissible>
+                                        <Alert variant="danger" className="border-0 shadow-sm" onClose={() => setError('')} dismissible>
                                             {error}
                                         </Alert>
                                     )}
 
-                                    <Form.Group className="mb-3">
-                                        <Form.Label>Nueva contraseña</Form.Label>
-                                        <InputGroup>
-                                            <InputGroup.Text><BsLockFill /></InputGroup.Text>
+                                    <Form.Group className="mb-4">
+                                        <Form.Label className="text-muted fw-semibold">Nueva contraseña</Form.Label>
+                                        <InputGroup className="search-group-modern shadow-sm">
+                                            <InputGroup.Text className="bg-transparent border-0 text-muted ps-3"><BsLockFill /></InputGroup.Text>
                                             <Form.Control 
                                                 type={showPassword ? 'text' : 'password'}
                                                 placeholder="Mínimo 6 caracteres" 
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
+                                                className="bg-transparent border-0 shadow-none py-2"
                                             />
                                             <Button
-                                                variant="outline-secondary"
+                                                variant="link"
+                                                className="text-muted text-decoration-none pe-3"
                                                 tabIndex={-1}
                                                 onMouseDown={(e) => { e.preventDefault(); setShowPassword(true); }}
                                                 onMouseUp={() => setShowPassword(false)}
@@ -108,17 +112,19 @@ function ResetConfirm() {
                                     </Form.Group>
 
                                     <Form.Group className="mb-4">
-                                        <Form.Label>Confirmar contraseña</Form.Label>
-                                        <InputGroup>
-                                            <InputGroup.Text><BsLockFill /></InputGroup.Text>
+                                        <Form.Label className="text-muted fw-semibold">Confirmar contraseña</Form.Label>
+                                        <InputGroup className="search-group-modern shadow-sm">
+                                            <InputGroup.Text className="bg-transparent border-0 text-muted ps-3"><BsLockFill /></InputGroup.Text>
                                             <Form.Control 
                                                 type={showConfirm ? 'text' : 'password'}
                                                 placeholder="Repite tu contraseña" 
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className="bg-transparent border-0 shadow-none py-2"
                                             />
                                             <Button
-                                                variant="outline-secondary"
+                                                variant="link"
+                                                className="text-muted text-decoration-none pe-3"
                                                 tabIndex={-1}
                                                 onMouseDown={(e) => { e.preventDefault(); setShowConfirm(true); }}
                                                 onMouseUp={() => setShowConfirm(false)}
@@ -134,9 +140,10 @@ function ResetConfirm() {
 
                                     <Button 
                                         type="submit" 
-                                        className="btn-custom-primary w-100 d-flex align-items-center justify-content-center"
+                                        className="w-100 mt-2 py-3 d-flex align-items-center justify-content-center btn-custom-primary rounded-pill shadow"
                                         size="lg"
                                         disabled={isLoading || !!message}
+                                        style={{ fontWeight: '600' }}
                                     >
                                         {isLoading ? (
                                             <>
@@ -147,15 +154,15 @@ function ResetConfirm() {
                                             </>
                                         ) : (
                                             <>
-                                                <FiSave className="me-2" />
+                                                <FiSave className="me-2 fs-5" />
                                                 Actualizar Contraseña
                                             </>
                                         )}
                                     </Button>
                                 </Form>
 
-                                <div className="text-center mt-4">
-                                    <Link to="/login" className="d-flex align-items-center justify-content-center text-decoration-none">
+                                <div className="text-center mt-4 pt-2">
+                                    <Link to="/login" className="auth-link d-flex align-items-center justify-content-center mb-2">
                                         <FiArrowLeft className="me-2" />
                                         Volver al inicio de sesión
                                     </Link>
