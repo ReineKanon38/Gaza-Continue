@@ -4,6 +4,7 @@ import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import Stripe from 'stripe';
 import WebhookLog from '../models/WebhookLog.js';
 import Order from '../models/Order.js';
+import syscomService from '../services/syscomService.js';
 
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
@@ -67,8 +68,19 @@ export const createPaymentSession = async (req, res) => {
         let id = item.productId || item._id || item.product;
         const qty = item.quantity || 1;
         
-        // Si es un producto syscom que no ha sido sincronizado en BD local, intentamos extraer su precio del fallback?
-        // En realidad, un pago no debería proceder si el producto ni siquiera existe en BD.
+        // Handle virtual syscom products by syncing them on-the-fly
+        if (String(id).startsWith('syscom-')) {
+          const syscomId = String(id).replace('syscom-', '');
+          try {
+            const result = await syscomService.syncProduct(syscomId);
+            if (result && result.product) {
+              id = result.product._id;
+            }
+          } catch (error) {
+            logger.warn(`Could not sync syscom product ${syscomId} on the fly for payment: ${error.message}`);
+          }
+        }
+
         if (id && mongoose.isValidObjectId(id)) {
           const product = await Product.findById(id);
           if (product && product.price) {
