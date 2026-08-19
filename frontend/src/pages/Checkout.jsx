@@ -413,7 +413,7 @@ function Checkout() {
                             ) : (
                               <>
                                 <BsShieldCheck className="me-2" /> 
-                                {selectedProvider === 'stripe' ? 'Pagar con Tarjeta' : 'Confirmar Pedido con Pago Bancario'}
+                                {selectedProvider === 'stripe' ? 'Proceder al Pago Seguro' : 'Confirmar Pedido con Pago Bancario'}
                               </>
                             )}
                           </Button>

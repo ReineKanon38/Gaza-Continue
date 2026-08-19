@@ -498,3 +498,14 @@
   color: var(--primary-hover);
   text-decoration: underline;
 }
+
+.btn-custom-primary:disabled,
+.btn-custom-primary.disabled {
+  background: var(--surface-2) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.65;
+  filter: none !important;
+  transform: none !important;
+}
