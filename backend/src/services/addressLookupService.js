@@ -3,8 +3,8 @@ import axios from 'axios';
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const cache = new Map();
 
-// Uses https://api.zippopotam.us — free, no token required, covers MX postal codes.
-// Returns state + delegacion/city. Neighborhoods are not available from this API.
+// Uses https://sepomex.kurenn.dev/ — free, open source API for SEPOMEX MX postal codes.
+// Returns state, city, municipality and a list of neighborhoods (colonias).
 export const lookupMexicanZipCode = async (zipCode) => {
   const normalizedZip = String(zipCode || '').replace(/\D/g, '').slice(0, 5);
   if (!/^\d{5}$/.test(normalizedZip)) {
@@ -16,27 +16,25 @@ export const lookupMexicanZipCode = async (zipCode) => {
     return cached.data;
   }
 
-  const endpoint = `https://api.zippopotam.us/mx/${normalizedZip}`;
+  const endpoint = `https://sepomex.kurenn.dev/api/v1/zip_codes?zip_code=${normalizedZip}`;
 
   const response = await axios.get(endpoint, {
     timeout: 8000,
     headers: { Accept: 'application/json' }
   });
 
-  const places = response?.data?.places;
-  if (!Array.isArray(places) || places.length === 0) {
+  const zipCodes = response?.data?.zip_codes;
+  if (!Array.isArray(zipCodes) || zipCodes.length === 0) {
     throw new Error('CP no encontrado');
   }
 
-  // Build unique sets from all places for this zip code
-  const states = [...new Set(places.map((p) => p['state']).filter(Boolean))];
-  const cities = [...new Set(places.map((p) => p['place name']).filter(Boolean))];
-
-  const first = places[0];
-  const state = first['state'] || '';
-  // In Mexico, "place name" from zippopotam corresponds to delegación/municipio
-  const municipality = first['place name'] || '';
-  const city = municipality;
+  const first = zipCodes[0];
+  const state = first['d_estado'] || '';
+  const municipality = first['d_mnpio'] || '';
+  const city = first['d_ciudad'] || municipality;
+  
+  // Extract all neighborhoods (colonias)
+  const neighborhoods = [...new Set(zipCodes.map((p) => p['d_asenta']).filter(Boolean))];
 
   const mapped = {
     zipCode: normalizedZip,
@@ -44,8 +42,8 @@ export const lookupMexicanZipCode = async (zipCode) => {
     city,
     municipality,
     locality: '',
-    neighborhoods: [],
-    options: { states, cities, municipalities: cities, localities: [] }
+    neighborhoods,
+    options: { states: [state], cities: [city], municipalities: [municipality], localities: [] }
   };
 
   cache.set(normalizedZip, { timestamp: Date.now(), data: mapped });

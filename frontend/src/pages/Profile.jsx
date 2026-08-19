@@ -231,18 +231,14 @@ function Profile() {
                 {/* Tarjeta con la información */}
                 <Row className="justify-content-center">
                     <Col md={8} lg={6}>
-                        <Card className="shadow-sm border-0">
+                        <Card className="auth-card border-0 mb-4">
                             <Card.Header 
                                 as="h5" 
-                                className="fw-bold d-flex justify-content-between align-items-center" 
-                                style={{ 
-                                    backgroundColor: 'var(--primary-color)', 
-                                    color: 'white' 
-                                }}
+                                className="fw-bold d-flex justify-content-between align-items-center bg-transparent border-bottom"
                             >
-                                Información de la Cuenta
+                                <span className="text-dark">Información de la Cuenta</span>
                                 <Button 
-                                    variant={isEditing ? "outline-light" : "light"}
+                                    variant={isEditing ? "outline-secondary" : "outline-primary"}
                                     size="sm"
                                     onClick={handleEditToggle}
                                     disabled={isLoading}
