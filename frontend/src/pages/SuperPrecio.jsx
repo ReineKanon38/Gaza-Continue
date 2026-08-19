@@ -276,11 +276,29 @@ function SuperPrecio() {
               </div>
             )}
 
-            <div className="text-center mt-5">
+            <div className="text-center my-5">
               <Button
-                className="load-more-btn"
+                variant="outline-primary"
+                size="lg"
                 onClick={handleLoadMore}
                 disabled={isLoadingMore}
+                style={{
+                    padding: '12px 40px',
+                    borderRadius: '25px',
+                    fontWeight: '600',
+                    border: '2px solid #00d4ff',
+                    color: '#00d4ff',
+                    background: 'transparent',
+                    transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                    e.target.style.background = '#00d4ff';
+                    e.target.style.color = '#000';
+                }}
+                onMouseLeave={(e) => {
+                    e.target.style.background = 'transparent';
+                    e.target.style.color = '#00d4ff';
+                }}
               >
                 {isLoadingMore ? 'Cargando...' : 'Cargar más Super Precio'}
               </Button>
