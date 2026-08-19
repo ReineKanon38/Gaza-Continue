@@ -227,8 +227,7 @@ function Profile() {
                         </h2>
                     </Col>
                 </Row>
-                
-                {/* Tarjeta con la información */}
+                      {/* Tarjeta con la información */}
                 <Row className="justify-content-center">
                     <Col md={8} lg={6}>
                         <Card className="auth-card border-0 mb-4">
@@ -457,7 +456,7 @@ function Profile() {
                                             <Badge bg="success" className="px-3 py-2">Activo</Badge>
                                         ) : (
                                             <Button 
-                                                variant="outline-primary" 
+                                                className="btn-custom-primary" 
                                                 size="sm" 
                                                 onClick={handleGenerate2FA}
                                                 disabled={isGenerating2FA}
@@ -475,8 +474,10 @@ function Profile() {
 
                 <Row className="justify-content-center mt-4">
                     <Col md={8} lg={6}>
-                        <Card className="shadow-sm border-0">
-                            <Card.Header as="h5" className="fw-bold">Rastreo de Paquetes</Card.Header>
+                        <Card className="auth-card border-0">
+                            <Card.Header as="h5" className="fw-bold bg-transparent border-bottom">
+                                <span className="text-dark">Rastreo de Paquetes</span>
+                            </Card.Header>
                             <Card.Body>
                                 {trackingError && <Alert variant="warning">{trackingError}</Alert>}
 
@@ -586,14 +587,14 @@ function Profile() {
                         </>
                     )}
                 </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShow2FAModal(false)} disabled={!!twoFASuccess}>
-                        Cancelar
-                    </Button>
-                    <Button variant="primary" onClick={handleVerify2FA} disabled={twoFactorToken.length < 6 || !!twoFASuccess}>
-                        Verificar y Activar
-                    </Button>
-                </Modal.Footer>
+                    <Modal.Footer className="border-0 bg-light rounded-bottom-4 p-3">
+                        <Button variant="secondary" className="rounded-3" onClick={() => setShow2FAModal(false)}>
+                            Cancelar
+                        </Button>
+                        <Button className="btn-custom-primary rounded-3" onClick={handleVerify2FA} disabled={!twoFactorToken || twoFactorToken.length < 6}>
+                            Verificar y Activar
+                        </Button>
+                    </Modal.Footer>
             </Modal>
         </div>
     );
