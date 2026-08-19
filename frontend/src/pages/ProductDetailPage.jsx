@@ -289,11 +289,7 @@ function ProductDetailPage() {
           <div className="mt-5 pt-4">
             <div className="d-flex flex-wrap gap-2 mb-4" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '1rem' }}>
                 {[
-                    { id: 'downloads', label: 'Descargas', icon: <BsFileEarmarkArrowDown className="me-2" /> },
                     { id: 'complementary', label: 'Equipos Complementarios', icon: <BsGrid className="me-2" /> },
-                    { id: 'articles', label: 'Artículos', icon: <BsFileText className="me-2" /> },
-                    { id: 'videos', label: 'Videos', icon: <BsPlayCircle className="me-2" /> },
-                    { id: 'marketing', label: 'Material de Marketing', icon: <BsMegaphone className="me-2" /> },
                 ].map(tab => (
                     <Button
                         key={tab.id}
