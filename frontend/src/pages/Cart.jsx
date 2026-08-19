@@ -16,14 +16,14 @@ function Cart() {
 
   if (isCartEmpty) {
     return (
-      <div className="cart-page-wrapper min-vh-100 pb-5">
+      <div className="bg-page-content min-vh-100 pb-5">
         <AppNavbar />
         <Container className="py-5 mt-5">
-          <Card className="border-0 shadow-lg p-5 text-center mx-auto fade-in-up" style={{ maxWidth: '600px' }}>
+          <Card className="auth-card p-5 text-center mx-auto fade-in-up border-0" style={{ maxWidth: '600px' }}>
             <h2 className="fw-bold mb-3 text-dark">Tu carrito está vacío</h2>
             <p className="text-secondary mb-4">Añade productos de TI o ciberseguridad para iniciar tu cotización.</p>
             <div className="d-flex flex-column flex-sm-row justify-content-center gap-3">
-              <Button className="btn-primary-gaza py-2.5 px-4" onClick={() => navigate('/catalog')}>
+              <Button className="btn-custom-primary py-2.5 px-4" onClick={() => navigate('/catalog')}>
                 Explorar Catálogo
               </Button>
               <Button variant="outline-secondary" className="py-2.5 px-4" onClick={() => navigate('/super-precio')}>
@@ -37,10 +37,10 @@ function Cart() {
   }
 
   return (
-    <div className="cart-page-wrapper pb-5">
+    <div className="bg-page-content pb-5 min-vh-100">
       <AppNavbar />
       
-      <div className="py-5 mb-5 shadow-sm fade-in-up" style={{ background: 'rgba(255, 255, 255, 0.45)', borderBottom: '1px solid rgba(207, 216, 220, 0.4)', backdropFilter: 'blur(10px)' }}>
+      <div className="py-5 mb-5 shadow-sm fade-in-up" style={{ background: 'var(--surface-0)', borderBottom: '1px solid var(--border-color)' }}>
         <Container>
           <div className="d-flex align-items-center justify-content-between">
             <div>
@@ -58,7 +58,7 @@ function Cart() {
         <Row className="g-5"> 
           <Col lg={8}>
             {/* LISTA DE PRODUCTOS */}
-            <Card className="border-0 shadow-sm mb-4">
+            <Card className="auth-card border-0 mb-4">
               <div className="p-0">
                 {cart.items.map((item) => (
                   <div key={item.product._id} className="p-4 border-bottom item-cart-row">
@@ -139,7 +139,7 @@ function Cart() {
           {/* COLUMNA DERECHA: RESUMEN TOTALIZADOR */}
           <Col lg={4}>
             <div className="sticky-summary-box">
-              <Card className="border-0 shadow-lg p-4">
+              <Card className="auth-card border-0 p-4">
                 <h3 className="fw-bold mb-4 h5 text-dark">Resumen de Orden</h3>
                 
                 <div className="d-flex justify-content-between mb-3 text-secondary small">
@@ -164,7 +164,7 @@ function Cart() {
                 <Button 
                   onClick={handleCheckout}
                   size="lg" 
-                  className="w-100 fw-bold py-3 rounded-3 mb-4 shadow-sm btn-primary-gaza"
+                  className="w-100 fw-bold py-3 rounded-3 mb-4 shadow-sm btn-custom-primary"
                   disabled={cart.items.length === 0}
                 >
                   <BsCreditCard className="me-2" /> CONTINUAR AL CHECKOUT

@@ -242,10 +242,10 @@ function Checkout() {
   if (orderSuccess) {
     const isStripePayment = selectedProvider === 'stripe';
     return (
-      <div className="checkout-main-wrapper pb-5">
+      <div className="bg-page-content min-vh-100 pb-5">
         <AppNavbar />
-        <Container className="py-5">
-          <div className="checkout-success-card fade-in-up">
+        <Container className="py-5 mt-5">
+          <div className="checkout-success-card auth-card border-0 fade-in-up">
             <BsCheckCircle className="status-icon-success" />
             <h2 className="fw-bold text-dark mb-3">
               {isStripePayment ? '¡Pago Confirmado y Pedido Registrado!' : '¡Pedido Registrado Exitosamente!'}
@@ -295,22 +295,35 @@ function Checkout() {
   }
 
   return (
-    <div className="checkout-main-wrapper pb-5">
+    <div className="bg-page-content pb-5 min-vh-100">
       <AppNavbar />
-      <Container className="py-4 mt-3 fade-in-up">
-        <div className="checkout-header-area">
-          <Button variant="link" onClick={() => navigate('/cart')} className="back-link">
-            <BsArrowLeft /> Volver al carrito
-          </Button>
-          <h2 className="checkout-title">Finalizar Compra</h2>
-        </div>
+      
+      <div className="checkout-header-area pt-5 pb-4 px-3" style={{ background: 'var(--surface-0)', borderBottom: '1px solid var(--border-color)' }}>
+        <Container>
+          <Link to="/cart" className="back-link">
+            <BsArrowLeft /> Volver al Carrito
+          </Link>
+          <h1 className="checkout-title mt-2 mb-0">Checkout</h1>
+        </Container>
+      </div>
 
-        {serverError && <Alert variant="danger" className="mb-4">{serverError}</Alert>}
+      <Container className="fade-in-up" style={{ animationDelay: '0.1s' }}>
+        {serverError && (
+          <Alert variant="danger" className="border-0 shadow-sm rounded-4 mb-4" onClose={() => setServerError('')} dismissible>
+            {serverError}
+          </Alert>
+        )}
 
-        <Row className="gx-5">
-          {/* Columna de Formularios */}
-          <Col lg={7} xl={8} className="checkout-forms-col">
-            <div className="form-section-container">
+        <Row className="g-5">
+          {/* Columna Izquierda */}
+          <Col lg={7}>
+            <Card className="auth-card border-0 mb-4 p-4 p-md-5">
+              <div className="d-flex align-items-center mb-4">
+                <div className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px' }}>
+                  1
+                </div>
+                <h3 className="fw-bold mb-0 text-dark h4">Dirección de Envío</h3>
+              </div>
               <AddressForm
                 address={address}
                 onChange={setAddress}
@@ -320,17 +333,16 @@ function Checkout() {
                 zipLookupSuccess={zipLookupSuccess}
                 autoCompleteOptions={autoCompleteOptions}
               />
-            </div>
+            </Card>
             
-            <Card className="border-0 shadow-sm mt-4">
-              <Card.Header>
-                <div className="d-flex align-items-center">
-                  <BsShieldCheck className="me-2 text-primary" size={20} />
-                  <h5 className="mb-0">Método de Pago Bancario</h5>
+            <Card className="auth-card border-0 p-4 p-md-5">
+              <div className="d-flex align-items-center mb-4">
+                <div className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px' }}>
+                  2
                 </div>
-              </Card.Header>
-              <Card.Body className="p-4">
-                {isLoadingPayment ? (
+                <h3 className="fw-bold mb-0 text-dark h4">Método de Pago</h3>
+              </div>
+              {isLoadingPayment ? (
                   <div className="text-center py-5">
                     <Spinner animation="border" variant="primary" />
                     <p className="mt-3 text-secondary">Cargando opciones bancarias...</p>
@@ -387,10 +399,11 @@ function Checkout() {
                             />
                           </Elements>
                         ) : (
-                          <Button
-                            className="w-100 py-3 fw-bold btn-primary-gaza"
+                          <Button 
+                            size="lg" 
+                            className="w-100 fw-bold py-3 mt-3 btn-custom-primary rounded-3"
                             onClick={handlePlaceOrder}
-                            disabled={isSubmittingOrder || !selectedProvider || cart.items.length === 0}
+                            disabled={cart.items.length === 0 || !isAddressValid() || !selectedProvider || isSubmittingOrder}
                           >
                             {isSubmittingOrder ? (
                               <>
@@ -409,15 +422,14 @@ function Checkout() {
                     )}
                   </>
                 )}
-              </Card.Body>
             </Card>
           </Col>
 
           {/* Columna de Resumen Lateral */}
-          <Col lg={5} xl={4} className="checkout-summary-col">
+          <Col lg={5}>
             <div className="sticky-summary-box">
-              <Card className="border-0 shadow-lg p-4">
-                <h5 className="summary-title text-dark">Resumen de Orden</h5>
+              <Card className="auth-card border-0 p-4 p-xl-5">
+                <h4 className="fw-bold mb-4 text-dark h5">Resumen del Pedido</h4>
                 
                 <div className="summary-row">
                   <span>Subtotal ({totalItems} productos)</span>
