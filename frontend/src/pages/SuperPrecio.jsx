@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Badge, Button, Col, Container, Form, InputGroup, Row, Spinner } from 'react-bootstrap';
-import { BsFire, BsSearch, BsStars, BsTag } from 'react-icons/bs';
+import { Badge, Button, Col, Container, Form, InputGroup, Row, Spinner, ButtonGroup } from 'react-bootstrap';
+import { BsFire, BsSearch, BsStars, BsTag, BsGrid3X3Gap, BsListUl } from 'react-icons/bs';
 import AppNavbar from '../components/AppNavbar';
 import ProductCard from '../components/ProductCard';
 import productService from '../services/productService';
@@ -81,6 +81,7 @@ function SuperPrecio() {
   const [brandFilter, setBrandFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [priceMax, setPriceMax] = useState('');
+  const [viewMode, setViewMode] = useState('grid');
 
   const pageSize = 30;
 
@@ -240,7 +241,11 @@ function SuperPrecio() {
             />
           </Col>
 
-          <Col lg={2}>
+          <Col lg={2} className="d-flex align-items-center justify-content-end gap-2">
+            <ButtonGroup>
+                <Button variant={viewMode === 'grid' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('grid')}><BsGrid3X3Gap /></Button>
+                <Button variant={viewMode === 'list' ? 'dark' : 'outline-dark'} onClick={() => setViewMode('list')}><BsListUl /></Button>
+            </ButtonGroup>
             <Button
               variant="outline-secondary"
               className="w-100"
@@ -262,10 +267,10 @@ function SuperPrecio() {
           </div>
         ) : (
           <>
-            <Row xs={1} md={2} lg={4} xl={5} className="g-4">
-              {visibleProducts.map((product) => (
-                <Col key={product._id}>
-                  <ProductCard product={product} />
+            <Row xs={1} md={2} lg={viewMode === 'grid' ? 3 : 2} xl={viewMode === 'grid' ? 4 : 2} className="g-4">
+              {visibleProducts.map((item) => (
+                <Col key={item._id}>
+                  <ProductCard product={item} viewMode={viewMode} />
                 </Col>
               ))}
             </Row>

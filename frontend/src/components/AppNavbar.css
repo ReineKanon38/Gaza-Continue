@@ -13,7 +13,9 @@
 
 /* ─── Fila 1: Top bar ─── */
 .navbar-top-bar {
-  background: linear-gradient(90deg, #0f172a 0%, #1e1b4b 60%, #4c1d95 100%);
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.85) 60%, rgba(76, 29, 149, 0.85) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(124, 58, 237, 0.35);
   height: 56px;
 }
@@ -63,24 +65,26 @@
 /* ─── Buscador central ─── */
 .navbar-search-form {
   flex: 1;
-  max-width: 520px;
+  max-width: 750px;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(124, 58, 237, 0.45);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
-  padding: 0.28rem 0.5rem 0.28rem 0.9rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 0;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .navbar-search-form:focus-within {
   border-color: #0ABFBF;
-  box-shadow: 0 0 0 3px rgba(10, 191, 191, 0.2);
+  box-shadow: 0 0 0 3px rgba(10, 191, 191, 0.25);
+  background: rgba(255, 255, 255, 0.15);
 }
 .navbar-search-icon {
-  color: #94a3b8;
-  font-size: 0.95rem;
+  color: #a78bfa;
+  font-size: 1rem;
   flex-shrink: 0;
-  margin-right: 0.45rem;
+  margin-right: 0.5rem;
+  margin-left: 0.8rem;
 }
 .navbar-search-input {
   flex: 1;
@@ -88,25 +92,64 @@
   outline: none;
   background: transparent;
   color: #f8fafc;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.5rem;
 }
 .navbar-search-input::placeholder {
-  color: #64748b;
+  color: #94a3b8;
+}
+.navbar-search-select {
+  border: none;
+  background: transparent;
+  color: #f8fafc;
+  outline: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0 0.5rem 0 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  height: 40px;
+}
+.navbar-search-select option {
+  background: #1e1b4b;
+  color: #fff;
+}
+.navbar-search-price {
+  display: flex;
+  align-items: center;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0 0.5rem;
+  height: 40px;
+}
+.navbar-search-price span {
+  color: #a78bfa;
+  font-weight: bold;
+}
+.navbar-search-price input {
+  width: 75px;
+  border: none;
+  background: transparent;
+  color: #f8fafc;
+  outline: none;
+  padding-left: 5px;
+  font-size: 0.9rem;
+}
+.navbar-search-price input::placeholder {
+  color: #94a3b8;
 }
 .navbar-search-btn {
   background: linear-gradient(135deg, #7C3AED, #0ABFBF);
   border: none;
   color: #fff;
-  font-size: 0.8rem;
-  font-weight: 700;
-  border-radius: 999px;
-  padding: 0.28rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0 1.2rem;
+  border-radius: 0 999px 999px 0;
+  height: 40px;
   cursor: pointer;
   transition: opacity 0.2s;
-  flex-shrink: 0;
 }
 .navbar-search-btn:hover {
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 /* ─── Íconos de acción ─── */
@@ -180,7 +223,9 @@
 
 /* ─── Fila 2: Nav bar ─── */
 .navbar-bottom-bar {
-  background: #1e1b4b;
+  background: rgba(30, 27, 75, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 2px solid rgba(10, 191, 191, 0.4);
   height: 44px;
   align-items: center;

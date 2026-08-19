@@ -4,7 +4,7 @@ import { BsCartPlusFill } from 'react-icons/bs';
 import { useCartHelpers } from '../hooks/useCartHooks';
 import { generateProductBenefits } from '../utils/productBenefits';
 
-function ProductCard({ product, matchMeta = null }) {
+function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
   const navigate = useNavigate();
   const { addToCart, isInCart, getItemQuantity } = useCartHelpers();
 
@@ -12,14 +12,17 @@ function ProductCard({ product, matchMeta = null }) {
     return null;
   }
 
-    const imagePlaceholder = {
-    height: '200px',
+  const isList = viewMode === 'list';
+
+  const imagePlaceholder = {
+    height: isList ? '100%' : '200px',
+    minHeight: isList ? '150px' : 'auto',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     color: '#ffffff',
-    fontSize: '2.5rem',
+    fontSize: isList ? '1.5rem' : '2.5rem',
     position: 'relative',
     overflow: 'hidden'
   };
@@ -37,13 +40,13 @@ function ProductCard({ product, matchMeta = null }) {
 
   return (
     <Card
-      className="product-card h-100 shadow-sm border-0 fade-in"
-      style={{ cursor: 'pointer' }}
+      className={`product-card h-100 auth-card border-0 fade-in ${isList ? 'd-flex flex-row' : ''}`}
+      style={{ cursor: 'pointer', overflow: 'hidden' }}
       onClick={() => navigate(`/product/${productSlug}`, { state: { product } })}
     >
-      <div className="product-card-media">
+      <div className={`product-card-media ${isList ? 'border-end' : ''}`} style={isList ? { width: '250px', flexShrink: 0 } : {}}>
         {imageUrl ? (
-        <div style={{ height: '200px', overflow: 'hidden' }}>
+        <div style={{ height: isList ? '100%' : '200px', minHeight: isList ? '150px' : 'auto', overflow: 'hidden' }}>
           <img
             src={imageUrl}
             alt={product.name}
@@ -51,7 +54,8 @@ function ProductCard({ product, matchMeta = null }) {
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover'
+              objectFit: 'contain',
+              background: '#fff'
             }}
           />
         </div>
@@ -73,109 +77,143 @@ function ProductCard({ product, matchMeta = null }) {
         </div>
       )}
       </div>
-      <Card.Body className="d-flex flex-column p-4">
-        <div className="d-flex gap-2 mb-2 flex-wrap">
-          {product.isSuperPrecio && <span className="badge text-bg-danger">Super Precio</span>}
-          {matchMeta?.isApprox && <span className="badge text-bg-info">Coincidencia aproximada</span>}
-          {hasLowStock && <span className="badge text-bg-warning">Ultimas piezas</span>}
-          {isOutOfStock && <span className="badge text-bg-secondary">Sin stock</span>}
-        </div>
-        <div className="product-title-wrapper">
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: '600' }}>
-            {product.modelo || product.syscomId ? `Modelo: ${product.modelo || product.syscomId}` : 'Código N/A'}
+      <Card.Body className={`d-flex flex-column ${isList ? 'p-4 flex-grow-1 justify-content-between' : 'p-4'}`}>
+        <div className={isList ? 'd-flex flex-column h-100' : ''}>
+          <div className="d-flex gap-2 mb-2 flex-wrap">
+            {product.isSuperPrecio && <span className="badge text-bg-danger">Super Precio</span>}
+            {matchMeta?.isApprox && <span className="badge text-bg-info">Coincidencia aproximada</span>}
+            {hasLowStock && <span className="badge text-bg-warning">Ultimas piezas</span>}
+            {isOutOfStock && <span className="badge text-bg-secondary">Sin stock</span>}
           </div>
-          <Card.Title className="mb-2 product-title" style={{ 
-              fontSize: '1.1rem', 
-              fontWeight: '600',
-              color: 'var(--text-primary)',
-              minHeight: '3rem',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              cursor: 'default'
-          }}>
-              {product.name}
-          </Card.Title>
-          <div className="product-title-hover-overlay">
-            <div className="product-hover-info">
-              <div className="d-flex justify-content-between align-items-start mb-3">
-                <span className={`badge ${isOutOfStock ? 'bg-secondary' : hasLowStock ? 'bg-warning text-dark' : 'bg-primary text-white'}`}>
-                  {isOutOfStock ? 'Sin stock' : 'Disponible'}
-                </span>
+          <div className="product-title-wrapper">
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: '600' }}>
+              {product.modelo || product.syscomId ? `Modelo: ${product.modelo || product.syscomId}` : 'Código N/A'}
+            </div>
+            <Card.Title className="mb-2 product-title" style={{ 
+                fontSize: '1.1rem', 
+                fontWeight: '600',
+                color: 'var(--text-primary)',
+                minHeight: isList ? 'auto' : '3rem',
+                display: '-webkit-box',
+                WebkitLineClamp: isList ? 1 : 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                cursor: 'default'
+            }}>
+                {product.name}
+            </Card.Title>
+            <div className="product-title-hover-overlay">
+              <div className="product-hover-info">
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <span className={`badge ${isOutOfStock ? 'bg-secondary' : hasLowStock ? 'bg-warning text-dark' : 'bg-primary text-white'}`}>
+                    {isOutOfStock ? 'Sin stock' : 'Disponible'}
+                  </span>
+                </div>
+                <h6 className="product-hover-title" style={{ color: 'var(--primary-light)' }}>{product.name}</h6>
+                {productCode && <p className="product-hover-meta" style={{ color: 'var(--primary-light)' }}>Código: {productCode}</p>}
+                {productBenefits.length > 0 ? (
+                  <ul className="product-hover-features mb-0">
+                    {productBenefits.map((benefit, index) => (
+                      <li key={index}>{benefit}</li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
-              <h6 className="product-hover-title" style={{ color: 'var(--primary-light)' }}>{product.name}</h6>
-              {productCode && <p className="product-hover-meta" style={{ color: 'var(--primary-light)' }}>Código: {productCode}</p>}
-              {productBenefits.length > 0 ? (
-                <ul className="product-hover-features mb-0">
-                  {productBenefits.map((benefit, index) => (
-                    <li key={index}>{benefit}</li>
-                  ))}
-                </ul>
-              ) : null}
+            </div>
+          </div>
+          
+          <Card.Text className="text-muted small mb-3">
+            <strong>Marca:</strong> {product.marca || product.distributor || 'No especificada'}
+          </Card.Text>
+
+          {isList && product.description && (
+              <Card.Text className="text-muted mb-2 product-card-description" style={{
+                  fontSize: '0.85rem',
+                  color: 'var(--text-secondary)',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+              }}>
+                  {product.description}
+              </Card.Text>
+          )}
+
+          <div className={`mt-auto ${isList ? 'd-flex align-items-end justify-content-between w-100' : ''}`}>
+            <div className="d-flex flex-column mb-3">
+              {hasPromoPrice ? (
+                <>
+                  <span className="text-muted text-decoration-line-through small" style={{ fontSize: '0.85rem' }}>
+                    ${safeListPrice.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                  <div className="d-flex align-items-baseline gap-2">
+                    <span className="h4 mb-0 fw-bold" style={{ color: 'var(--brand-primary)' }}>
+                      ${safePrice.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                    <span className="badge bg-danger rounded-pill">
+                      -{Math.round((1 - safePrice/safeListPrice) * 100)}%
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <span className="h4 mb-0 fw-bold" style={{ color: 'var(--brand-primary)' }}>
+                  ${safePrice.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              )}
+              
+              <div className="mt-2 text-muted small d-flex align-items-center">
+                <span className={`d-inline-block rounded-circle me-2 ${stock > 0 ? 'bg-success' : 'bg-secondary'}`} style={{ width: '8px', height: '8px' }}></span>
+                {stock > 0 ? `${stock} piezas disponibles` : 'Sin inventario'}
+              </div>
+            </div>
+
+            <div style={{ width: isList ? '200px' : '100%' }}>
+              {isInCart(product._id) ? (
+                <div className="d-flex align-items-center justify-content-between p-2 rounded-3" style={{ background: 'rgba(255,255,255,0.05)' }} onClick={(e) => e.stopPropagation()}>
+                  <Button 
+                    variant="outline-light"
+                    size="sm"
+                    className="rounded-circle d-flex align-items-center justify-content-center p-0"
+                    style={{ width: '28px', height: '28px' }}
+                    onClick={() => addToCart(product, -1)}
+                  >
+                    -
+                  </Button>
+                  <span className="fw-bold px-3 text-light">{getItemQuantity(product._id)}</span>
+                  <Button 
+                    variant="outline-light"
+                    size="sm"
+                    className="rounded-circle d-flex align-items-center justify-content-center p-0"
+                    style={{ width: '28px', height: '28px' }}
+                    onClick={() => addToCart(product, 1)}
+                    disabled={getItemQuantity(product._id) >= stock}
+                  >
+                    +
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  className="w-100 rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #7C3AED 0%, #0ABFBF 100%)', 
+                    border: 'none',
+                    fontWeight: '600',
+                    color: '#fff',
+                    padding: '0.6rem'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product, 1);
+                  }}
+                  disabled={isOutOfStock}
+                >
+                  <BsCartPlusFill />
+                  {isOutOfStock ? 'Agotado' : 'Agregar'}
+                </Button>
+              )}
             </div>
           </div>
         </div>
-        {product.description && (
-            <Card.Text className="text-muted mb-2 product-card-description" style={{
-                fontSize: '0.85rem',
-                color: 'var(--text-secondary)',
-                minHeight: '1.8rem',
-                display: '-webkit-box',
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-            }}>
-                {product.description}
-            </Card.Text>
-        )}
-        <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        {hasPromoPrice && (
-                            <div className="text-muted text-decoration-line-through small">
-                                ${safeListPrice.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN
-                            </div>
-                        )}
-                        <Card.Text className="mb-0" style={{ 
-                            fontSize: '1.5rem', 
-                            fontWeight: '700',
-                            color: 'var(--primary-color)'
-                        }}>
-                            {typeof product.price === 'number' 
-                                ? `$${product.price.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN` 
-                                : product.price}
-                        </Card.Text>
-                    </div>
-                    {product.stock !== undefined && (
-                        <span className={`badge ${hasLowStock ? 'bg-warning text-dark' : 'bg-secondary'}`} style={{ 
-                            fontSize: '0.75rem',
-                            padding: '0.25rem 0.5rem'
-                        }}>
-                            Stock: {product.stock}
-                        </span>
-                    )}
-        </div>
-        <Button 
-          onClick={(e) => {
-            e.stopPropagation();
-            addToCart(product, 1);
-          }}
-          className="btn-custom-primary w-100 d-flex align-items-center justify-content-center"
-          disabled={!product.active || isOutOfStock}
-          style={{ 
-              borderRadius: '0.5rem',
-              padding: '0.7rem 0.9rem',
-              fontSize: '0.95rem',
-              fontWeight: '600'
-          }}
-        >
-          <BsCartPlusFill className="me-2" style={{ fontSize: '0.9rem' }} />
-          {isOutOfStock
-              ? 'No disponible'
-              : isInCart(product._id)
-                  ? `En carrito (${getItemQuantity(product._id)})`
-                  : 'Agregar al Carrito'}
-        </Button>
       </Card.Body>
     </Card>
     );

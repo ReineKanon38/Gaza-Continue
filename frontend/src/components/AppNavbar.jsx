@@ -150,13 +150,12 @@ function AppNavbar() {
                     </Link>
 
                     {/* Buscador central (desktop) */}
-                    <div className="navbar-search-container position-relative d-none d-md-flex w-100" ref={searchRef} style={{ maxWidth: '750px', margin: '0 2rem' }}>
-                        <form className="navbar-search-form w-100" onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', padding: 0 }}>
+                    <div className="navbar-search-container position-relative d-none d-md-flex w-100" ref={searchRef} style={{ margin: '0 2rem' }}>
+                        <form className="navbar-search-form w-100" onSubmit={handleSearch}>
                             <select
                                 className="navbar-search-select d-none d-lg-block"
                                 value={brandFilter}
                                 onChange={(e) => setBrandFilter(e.target.value)}
-                                style={{ width: '135px', border: 'none', background: 'transparent', padding: '0 10px 0 15px', color: 'var(--text-primary)', outline: 'none', borderRight: '1px solid var(--border-color)', height: '100%', cursor: 'pointer', fontSize: '0.9rem' }}
                             >
                                 <option value="">Todas las Marcas</option>
                                 <option value="HIKVISION">HIKVISION</option>
@@ -169,32 +168,28 @@ function AppNavbar() {
                                 <option value="SYSCOM">SYSCOM</option>
                             </select>
 
-                            <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center', height: '100%' }}>
-                                <BsSearch className="navbar-search-icon" style={{ position: 'absolute', left: '15px' }} />
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value);
-                                        if(e.target.value.trim().length > 0) setShowSuggestions(true);
-                                    }}
-                                    onFocus={() => {
-                                        if(suggestions.length > 0) setShowSuggestions(true);
-                                    }}
-                                    placeholder="Buscar producto, marca o ID..."
-                                    className="navbar-search-input w-100"
-                                    style={{ paddingLeft: '40px', border: 'none', height: '100%', background: 'transparent' }}
-                                />
-                            </div>
+                            <BsSearch className="navbar-search-icon" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    if(e.target.value.trim().length > 0) setShowSuggestions(true);
+                                }}
+                                onFocus={() => {
+                                    if(suggestions.length > 0) setShowSuggestions(true);
+                                }}
+                                placeholder="Buscar producto, marca o ID..."
+                                className="navbar-search-input"
+                            />
 
-                            <div className="d-none d-lg-flex" style={{ alignItems: 'center', borderLeft: '1px solid var(--border-color)', padding: '0 10px', height: '100%' }}>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>$</span>
+                            <div className="navbar-search-price d-none d-lg-flex">
+                                <span>$</span>
                                 <input
                                     type="number"
-                                    placeholder="Máximo"
+                                    placeholder="Máx"
                                     value={maxPriceFilter}
                                     onChange={(e) => setMaxPriceFilter(e.target.value)}
-                                    style={{ width: '80px', border: 'none', background: 'transparent', outline: 'none', paddingLeft: '5px', color: 'var(--text-primary)', fontSize: '0.9rem' }}
                                 />
                             </div>
 
