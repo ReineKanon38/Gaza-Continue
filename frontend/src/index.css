@@ -6,47 +6,6 @@
    completo del proyecto.
 */
 
-/* Tarjetas de Autenticación Premium */
-.auth-card {
-  background: var(--surface-0) !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 20px !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.auth-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
-}
-
-[data-theme="dark"] .auth-card {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-}
-
-[data-theme="dark"] .auth-card:hover {
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
-}
-
-.auth-title {
-  color: var(--text-primary);
-  font-weight: 800;
-  letter-spacing: -0.5px;
-}
-
-.auth-link {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.auth-link:hover {
-  color: var(--primary-hover);
-  text-decoration: underline;
-}
 
 /* Importar la fuente de Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
@@ -498,3 +457,44 @@
   animation: fadeInUp 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Tarjetas de Autenticación Premium */
+.auth-card {
+  background: var(--surface-0) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 20px !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="dark"] .auth-card {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .auth-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+}
+
+.auth-title {
+  color: var(--text-primary);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.auth-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.auth-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
