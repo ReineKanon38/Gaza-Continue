@@ -65,7 +65,8 @@ export const createPaymentSession = async (req, res) => {
     if (items && Array.isArray(items) && items.length > 0) {
       const mongoose = (await import('mongoose')).default;
       for (const item of items) {
-        let id = item.productId || item._id || item.product;
+        // item.product could be a populated object, so we extract _id if it exists
+        let id = item.productId || (item.product && item.product._id) || item.product || item._id;
         const qty = item.quantity || 1;
         
         // Handle virtual syscom products by syncing them on-the-fly
