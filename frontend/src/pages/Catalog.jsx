@@ -333,39 +333,43 @@ function Catalog() {
                     <div className="text-center py-5"><Spinner animation="border" variant="info" /></div>
                 ) : (
                     <>
-                        {syscomCategoryFilter && getCurrentCategoryInfo() && (
-                            <div
-                                className="category-header-sleek mb-4"
-                                style={{
-                                    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(2, 132, 199, 0.05) 100%)',
-                                    border: '1px solid rgba(14, 165, 233, 0.2)',
-                                    borderRadius: '1rem',
-                                    padding: '2rem 2.5rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    backdropFilter: 'blur(10px)',
-                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
-                                }}
-                            >
-                                <div>
-                                    <Badge bg="primary" className="mb-2 px-3 py-2 rounded-pill fw-semibold" style={{ letterSpacing: '0.5px' }}>
-                                        CATEGORÍA SELECCIONADA
-                                    </Badge>
-                                    <h2 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-0.5px', fontSize: '2rem' }}>
-                                        {getCurrentCategoryInfo().name}
-                                    </h2>
+                        {syscomCategoryFilter && getCurrentCategoryInfo() && (() => {
+                            const categoryName = getCurrentCategoryInfo().name;
+                            const CatIcon = getCategoryIcon(categoryName);
+                            return (
+                                <div
+                                    className="category-header-sleek mb-4"
+                                    style={{
+                                        background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(2, 132, 199, 0.05) 100%)',
+                                        border: '1px solid rgba(14, 165, 233, 0.2)',
+                                        borderRadius: '1rem',
+                                        padding: '2rem 2.5rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        backdropFilter: 'blur(10px)',
+                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                                    }}
+                                >
+                                    <div className="d-flex align-items-center gap-4">
+                                        <div className="d-none d-md-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm" style={{ width: '80px', height: '80px', color: '#0ea5e9' }}>
+                                            <CatIcon size={40} />
+                                        </div>
+                                        <div>
+                                            <Badge bg="primary" className="mb-2 px-3 py-2 rounded-pill fw-semibold" style={{ letterSpacing: '0.5px' }}>
+                                                CATEGORÍA SELECCIONADA
+                                            </Badge>
+                                            <h2 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-0.5px', fontSize: '2rem' }}>
+                                                {categoryName}
+                                            </h2>
+                                        </div>
+                                    </div>
+                                    <div className="d-none d-lg-block opacity-10" style={{ transform: 'scale(2.5)', marginRight: '2rem', color: '#0284c7' }}>
+                                        <CatIcon size={64} />
+                                    </div>
                                 </div>
-                                <div className="d-none d-md-block opacity-25">
-                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="3" y="3" width="7" height="7"></rect>
-                                        <rect x="14" y="3" width="7" height="7"></rect>
-                                        <rect x="14" y="14" width="7" height="7"></rect>
-                                        <rect x="3" y="14" width="7" height="7"></rect>
-                                    </svg>
-                                </div>
-                            </div>
-                        )}
+                            );
+                        })()}
 
                         {/* ── CATEGORÍAS DESTACADAS (ARRIBA) ── */}
                         {showHomeSections && categories.length > 0 && (
