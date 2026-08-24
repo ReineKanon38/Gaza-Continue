@@ -1,170 +1,88 @@
 /* ==================================================
-   SUPER PRECIO - ESTILOS PREMIUM GAZA TECH
+   SUPER PRECIO - ESTILOS PREMIUM GAZA TECH (REDISEÑO)
    ================================================== */
 
 .super-page-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at 10% 20%, rgba(2, 6, 23, 0.05) 0%, rgba(243, 248, 255, 0.95) 90%) !important;
+  background: #f8fafc; /* Color de fondo muy sutil y limpio */
   position: relative;
-  overflow: hidden;
   z-index: 1;
 }
 
-.super-page-shell::before {
-  content: "";
-  position: absolute;
-  top: -15%;
-  left: -5%;
-  width: 45%;
-  height: 45%;
-  background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: -1;
+/* Sidebar Estilos */
+.super-sidebar {
+  border-color: #e2e8f0 !important;
 }
 
-.super-page-shell::after {
-  content: "";
-  position: absolute;
-  bottom: -15%;
-  right: -5%;
-  width: 50%;
-  height: 50%;
-  background: radial-gradient(circle, rgba(21, 101, 192, 0.08) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: -1;
+.super-sidebar h5 {
+  color: #0f172a;
 }
 
-.super-hero {
-  background:
-    radial-gradient(circle at 85% 10%, rgba(0, 212, 255, 0.15), transparent 45%),
-    linear-gradient(135deg, #020617 0%, #1e3a8a 100%);
-  padding: 3rem 0;
-  border-bottom: 2px solid #00d4ff;
-  box-shadow: 0 10px 25px rgba(2, 6, 23, 0.2);
-  margin-bottom: 2rem;
+.super-sidebar hr {
+  border-color: #cbd5e1;
+  opacity: 0.5;
 }
 
-.super-hero-content {
-  color: #f1f5f9;
+.super-sidebar .btn-link {
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
 }
 
-.super-tag {
-  background: rgba(0, 212, 255, 0.25) !important;
-  color: #00d4ff !important;
-  border: 1px solid rgba(0, 212, 255, 0.4);
-  margin-bottom: 1rem;
-  padding: 0.4rem 0.8rem !important;
-  font-weight: 700 !important;
+.super-sidebar .btn-link:hover {
+  background-color: #f1f5f9;
+  color: #0f172a !important;
 }
 
-.super-hero h1 {
-  margin: 0;
-  font-weight: 800;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
-  color: #ffffff;
-  letter-spacing: -1px;
+.super-sidebar .form-control,
+.super-sidebar .form-select {
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
 }
 
-.super-hero p {
-  max-width: 800px;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  color: #94a3b8;
-  font-size: 1.05rem;
-  line-height: 1.6;
+.super-sidebar .form-control:focus,
+.super-sidebar .form-select:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.15);
+  background-color: #ffffff;
 }
 
-.super-kpis {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  margin-top: 1.2rem;
+/* Topbar Estilos */
+.super-topbar {
+  border-color: #e2e8f0 !important;
 }
 
-.super-kpis span {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  padding: 0.35rem 0.95rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #e2e8f0;
+.super-topbar .input-group-text {
+  font-size: 1.1rem;
 }
 
-/* Filtros y Buscador */
-.super-filters {
-  background: rgba(255, 255, 255, 0.75) !important;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
-  border-radius: 1.25rem !important;
-  padding: 1.25rem !important;
-  box-shadow: 0 15px 30px rgba(15, 25, 41, 0.05) !important;
-  margin-bottom: 2.5rem;
-  transition: all 0.3s ease;
-}
-
-.super-filters .form-control,
-.super-filters .form-select {
-  background: rgba(255, 255, 255, 0.65) !important;
-  border: 1px solid rgba(207, 216, 220, 0.8) !important;
-  border-radius: 0.75rem !important;
-  padding: 0.65rem 0.85rem !important;
-  transition: all 0.25s ease;
-}
-
-.super-filters .form-control:focus,
-.super-filters .form-select:focus {
-  background: #ffffff !important;
-  border-color: var(--primary-blue) !important;
-  box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.12) !important;
-  transform: scale(1.005);
-}
-
-.super-filters .input-group-text {
-  background: rgba(255, 255, 255, 0.65) !important;
-  border: 1px solid rgba(207, 216, 220, 0.8) !important;
-  border-right: none !important;
-  border-radius: 0.75rem 0 0 0.75rem !important;
-  color: var(--text-secondary);
-}
-
-.super-filters .input-group .form-control {
-  border-left: none !important;
-  border-radius: 0 0.75rem 0.75rem 0 !important;
+.super-topbar .form-control:focus {
+  box-shadow: none !important;
 }
 
 /* Estado Vacío */
 .super-empty {
-  border: 1px dashed rgba(21, 101, 192, 0.3) !important;
-  border-radius: 1.25rem;
-  padding: 3rem 1.5rem;
-  text-align: center;
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(12px);
+  border: 2px dashed #cbd5e1;
+  border-radius: 1rem;
+  padding: 4rem 2rem;
+  background-color: #ffffff;
 }
 
-/* Botón Cargar Más */
-.load-more-btn {
-  background: linear-gradient(135deg, #1565c0 0%, #00bcd4 100%) !important;
-  border: none !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  border-radius: 0.75rem !important;
-  padding: 0.8rem 2rem !important;
-  box-shadow: 0 4px 15px rgba(21, 101, 192, 0.25) !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* Scrollbar para el Sidebar si es muy largo */
+.super-sidebar {
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
 }
 
-.load-more-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(21, 101, 192, 0.35) !important;
-  filter: brightness(1.08);
+.super-sidebar::-webkit-scrollbar {
+  width: 6px;
 }
 
-@media (max-width: 991px) {
-  .super-hero {
-    padding: 2.2rem 0;
-  }
+.super-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.super-sidebar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
 }
