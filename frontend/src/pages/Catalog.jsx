@@ -335,19 +335,34 @@ function Catalog() {
                     <>
                         {syscomCategoryFilter && getCurrentCategoryInfo() && (
                             <div
-                                className="premium-page-header"
+                                className="category-header-sleek mb-4"
                                 style={{
-                                    backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.75))',
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                    backgroundRepeat: 'no-repeat',
-                                    minHeight: '250px',
-                                    transition: 'all 0.3s ease'
+                                    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(2, 132, 199, 0.05) 100%)',
+                                    border: '1px solid rgba(14, 165, 233, 0.2)',
+                                    borderRadius: '1rem',
+                                    padding: '2rem 2.5rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    backdropFilter: 'blur(10px)',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
                                 }}
                             >
                                 <div>
-                                    <Badge className="badge-premium-tag">PRODUCTOS PREMIUM</Badge>
-                                    <h2 style={{ color: '#00d4ff', textShadow: '0 0 20px rgba(0, 212, 255, 0.5)' }}>{getCurrentCategoryInfo().name}</h2>
+                                    <Badge bg="primary" className="mb-2 px-3 py-2 rounded-pill fw-semibold" style={{ letterSpacing: '0.5px' }}>
+                                        CATEGORÍA SELECCIONADA
+                                    </Badge>
+                                    <h2 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-0.5px', fontSize: '2rem' }}>
+                                        {getCurrentCategoryInfo().name}
+                                    </h2>
+                                </div>
+                                <div className="d-none d-md-block opacity-25">
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>
                                 </div>
                             </div>
                         )}
