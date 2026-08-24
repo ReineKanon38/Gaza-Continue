@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // --- 1. IMPORTAR EL GUARDIÁN ---
 import ProtectedRoute from './components/ProtectedRoute';
 
+import PageLoader from './components/PageLoader';
+
 const Index = lazy(() => import('./pages/Index'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
@@ -20,7 +22,7 @@ const OrderTracking = lazy(() => import('./pages/OrderTracking'));
 
 function App() {
   return (
-    <Suspense fallback={<div className="text-center mt-5">Cargando...</div>}>
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* --- Rutas Públicas --- */}
       {/* Cualquiera puede ver estas */}

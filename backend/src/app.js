@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -25,6 +26,7 @@ const app = express();
 
 app.set('trust proxy', 1);
 app.use(helmet());
+app.use(compression());
 app.use(cors(corsOptions));
 
 // Stripe Webhook needs raw body, must be before express.json()

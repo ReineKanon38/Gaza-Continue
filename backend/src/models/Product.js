@@ -62,4 +62,7 @@ productSchema.index({ active: 1, brand: 1, createdAt: -1 });
 productSchema.index({ active: 1, name: 1 });
 productSchema.index({ active: 1, description: 1 });
 
+// 3. Índice de texto para búsquedas full-text
+productSchema.index({ name: 'text', description: 'text', brand: 'text' }, { weights: { name: 10, brand: 5, description: 1 } });
+
 export default mongoose.model("Product", productSchema);

@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button } from 'react-bootstrap';
 import { BsCartPlusFill } from 'react-icons/bs';
@@ -219,4 +220,12 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
     );
 }
 
-export default ProductCard;
+const areEqual = (prevProps, nextProps) => {
+  return (
+    prevProps.product?._id === nextProps.product?._id &&
+    prevProps.viewMode === nextProps.viewMode &&
+    prevProps.matchMeta?.isApprox === nextProps.matchMeta?.isApprox
+  );
+};
+
+export default React.memo(ProductCard, areEqual);

@@ -14,8 +14,8 @@ import { logger } from '../utils/logger.js';
 class SyscomService {
   constructor() {
     this.responseCache = new Map();
-    // TTL para productos y búsquedas (5 minutos por defecto)
-    this.productCacheTtlMs = Number(process.env.SYSCOM_PRODUCT_CACHE_TTL_MS || 300000);
+    // TTL para productos y búsquedas (15 minutos por defecto)
+    this.productCacheTtlMs = Number(process.env.SYSCOM_PRODUCT_CACHE_TTL_MS || 900000);
     // TTL para metadatos estáticos (24 horas por defecto)
     this.metadataCacheTtlMs = Number(process.env.SYSCOM_METADATA_CACHE_TTL_MS || 86400000);
     // Compatibilidad retrospectiva
