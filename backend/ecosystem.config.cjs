@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'syscom-gaza-backend',
-      script: './index.js',
+      script: './server.js',
       instances: 1, // En AWS Free Tier (1 vCPU) usamos 1 instancia
       exec_mode: 'cluster',
       env_production: {

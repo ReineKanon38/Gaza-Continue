@@ -1,3 +1,4 @@
+import "./src/utils/dns-fix.js";
 import dotenv from "dotenv";
 dotenv.config();
 
