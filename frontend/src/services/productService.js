@@ -189,8 +189,10 @@ export const OFFICIAL_PLATFORM_CATEGORIES = [
   { id: 'redes-it', name: 'Redes e IT' },
   { id: 'control-acceso', name: 'Control de Acceso' },
   { id: 'energia-herramientas', name: 'Energía y Herramientas' },
-  { id: 'automatizacion', name: 'Automatización' },
-  { id: 'iot-gps', name: 'IoT / GPS' }
+  { id: 'automatizacion', name: 'Automatización e Intrusión' },
+  { id: 'iot-gps', name: 'IoT / GPS / Telemetría' },
+  { id: 'deteccion-fuego', name: 'Detección de Fuego' },
+  { id: 'radiocomunicacion', name: 'Radiocomunicación' }
 ];
 
 export const getSyscomCategories = async () => {

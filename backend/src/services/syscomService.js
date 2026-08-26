@@ -1006,16 +1006,9 @@ class SyscomService {
         const limitNum = parseInt(params?.limit || params?.limite) || 30;
         const skip = (pageNum - 1) * limitNum;
 
-        const BLOCKED_REGEX = /(radio|walkie|handy|radiocom|fuego|humo|incendio|estacion manual|estación manual|estacion de jalon|estación de jalón)/i;
-        const mongoFilter = {
-          active: true,
-          name: { $not: BLOCKED_REGEX },
-          description: { $not: /(fuego|incendio|humo)/i }
-        };
+        const mongoFilter = { active: true };
         if (categoryStr) {
           mongoFilter.category = categoryStr;
-        } else {
-          mongoFilter.category = { $nin: ['deteccion-fuego', 'radiocomunicacion', 'general'] };
         }
         if (brandStr) {
           mongoFilter.brand = new RegExp(`^${brandStr}$`, 'i');

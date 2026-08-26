@@ -5,7 +5,7 @@ import AppNavbar from '../components/AppNavbar';
 import ProductCard from '../components/ProductCard';
 import PromoModal from '../components/PromoModal';
 import { BsGrid3X3Gap, BsSearch, BsCurrencyDollar, BsListUl } from 'react-icons/bs';
-import { FiActivity, FiBarChart2, FiCamera, FiCpu, FiGrid, FiLock, FiMic, FiShield, FiTool, FiZap } from 'react-icons/fi';
+import { FiActivity, FiBarChart2, FiCamera, FiCpu, FiGrid, FiLock, FiMic, FiShield, FiTool, FiZap, FiRadio, FiAlertCircle } from 'react-icons/fi';
 import productService from '../services/productService';
 import './Catalog.css';
 
@@ -24,6 +24,8 @@ const getCategoryIcon = (categoryName) => {
     if (/(energia|herramient|fuente|ups|bateria)/.test(normalized)) return FiZap;
     if (/(automatiz|intrusion|sensor|alarma)/.test(normalized)) return FiShield;
     if (/(acceso|biometri|cerradura)/.test(normalized)) return FiLock;
+    if (/(fuego|incendio|humo)/.test(normalized)) return FiAlertCircle;
+    if (/(radio|walkie|handy)/.test(normalized)) return FiRadio;
     if (/(marketing|publicidad|anuncio)/.test(normalized)) return FiBarChart2;
     if (/(cableado|infraestructura|fibra|conector)/.test(normalized)) return FiTool;
     if (/(audio|video profesional|microfono|bocina)/.test(normalized)) return FiMic;

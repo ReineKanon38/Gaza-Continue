@@ -6,38 +6,24 @@
 
 export const PLATFORM_CATEGORIES = {
   VIDEOVIGILANCIA: 'videovigilancia',
+  REDES_IT: 'redes-it',
   CONTROL_ACCESO: 'control-acceso',
   ENERGIA_HERRAMIENTAS: 'energia-herramientas',
-  DETECCION_FUEGO: 'deteccion-fuego',
   AUTOMATIZACION: 'automatizacion',
-  RADIOCOMUNICACION: 'radiocomunicacion',
-  REDES_IT: 'redes-it',
-  IOT_GPS: 'iot-gps'
+  IOT_GPS: 'iot-gps',
+  DETECCION_FUEGO: 'deteccion-fuego',
+  RADIOCOMUNICACION: 'radiocomunicacion'
 };
 
-// Categorias descartadas temporalmente por negocio/proveedor.
-export const BLOCKED_PLATFORM_CATEGORIES = new Set([
-  PLATFORM_CATEGORIES.DETECCION_FUEGO,
-  PLATFORM_CATEGORIES.RADIOCOMUNICACION
-]);
+// Todas las 8 categorías están completamente activadas
+export const BLOCKED_PLATFORM_CATEGORIES = new Set([]);
 
 export function isBlockedPlatformCategory(categorySlug) {
-  return BLOCKED_PLATFORM_CATEGORIES.has(categorySlug);
+  return false;
 }
 
 export function isBlockedSyscomCategoryName(syscomCategory = '') {
-  const value = String(syscomCategory || '').toLowerCase();
-  if (!value) return false;
-
-  return (
-    value.includes('radio') ||
-    value.includes('walkie') ||
-    value.includes('handy') ||
-    value.includes('radiocom') ||
-    value.includes('fuego') ||
-    value.includes('humo') ||
-    value.includes('incendio')
-  );
+  return false;
 }
 
 /**
