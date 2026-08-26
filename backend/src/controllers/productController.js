@@ -35,31 +35,66 @@ export const getAllProducts = async (req, res) => {
       name: { $not: BLOCKED_REGEX },
       description: { $not: /(fuego|incendio|humo)/i }
     };
-    
-    // Si hay búsqueda, buscar por nombre, descripción, syscomId, categoría o marca
-    if (search) {
-      const searchRegex = new RegExp(String(search).trim(), 'i');
-      filter.$or = [
-        { name: searchRegex },
-        { description: searchRegex },
-        { syscomId: searchRegex },
-        { category: searchRegex },
-        { brand: searchRegex }
-      ];
+
+    // Mapeo flexible de categorías en lenguaje natural
+    const categoryMap = {
+      'videovigilancia': /(videovigilancia|cctv|camara|grabador|dvr|nvr)/i,
+      'redes-it': /(redes|network|it|switch|router|access point|rack|fibra|utp)/i,
+      'control-acceso': /(control.*acceso|acceso|biometrico|cerradura|chapa|torniquete)/i,
+      'energia-herramientas': /(energia|herramienta|fuente|ups|no.*break|bateria|generador|regulador)/i,
+      'automatizacion': /(automatizacion|intrusion|alarma|sensor|sirena|domotica)/i,
+      'iot-gps': /(iot|gps|telemat|tracker|rastreador)/i
+    };
+
+    const andConditions = [];
+
+    // Si hay categoría, buscar por slug o por coincidencia en lenguaje natural
+    if (category) {
+      const cleanCat = String(category).trim().toLowerCase();
+      const catRegex = categoryMap[cleanCat] || new RegExp(cleanCat.replace(/-/g, '[ -]?'), 'i');
+      andConditions.push({
+        $or: [
+          { category: catRegex },
+          { name: catRegex },
+          { description: catRegex }
+        ]
+      });
     }
-    
+
+    // Si hay búsqueda, tokenizar palabras para búsqueda flexible (ej. "camaras ip wifi")
+    if (search) {
+      const searchTokens = String(search)
+        .trim()
+        .split(/\s+/)
+        .map(t => t.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, ''))
+        .filter(t => t.length > 1);
+
+      if (searchTokens.length > 0) {
+        for (const token of searchTokens) {
+          const r = new RegExp(token, 'i');
+          andConditions.push({
+            $or: [
+              { name: r },
+              { description: r },
+              { syscomId: r },
+              { category: r },
+              { brand: r },
+              { model: r }
+            ]
+          });
+        }
+      }
+    }
+
     // Filtrar por marca si se especifica
     if (brand) {
-      filter.brand = new RegExp(String(brand).trim(), 'i');
+      andConditions.push({ brand: new RegExp(String(brand).trim(), 'i') });
     }
-    
-    // Si hay categoría, filtrar por categoría; si no, excluir categorías bloqueadas
-    if (category) {
-      filter.category = category;
-    } else {
-      filter.category = { $nin: ['deteccion-fuego', 'radiocomunicacion', 'general'] };
+
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
     }
-    
+
     // Filtrar por productos activos (por defecto)
     if (active !== 'false') {
       filter.active = active === 'true' || active === true;

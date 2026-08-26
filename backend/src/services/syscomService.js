@@ -556,30 +556,65 @@ class SyscomService {
         const limitNum = parseInt(searchParams?.limit || searchParams?.limite) || 20;
         const skip = (pageNum - 1) * limitNum;
 
+        const categoryMap = {
+          'videovigilancia': /(videovigilancia|cctv|camara|grabador|dvr|nvr)/i,
+          'redes-it': /(redes|network|it|switch|router|access point|rack|fibra|utp)/i,
+          'control-acceso': /(control.*acceso|acceso|biometrico|cerradura|chapa|torniquete)/i,
+          'energia-herramientas': /(energia|herramienta|fuente|ups|no.*break|bateria|generador|regulador)/i,
+          'automatizacion': /(automatizacion|intrusion|alarma|sensor|sirena|domotica)/i,
+          'iot-gps': /(iot|gps|telemat|tracker|rastreador)/i
+        };
+
         const BLOCKED_REGEX = /(radio|walkie|handy|radiocom|fuego|humo|incendio|estacion manual|estación manual|estacion de jalon|estación de jalón)/i;
         const mongoFilter = {
           active: true,
           name: { $not: BLOCKED_REGEX },
           description: { $not: /(fuego|incendio|humo)/i }
         };
+
+        const andConditions = [];
+
         if (categoryStr) {
-          mongoFilter.category = categoryStr;
-        } else {
-          mongoFilter.category = { $nin: ['deteccion-fuego', 'radiocomunicacion', 'general'] };
+          const cleanCat = categoryStr.toLowerCase();
+          const catRegex = categoryMap[cleanCat] || new RegExp(cleanCat.replace(/-/g, '[ -]?'), 'i');
+          andConditions.push({
+            $or: [
+              { category: catRegex },
+              { name: catRegex },
+              { description: catRegex }
+            ]
+          });
         }
 
         if (queryStr) {
-          const searchRegex = new RegExp(queryStr, 'i');
-          mongoFilter.$or = [
-            { name: searchRegex },
-            { description: searchRegex },
-            { syscomId: searchRegex },
-            { category: searchRegex },
-            { brand: searchRegex }
-          ];
+          const searchTokens = queryStr
+            .split(/\s+/)
+            .map(t => t.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, ''))
+            .filter(t => t.length > 1);
+
+          if (searchTokens.length > 0) {
+            for (const token of searchTokens) {
+              const r = new RegExp(token, 'i');
+              andConditions.push({
+                $or: [
+                  { name: r },
+                  { description: r },
+                  { syscomId: r },
+                  { category: r },
+                  { brand: r },
+                  { model: r }
+                ]
+              });
+            }
+          }
         }
+
         if (brandStr) {
-          mongoFilter.brand = new RegExp(`^${brandStr}$`, 'i');
+          andConditions.push({ brand: new RegExp(brandStr, 'i') });
+        }
+
+        if (andConditions.length > 0) {
+          mongoFilter.$and = andConditions;
         }
 
         const [totalCount, dbProducts] = await Promise.all([
