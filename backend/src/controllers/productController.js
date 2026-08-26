@@ -29,8 +29,12 @@ export const getAllProducts = async (req, res) => {
       limit = 20
     } = req.query;
     
-    // Construir el filtro para el catálogo
-    const filter = {};
+    // Construir el filtro para el catálogo (excluyendo fuego y radiocomunicación)
+    const BLOCKED_REGEX = /(radio|walkie|handy|radiocom|fuego|humo|incendio|estacion manual|estación manual|estacion de jalon|estación de jalón)/i;
+    const filter = {
+      name: { $not: BLOCKED_REGEX },
+      description: { $not: /(fuego|incendio|humo)/i }
+    };
     
     // Si hay búsqueda, buscar por nombre, descripción, syscomId, categoría o marca
     if (search) {
@@ -49,9 +53,11 @@ export const getAllProducts = async (req, res) => {
       filter.brand = new RegExp(String(brand).trim(), 'i');
     }
     
-    // Si hay categoría, filtrar por categoría
+    // Si hay categoría, filtrar por categoría; si no, excluir categorías bloqueadas
     if (category) {
       filter.category = category;
+    } else {
+      filter.category = { $nin: ['deteccion-fuego', 'radiocomunicacion', 'general'] };
     }
     
     // Filtrar por productos activos (por defecto)

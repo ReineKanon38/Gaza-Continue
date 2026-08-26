@@ -15,15 +15,19 @@ export const PLATFORM_CATEGORIES = {
   RADIOCOMUNICACION: 'radiocomunicacion'
 };
 
-// Todas las 8 categorías están completamente activadas
-export const BLOCKED_PLATFORM_CATEGORIES = new Set([]);
+// Categorias descartadas permanentemente de base
+export const BLOCKED_PLATFORM_CATEGORIES = new Set([
+  PLATFORM_CATEGORIES.DETECCION_FUEGO,
+  PLATFORM_CATEGORIES.RADIOCOMUNICACION
+]);
 
 export function isBlockedPlatformCategory(categorySlug) {
-  return false;
+  return BLOCKED_PLATFORM_CATEGORIES.has(categorySlug);
 }
 
 export function isBlockedSyscomCategoryName(syscomCategory = '') {
-  return false;
+  const val = String(syscomCategory || '').toLowerCase();
+  return val.includes('fuego') || val.includes('humo') || val.includes('incendio') || val.includes('radio') || val.includes('walkie') || val.includes('handy') || val.includes('radiocom');
 }
 
 /**

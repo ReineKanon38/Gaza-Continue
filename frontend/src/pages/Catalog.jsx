@@ -378,34 +378,7 @@ function Catalog() {
                             );
                         })()}
 
-                        {/* ── CATEGORÍAS DESTACADAS (ARRIBA) ── */}
-                        {showHomeSections && categories.length > 0 && (
-                            <div className="home-sections-wrapper mb-4">
-                                <section className="home-section">
-                                    <div className="home-section-header">
-                                        <span className="home-section-tag cats-tag">📂 CATEGORÍAS DESTACADAS</span>
-                                    </div>
-                                    <div className="home-cats-grid">
-                                        {categories.slice(0, 12).map((cat) => {
-                                            const CatIcon = getCategoryIcon(cat.name);
-                                            return (
-                                                <button
-                                                    key={cat.id}
-                                                    className="home-cat-card"
-                                                    onClick={() => handleCategoryChange(cat.id)}
-                                                >
-                                                    <div className="home-cat-icon-wrap">
-                                                        <CatIcon />
-                                                    </div>
-                                                    <span className="home-cat-name">{cat.name}</span>
-                                                    <span className="home-cat-arrow">→</span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </section>
-                            </div>
-                        )}
+
 
                         <Row className="mb-3 g-2 align-items-center filter-row-custom shadow-sm p-2 mx-0" style={{ background: 'var(--surface-0)', borderRadius: '12px' }}>
                             <Col className="d-flex align-items-center gap-2">
@@ -573,6 +546,30 @@ function Catalog() {
                                     </div>
                                 </section>
 
+                                {/* ── EXPLORAR POR CATEGORÍAS (ABAJO) ── */}
+                                <section className="home-section mt-4">
+                                    <div className="home-section-header">
+                                        <span className="home-section-tag cats-tag">📂 EXPLORAR POR CATEGORÍAS</span>
+                                    </div>
+                                    <div className="home-cats-grid">
+                                        {categories.map((cat) => {
+                                            const CatIcon = getCategoryIcon(cat.name);
+                                            return (
+                                                <button
+                                                    key={cat.id}
+                                                    className="home-cat-card"
+                                                    onClick={() => handleCategoryChange(cat.id)}
+                                                >
+                                                    <div className="home-cat-icon-wrap">
+                                                        <CatIcon />
+                                                    </div>
+                                                    <span className="home-cat-name">{cat.name}</span>
+                                                    <span className="home-cat-arrow">→</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </section>
 
                             </div>
                         )}

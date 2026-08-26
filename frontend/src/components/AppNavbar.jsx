@@ -23,7 +23,6 @@ function AppNavbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [brandFilter, setBrandFilter] = useState(searchParams.get('brand') || '');
-    const [maxPriceFilter, setMaxPriceFilter] = useState(searchParams.get('maxPrice') || '');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const megaMenuRef = useRef(null);
@@ -70,7 +69,6 @@ function AppNavbar() {
     useEffect(() => {
         setSearchTerm(searchParams.get('search') || '');
         setBrandFilter(searchParams.get('brand') || '');
-        setMaxPriceFilter(searchParams.get('maxPrice') || '');
     }, [searchParams]);
 
     /* ── Close mega-menu on outside click ── */
@@ -104,8 +102,7 @@ function AppNavbar() {
         if (brandFilter) params.set('brand', brandFilter);
         else params.delete('brand');
         
-        if (maxPriceFilter) params.set('maxPrice', maxPriceFilter);
-        else params.delete('maxPrice');
+        params.delete('maxPrice');
         
         navigate(`/tienda?${params.toString()}`);
         setShowSuggestions(false);
@@ -185,16 +182,6 @@ function AppNavbar() {
                                 placeholder="Buscar producto, marca o ID..."
                                 className="navbar-search-input"
                             />
-
-                            <div className="navbar-search-price d-none d-lg-flex">
-                                <span>$</span>
-                                <input
-                                    type="number"
-                                    placeholder="Máx"
-                                    value={maxPriceFilter}
-                                    onChange={(e) => setMaxPriceFilter(e.target.value)}
-                                />
-                            </div>
 
                             <button type="submit" className="navbar-search-btn">Buscar</button>
                         </form>
