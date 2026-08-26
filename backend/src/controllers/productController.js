@@ -23,6 +23,7 @@ export const getAllProducts = async (req, res) => {
     const { 
       category, 
       search, 
+      brand,
       active = true,
       page = 1,
       limit = 20
@@ -42,8 +43,14 @@ export const getAllProducts = async (req, res) => {
         { name: searchRegex },
         { description: searchRegex },
         { syscomId: searchRegex },
-        { category: searchRegex }
+        { category: searchRegex },
+        { brand: searchRegex }
       ];
+    }
+    
+    // Filtrar por marca si se especifica
+    if (brand) {
+      filter.brand = new RegExp(String(brand).trim(), 'i');
     }
     
     // Si hay categoría, filtrar por categoría; si no, excluir categorías bloqueadas

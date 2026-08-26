@@ -47,11 +47,19 @@ function AppNavbar() {
     const leftCats = visibleCategories.slice(0, halfLen);
     const rightCats = visibleCategories.slice(halfLen);
 
+    const [availableBrands, setAvailableBrands] = useState([]);
+
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await productService.getSyscomCategories();
-                setCategories(res.categories || []);
+                const [catRes, brandList] = await Promise.all([
+                    productService.getSyscomCategories(),
+                    productService.getBrands()
+                ]);
+                setCategories(catRes.categories || []);
+                if (Array.isArray(brandList) && brandList.length > 0) {
+                    setAvailableBrands(brandList);
+                }
             } catch {
                 setCategories([]);
             }
@@ -158,14 +166,9 @@ function AppNavbar() {
                                 onChange={(e) => setBrandFilter(e.target.value)}
                             >
                                 <option value="">Todas las Marcas</option>
-                                <option value="HIKVISION">HIKVISION</option>
-                                <option value="DAHUA">DAHUA</option>
-                                <option value="EPCOM">EPCOM</option>
-                                <option value="UBIQUITI">UBIQUITI</option>
-                                <option value="TP-LINK">TP-LINK</option>
-                                <option value="SAXXON">SAXXON</option>
-                                <option value="ZKTECO">ZKTECO</option>
-                                <option value="SYSCOM">SYSCOM</option>
+                                {availableBrands.map((b) => (
+                                    <option key={b} value={b}>{b}</option>
+                                ))}
                             </select>
 
                             <BsSearch className="navbar-search-icon" />

@@ -227,6 +227,7 @@ function Catalog() {
                             page: currentPage,
                             limit: productsPerPage,
                             category: syscomCategoryFilter || undefined,
+                            brand: brandFilter || undefined,
                             search: urlSearchTerm || undefined
                         });
                         if (localRes.products && localRes.products.length > 0) {
@@ -268,7 +269,7 @@ function Catalog() {
             }
         };
         loadProducts();
-    }, [syscomCategoryFilter, currentPage, urlSearchTerm]);
+    }, [syscomCategoryFilter, currentPage, urlSearchTerm, brandFilter]);
 
     const searchRankedProducts = useMemo(() => {
         const normalizedTerm = normalizeText(urlSearchTerm);

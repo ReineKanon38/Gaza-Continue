@@ -76,6 +76,7 @@ export const getAllProducts = async (params = {}) => {
   if (params.page) queryParams.append('page', params.page);
   if (params.limit) queryParams.append('limit', params.limit);
   if (params.category) queryParams.append('category', params.category);
+  if (params.brand) queryParams.append('brand', params.brand);
   if (params.search) queryParams.append('search', params.search);
   if (params.active !== undefined) queryParams.append('active', params.active);
   
@@ -260,11 +261,28 @@ export const deleteProduct = async (productId) => {
   });
 };
 
+export const getBrands = async () => {
+  try {
+    const data = await cachedRequestJson('/api/syscom/brands');
+    const raw = data?.data || data?.brands || [];
+    if (Array.isArray(raw) && raw.length > 0) {
+      return raw.map(b => (typeof b === 'string' ? b : b.nombre || b.name || b.id)).filter(Boolean);
+    }
+  } catch (err) {
+    console.warn('Error fetching brands:', err);
+  }
+  return [
+    'HIKVISION', 'DAHUA', 'EPCOM', 'UBIQUITI', 'TP-LINK', 'SAXXON', 'ZKTECO',
+    'SYSCOM', 'HONEYWELL', 'ECOFLOW', 'ACCESSPRO', 'ROSSLARE', 'M2M SERVICES', 'WESTERN DIGITAL', 'SEAGATE'
+  ];
+};
+
 export default {
   getAllProducts,
   getProductById,
   getSuperPrecioProducts,
   getSyscomCategories,
+  getBrands,
   searchSyscomProducts,
   createProduct,
   updateProduct,
