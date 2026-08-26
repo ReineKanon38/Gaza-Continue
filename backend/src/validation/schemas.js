@@ -48,12 +48,15 @@ export const shippingAddressSchema = z.object({
 
 export const createProductSchema = z.object({
   name: z.string().min(1, 'Nombre requerido'),
-  price: z.number().nonnegative('Precio debe ser >= 0'),
+  price: z.coerce.number().min(0, 'Precio debe ser >= 0'),
   description: z.string().optional(),
   category: z.string().optional(),
-  image: z.string().url('Debe ser URL válida').optional(),
-  stock: z.number().int().nonnegative().optional(),
-  syscomId: z.string().optional()
+  brand: z.string().optional(),
+  model: z.string().optional(),
+  image: z.string().optional(),
+  stock: z.coerce.number().int().min(0).optional(),
+  syscomId: z.string().optional(),
+  active: z.boolean().optional()
 });
 
 export const createOrderSchema = z.object({
