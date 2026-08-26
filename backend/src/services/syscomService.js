@@ -556,7 +556,18 @@ class SyscomService {
         const limitNum = parseInt(searchParams?.limit || searchParams?.limite) || 20;
         const skip = (pageNum - 1) * limitNum;
 
-        const mongoFilter = { active: true };
+        const BLOCKED_REGEX = /(radio|walkie|handy|radiocom|fuego|humo|incendio|estacion manual|estación manual|estacion de jalon|estación de jalón)/i;
+        const mongoFilter = {
+          active: true,
+          name: { $not: BLOCKED_REGEX },
+          description: { $not: /(fuego|incendio|humo)/i }
+        };
+        if (categoryStr) {
+          mongoFilter.category = categoryStr;
+        } else {
+          mongoFilter.category = { $nin: ['deteccion-fuego', 'radiocomunicacion', 'general'] };
+        }
+
         if (queryStr) {
           const searchRegex = new RegExp(queryStr, 'i');
           mongoFilter.$or = [
@@ -569,9 +580,6 @@ class SyscomService {
         }
         if (brandStr) {
           mongoFilter.brand = new RegExp(`^${brandStr}$`, 'i');
-        }
-        if (categoryStr) {
-          mongoFilter.category = categoryStr;
         }
 
         const [totalCount, dbProducts] = await Promise.all([
@@ -988,6 +996,70 @@ class SyscomService {
           source: 'stale-cache',
           warning: 'Mostrando resultados previos por fallo temporal de SYSCOM'
         };
+      }
+
+      // FALLBACK AUTOMÁTICO A MONGODB PARA SUPER PRECIO
+      try {
+        const brandStr = String(params?.brand || '').trim();
+        const categoryStr = String(params?.category || '').trim();
+        const pageNum = parseInt(params?.page || params?.pagina) || 1;
+        const limitNum = parseInt(params?.limit || params?.limite) || 30;
+        const skip = (pageNum - 1) * limitNum;
+
+        const BLOCKED_REGEX = /(radio|walkie|handy|radiocom|fuego|humo|incendio|estacion manual|estación manual|estacion de jalon|estación de jalón)/i;
+        const mongoFilter = {
+          active: true,
+          name: { $not: BLOCKED_REGEX },
+          description: { $not: /(fuego|incendio|humo)/i }
+        };
+        if (categoryStr) {
+          mongoFilter.category = categoryStr;
+        } else {
+          mongoFilter.category = { $nin: ['deteccion-fuego', 'radiocomunicacion', 'general'] };
+        }
+        if (brandStr) {
+          mongoFilter.brand = new RegExp(`^${brandStr}$`, 'i');
+        }
+
+        const [totalCount, dbProducts] = await Promise.all([
+          Product.countDocuments(mongoFilter),
+          Product.find(mongoFilter)
+            .sort({ stock: -1, createdAt: -1 })
+            .skip(skip)
+            .limit(limitNum)
+            .lean()
+        ]);
+
+        if (dbProducts && dbProducts.length > 0) {
+          const transformed = dbProducts.map((p) => {
+            const prod = this.transformSyscomProduct(p);
+            const regularPrice = prod.price || 100;
+            const listPrice = Math.round(regularPrice * 1.25);
+            return {
+              ...prod,
+              price: regularPrice,
+              listPrice: prod.listPrice > regularPrice ? prod.listPrice : listPrice,
+              precio_descuento_mxn: regularPrice,
+              precio_lista_mxn: prod.listPrice > regularPrice ? prod.listPrice : listPrice,
+              isSuperPrecio: true
+            };
+          });
+
+          return {
+            success: true,
+            data: transformed,
+            total: totalCount,
+            page: pageNum,
+            pagination: {
+              pagina_actual: pageNum,
+              paginas: Math.ceil(totalCount / limitNum),
+              total_registros: totalCount
+            },
+            source: 'database'
+          };
+        }
+      } catch (dbErr) {
+        logger.error('Error en fallback a base de datos de Super Precio', { error: dbErr.message });
       }
 
       this.trackMetric('superPrecio', {
