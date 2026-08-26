@@ -12,26 +12,6 @@ import { useAuth } from '../context/AuthContext';
 import productService from '../services/productService';
 import './AppNavbar.css';
 
-function AppNavbar() {
-    const navigate = useNavigate();
-    const { totalItems } = useCartHelpers();
-    const { user, logout, isAdmin } = useAuth();
-    const [searchParams] = useSearchParams();
-    const [categories, setCategories] = useState([]);
-    const [menuQuery, setMenuQuery] = useState('');
-    const [megaMenuOpen, setMegaMenuOpen] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-    const [brandFilter, setBrandFilter] = useState(searchParams.get('brand') || '');
-    const [suggestions, setSuggestions] = useState([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const megaMenuRef = useRef(null);
-    const searchRef = useRef(null);
-    const currentCategory = searchParams.get('syscomCategory');
-
-    /* ── Logo destination ── */
-    const logoTo = !user ? '/' : isAdmin() ? '/admin' : '/catalog';
-
 export const CATEGORY_TREE = [
   {
     id: 'videovigilancia',
@@ -106,6 +86,26 @@ export const CATEGORY_TREE = [
     ]
   }
 ];
+
+function AppNavbar() {
+    const navigate = useNavigate();
+    const { totalItems } = useCartHelpers();
+    const { user, logout, isAdmin } = useAuth();
+    const [searchParams] = useSearchParams();
+    const [categories, setCategories] = useState([]);
+    const [menuQuery, setMenuQuery] = useState('');
+    const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+    const [brandFilter, setBrandFilter] = useState(searchParams.get('brand') || '');
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const megaMenuRef = useRef(null);
+    const searchRef = useRef(null);
+    const currentCategory = searchParams.get('syscomCategory');
+
+    /* ── Logo destination ── */
+    const logoTo = !user ? '/' : isAdmin() ? '/admin' : '/catalog';
 
     /* ── Filtered Categories with Subdivisions ── */
     const filteredCategoryTree = useMemo(() => {
