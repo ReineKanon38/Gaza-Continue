@@ -328,34 +328,41 @@ class SyscomService {
    * Transformar producto de SYSCOM a nuestro schema
    */
   transformSyscomProduct(syscomProduct = {}) {
-    // Mapeo inteligente de precios (en USD de SYSCOM)
-    const priceUSD = this.extractPriceUSD(syscomProduct);
+    // Si ya viene de MongoDB con precio en MXN (> 0)
+    const existingPrice = Number(syscomProduct.price ?? syscomProduct.precio_mxn ?? syscomProduct.listPrice ?? 0);
+    const existingListPrice = Number(syscomProduct.listPrice ?? syscomProduct.precio_lista_mxn ?? existingPrice);
 
-    // Convertir precio de USD a MXN
-    const priceMXN = convertUSDtoMXN(priceUSD);
+    let priceMXN = existingPrice;
+    let listPriceMXN = existingListPrice;
+
+    if (priceMXN <= 0) {
+      // Mapeo inteligente de precios (en USD de SYSCOM)
+      const priceUSD = this.extractPriceUSD(syscomProduct);
+      priceMXN = convertUSDtoMXN(priceUSD);
+      listPriceMXN = priceMXN;
+    }
 
     // Obtener categoría(s) de SYSCOM
     const syscomCategoryName = this.getPrimarySyscomCategoryName(syscomProduct);
+    const platformCategory = (syscomProduct.category && !syscomCategoryName)
+      ? syscomProduct.category
+      : (mapSyscomCategoryToPlatform(syscomCategoryName) || syscomProduct.category || 'videovigilancia');
 
-    // Mapear a categoría de la plataforma
-    const platformCategory = mapSyscomCategoryToPlatform(syscomCategoryName);
-
-    const parsedStock = parseInt(syscomProduct.existencia?.nuevo) || parseInt(syscomProduct.existencia) || parseInt(syscomProduct.stock) || 10;
-    const productId = String(syscomProduct.producto_id || syscomProduct.id || syscomProduct.syscomId || '');
+    const parsedStock = parseInt(syscomProduct.stock ?? syscomProduct.existencia?.nuevo ?? syscomProduct.existencia ?? 10) || 5;
+    const productId = String(syscomProduct.syscomId || syscomProduct.producto_id || syscomProduct.id || '');
 
     const productToReturn = {
       syscomId: productId,
-      name: syscomProduct.titulo || syscomProduct.nombre || syscomProduct.name || 'Producto SYSCOM',
-      price: priceMXN > 0 ? priceMXN : 0,
-      listPrice: priceMXN > 0 ? priceMXN : 0,
-      description: syscomProduct.descripcion || syscomProduct.titulo || '',
-      category: platformCategory || 'videovigilancia',
-      brand: syscomProduct.marca || syscomProduct.brand || '',
-      model: syscomProduct.modelo || syscomProduct.model || '',
-      image: syscomProduct.img_portada || syscomProduct.imagen || syscomProduct.image || '',
+      name: syscomProduct.name || syscomProduct.titulo || syscomProduct.nombre || 'Producto SYSCOM',
+      price: priceMXN > 0 ? priceMXN : 100,
+      listPrice: listPriceMXN > 0 ? listPriceMXN : (priceMXN > 0 ? priceMXN : 100),
+      description: syscomProduct.description || syscomProduct.descripcion || syscomProduct.titulo || '',
+      category: platformCategory,
+      brand: syscomProduct.brand || syscomProduct.marca || syscomProduct.distributor || 'SYSCOM',
+      model: syscomProduct.model || syscomProduct.modelo || productId,
+      image: syscomProduct.image || syscomProduct.img_portada || syscomProduct.imagen || '',
       stock: parsedStock > 0 ? parsedStock : 5,
-      distributor: syscomProduct.marca || syscomProduct.brand || syscomProduct.fabricante || '',
-      syscomId: productId,
+      distributor: syscomProduct.brand || syscomProduct.marca || syscomProduct.distributor || syscomProduct.fabricante || '',
       active: true
     };
     
@@ -1111,11 +1118,21 @@ class SyscomService {
       try {
         const dbCategories = await Product.distinct('category', { active: true });
         if (dbCategories && dbCategories.length > 0) {
-          sourceCategories = dbCategories.map(cat => ({
-            id: cat,
-            nombre: String(cat).charAt(0).toUpperCase() + String(cat).slice(1),
-            name: cat
-          }));
+          const categoryLabels = {
+            'videovigilancia': 'Videovigilancia',
+            'control-acceso': 'Control de Acceso',
+            'energia-herramientas': 'Energía y Herramientas',
+            'automatizacion': 'Automatización',
+            'redes-it': 'Redes e IT',
+            'iot-gps': 'IoT / GPS'
+          };
+          sourceCategories = dbCategories
+            .filter(cat => cat && !isBlockedPlatformCategory(cat) && !isBlockedSyscomCategoryName(cat))
+            .map(cat => ({
+              id: cat,
+              nombre: categoryLabels[cat] || (String(cat).charAt(0).toUpperCase() + String(cat).slice(1)),
+              name: categoryLabels[cat] || cat
+            }));
         }
       } catch (catErr) {
         logger.warn('Error obteniendo categorías desde MongoDB:', { message: catErr.message });
