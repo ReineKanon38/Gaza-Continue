@@ -28,19 +28,21 @@ const LineChart = ({ data, title, height = 200, width = 400 }) => {
 
     // Configuración del gráfico
     const padding = 40;
-    const chartWidth = width - (padding * 2);
-    const chartHeight = height - (padding * 2);
+    const chartWidth = Math.max(10, width - (padding * 2));
+    const chartHeight = Math.max(10, height - (padding * 2));
 
     // Calcular valores mínimos y máximos
-    const maxValue = Math.max(...data.map(item => item.value));
-    const minValue = Math.min(...data.map(item => item.value));
-    const valueRange = maxValue - minValue || 1;
+    const maxValue = Math.max(...data.map(item => item.value || 0));
+    const minValue = Math.min(...data.map(item => item.value || 0));
+    const valueRange = maxValue === minValue ? 1 : (maxValue - minValue || 1);
+    const divisor = data.length > 1 ? data.length - 1 : 1;
 
     // Calcular puntos de la línea
     const points = data.map((item, index) => {
-        const x = padding + (index / (data.length - 1)) * chartWidth;
-        const y = padding + chartHeight - ((item.value - minValue) / valueRange) * chartHeight;
-        return { x, y, ...item };
+        const val = Number(item.value || 0);
+        const x = data.length === 1 ? padding + chartWidth / 2 : padding + (index / divisor) * chartWidth;
+        const y = padding + chartHeight - ((val - minValue) / valueRange) * chartHeight;
+        return { x: Number.isFinite(x) ? x : padding, y: Number.isFinite(y) ? y : padding, ...item };
     });
 
     // Crear path de la línea
@@ -50,7 +52,8 @@ const LineChart = ({ data, title, height = 200, width = 400 }) => {
     }, '');
 
     // Crear path del área bajo la línea
-    const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding + chartHeight} L ${padding} ${padding + chartHeight} Z`;
+    const lastPointX = points[points.length - 1]?.x ?? padding;
+    const areaPath = `${linePath} L ${lastPointX} ${padding + chartHeight} L ${padding} ${padding + chartHeight} Z`;
 
     // Líneas de la cuadrícula
     const gridLines = [];
