@@ -217,12 +217,13 @@ function Catalog() {
 
                 let rawList = res.products || [];
 
-                // Fallback a productos locales si SYSCOM no devuelve elementos en búsqueda general
-                if (!rawList.length && !syscomCategoryFilter) {
+                // Fallback a base de datos si SYSCOM no devuelve elementos o falla
+                if (!rawList.length) {
                     try {
                         const localRes = await productService.getAllProducts({
                             page: currentPage,
                             limit: productsPerPage,
+                            category: syscomCategoryFilter || undefined,
                             search: urlSearchTerm || undefined
                         });
                         if (localRes.products && localRes.products.length > 0) {

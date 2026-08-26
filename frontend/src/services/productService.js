@@ -83,12 +83,18 @@ export const getAllProducts = async (params = {}) => {
   const url = queryString ? `/api/products?${queryString}` : '/api/products';
   
   const data = await cachedRequestJson(url);
-  // Normaliza respuesta {success, data, count, pagination}
+  const payloadData = data?.data;
+  const rawProducts = Array.isArray(payloadData?.data)
+    ? payloadData.data
+    : (Array.isArray(payloadData)
+      ? payloadData
+      : (Array.isArray(data?.products) ? data.products : []));
+
   return {
-    products: data.data || data.products || [],
-    count: data.count ?? (data.data ? data.data.length : 0),
-    total: data.total || data.count || 0,
-    pagination: data.pagination || null
+    products: rawProducts,
+    count: payloadData?.count ?? rawProducts.length,
+    total: payloadData?.total ?? data?.total ?? rawProducts.length,
+    pagination: payloadData?.pagination || data?.pagination || null
   };
 };
 

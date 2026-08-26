@@ -540,6 +540,61 @@ class SyscomService {
         };
       }
 
+      // FALLBACK AUTOMÁTICO A MONGODB (2,389+ productos en base de datos)
+      try {
+        const queryStr = String(searchParams?.query || '').trim();
+        const brandStr = String(searchParams?.brand || '').trim();
+        const categoryStr = String(searchParams?.category || '').trim();
+        const pageNum = parseInt(searchParams?.page || searchParams?.pagina) || 1;
+        const limitNum = parseInt(searchParams?.limit || searchParams?.limite) || 20;
+        const skip = (pageNum - 1) * limitNum;
+
+        const mongoFilter = { active: true };
+        if (queryStr) {
+          const searchRegex = new RegExp(queryStr, 'i');
+          mongoFilter.$or = [
+            { name: searchRegex },
+            { description: searchRegex },
+            { syscomId: searchRegex },
+            { category: searchRegex },
+            { brand: searchRegex }
+          ];
+        }
+        if (brandStr) {
+          mongoFilter.brand = new RegExp(`^${brandStr}$`, 'i');
+        }
+        if (categoryStr) {
+          mongoFilter.category = categoryStr;
+        }
+
+        const [totalCount, dbProducts] = await Promise.all([
+          Product.countDocuments(mongoFilter),
+          Product.find(mongoFilter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNum)
+            .lean()
+        ]);
+
+        if (dbProducts && dbProducts.length > 0) {
+          const transformed = dbProducts.map((p) => this.transformSyscomProduct(p));
+          return {
+            success: true,
+            data: transformed,
+            total: totalCount,
+            page: pageNum,
+            pagination: {
+              pagina_actual: pageNum,
+              paginas: Math.ceil(totalCount / limitNum),
+              total_registros: totalCount
+            },
+            source: 'database'
+          };
+        }
+      } catch (dbErr) {
+        logger.error('Error en fallback a base de datos de SYSCOM search', { error: dbErr.message });
+      }
+
       this.trackMetric('search', {
         success: false,
         source: 'syscom',
@@ -1049,27 +1104,41 @@ class SyscomService {
     }
 
     const result = await syscomClient.getCategories();
-    const sourceCategories = Array.isArray(result?.data) ? result.data : [];
+    let sourceCategories = Array.isArray(result?.data) ? result.data : [];
+    
+    // Si la API falla, obtener categorías desde la base de datos
+    if (!result?.success || sourceCategories.length === 0) {
+      try {
+        const dbCategories = await Product.distinct('category', { active: true });
+        if (dbCategories && dbCategories.length > 0) {
+          sourceCategories = dbCategories.map(cat => ({
+            id: cat,
+            nombre: String(cat).charAt(0).toUpperCase() + String(cat).slice(1),
+            name: cat
+          }));
+        }
+      } catch (catErr) {
+        logger.warn('Error obteniendo categorías desde MongoDB:', { message: catErr.message });
+      }
+    }
+
     const filteredCategories = sourceCategories.filter((categoryItem) => {
       const categoryName = categoryItem?.nombre || categoryItem?.name || categoryItem;
       return !isBlockedSyscomCategoryName(categoryName);
     });
 
     const response = {
-      ...result,
-      data: Array.isArray(result?.data) ? filteredCategories : result?.data,
-      source: 'syscom'
+      success: true,
+      data: filteredCategories,
+      source: result?.success ? 'syscom' : 'database'
     };
 
-    if (response.success) {
-      this.setCachedValue(cacheKey, response);
-    }
+    this.setCachedValue(cacheKey, response);
 
     this.trackMetric('categories', {
-      success: !!response.success,
-      source: 'syscom',
-      latencyMs: Date.now() - startTime,
-      error: response.error
+      success: true,
+      source: response.source,
+      latencyMs: Date.now() - startTime
     });
 
     return response;
@@ -1109,20 +1178,35 @@ class SyscomService {
     }
 
     const result = await syscomClient.getBrands();
-    const response = {
-      ...result,
-      source: 'syscom'
-    };
+    let sourceBrands = Array.isArray(result?.data) ? result.data : [];
 
-    if (response.success) {
-      this.setCachedValue(cacheKey, response);
+    if (!result?.success || sourceBrands.length === 0) {
+      try {
+        const dbBrands = await Product.distinct('brand', { active: true });
+        if (dbBrands && dbBrands.length > 0) {
+          sourceBrands = dbBrands.filter(Boolean).map(b => ({
+            id: b,
+            nombre: b,
+            name: b
+          }));
+        }
+      } catch (brandErr) {
+        logger.warn('Error obteniendo marcas desde MongoDB:', { message: brandErr.message });
+      }
     }
 
+    const response = {
+      success: true,
+      data: sourceBrands,
+      source: result?.success ? 'syscom' : 'database'
+    };
+
+    this.setCachedValue(cacheKey, response);
+
     this.trackMetric('brands', {
-      success: !!response.success,
-      source: 'syscom',
-      latencyMs: Date.now() - startTime,
-      error: response.error
+      success: true,
+      source: response.source,
+      latencyMs: Date.now() - startTime
     });
 
     return response;
