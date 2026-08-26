@@ -4,7 +4,11 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:5174',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
-  'http://127.0.0.1:5174'
+  'http://127.0.0.1:5174',
+  'https://syscomgaza.com',
+  'https://www.syscomgaza.com',
+  'http://syscomgaza.com',
+  'http://www.syscomgaza.com'
 ];
 
 const configuredOrigins = (process.env.CORS_ORIGIN || '')
@@ -27,6 +31,12 @@ export const corsOptions = {
     }
 
     if (allowAnyOrigin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    // Permitir cualquier variante de syscomgaza.com
+    if (/^https?:\/\/([a-zA-Z0-9-]+\.)*syscomgaza\.com(:\d+)?$/.test(origin)) {
       callback(null, true);
       return;
     }
