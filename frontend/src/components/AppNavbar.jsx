@@ -17,72 +17,207 @@ export const CATEGORY_TREE = [
     id: 'videovigilancia',
     name: 'Videovigilancia',
     icon: '📹',
-    subcategories: [
-      { name: 'Cámaras IP & Wi-Fi', query: 'camara ip' },
-      { name: 'Domos & Cámaras Bala', query: 'domo bala' },
-      { name: 'Cámaras PTZ & TurboHD', query: 'ptz' },
-      { name: 'Grabadores DVR / NVR', query: 'dvr nvr' },
-      { name: 'Baluns & Transceptores', query: 'transceptor' }
+    sections: [
+      {
+        title: 'Cámaras IP',
+        items: ['Cámaras IP Bala', 'Cámaras IP Domo', 'Cámaras IP PTZ', 'Cámaras Panorámicas 360°', 'Cámaras Térmicas']
+      },
+      {
+        title: 'Cámaras TurboHD',
+        items: ['Domo TurboHD', 'Bala TurboHD', 'PTZ TurboHD', 'Cámaras ColorVu / Full Color', 'Lentes y Accesorios']
+      },
+      {
+        title: 'Grabadores DVR / NVR',
+        items: ['NVR 4 a 64 Canales', 'DVR TurboHD AcuSense', 'Servidores de Almacenamiento', 'Discos Duros Purple', 'Switches PoE para Cámaras']
+      },
+      {
+        title: 'Accesorios y Video Móvil',
+        items: ['Baluns y Transceptores', 'Fuentes para Cámaras', 'Gabinete para Grabador', 'Body Cams', 'Monitores de Seguridad']
+      }
     ]
   },
   {
     id: 'redes-it',
-    name: 'Redes e IT',
+    name: 'Redes y Telecomunicaciones',
     icon: '🌐',
-    subcategories: [
-      { name: 'Switches PoE & Gestionables', query: 'switch poe' },
-      { name: 'Routers & Gateways', query: 'router' },
-      { name: 'Access Points Wi-Fi 6', query: 'access point' },
-      { name: 'Racks, Gabinetes & Patch Panels', query: 'rack gabinete' },
-      { name: 'Fibra Óptica & Bobinas UTP', query: 'fibra bobina' }
+    sections: [
+      {
+        title: 'Switches y Routing',
+        items: ['Switches PoE y PoE+', 'Switches Administrables L2/L3', 'Routers y Gateways', 'Balanceadores de Carga', 'Módulos SFP Fibra']
+      },
+      {
+        title: 'Conectividad Wi-Fi',
+        items: ['Access Points Wi-Fi 6', 'Antenas Sectoriales', 'Enlaces Punto a Punto PTP', 'Enlaces Punto Multipunto', 'Controladores Wi-Fi']
+      },
+      {
+        title: 'Racks y Gabinetes',
+        items: ['Racks de Pared y Piso', 'Gabinetes de Comunicación', 'Organizadores de Cable', 'Bandejas y PDU', 'Patch Panels Cat6/6A']
+      },
+      {
+        title: 'Fibra y Medios',
+        items: ['Convertidores de Medios', 'Cables Patch Cord Fibra', 'Cajas de Distribución Óptica', 'Transceivers Ópticos', 'Herramientas de Fusión']
+      }
     ]
   },
   {
     id: 'control-acceso',
     name: 'Control de Acceso',
     icon: '🔐',
-    subcategories: [
-      { name: 'Chapas & Cerraduras Magnéticas', query: 'chapa magnetica' },
-      { name: 'Contrachapas Eléctricas', query: 'contrachapa' },
-      { name: 'Biométricos & Reconocimiento Facial', query: 'biometrico' },
-      { name: 'Torniquetes & Barreras', query: 'torniquete' },
-      { name: 'Tarjetas RFID & Botones de Salida', query: 'tarjeta rfid' }
+    sections: [
+      {
+        title: 'Cerraduras y Chapas',
+        items: ['Chapas Magnéticas 600/1200 lbs', 'Contrachapas Eléctricas', 'Cerraduras Autónomas', 'Soportes ZL y L', 'Cierra Puertas Hidráulicos']
+      },
+      {
+        title: 'Lectores y Biometría',
+        items: ['Terminales Reconocimiento Facial', 'Lectores de Huella Digital', 'Lectores de Tarjetas RFID / NFC', 'Lectores QR Dinámico', 'Teclados con Lector']
+      },
+      {
+        title: 'Torniquetes y Barreras',
+        items: ['Torniquetes de Acceso', 'Barreras Vehiculares Rápidas', 'Brazos para Barrera', 'Detectores de Masa / Loop', 'Llaveros y Tags Vehiculares']
+      },
+      {
+        title: 'Accesorios y Software',
+        items: ['Tarjetas RFID 125kHz / Mifare', 'Botones de Salida Sin Contacto', 'Controladores de Acceso 2/4 Puertas', 'Fuentes con Respaldo de Batería']
+      }
     ]
   },
   {
     id: 'energia-herramientas',
-    name: 'Energía y Herramientas',
+    name: 'Energía y Climatización',
     icon: '⚡',
-    subcategories: [
-      { name: 'UPS & Sistemas No-Break', query: 'ups no break' },
-      { name: 'Fuentes de Poder & Baterías', query: 'fuente poder' },
-      { name: 'Reguladores & Inversores', query: 'regulador' },
-      { name: 'Generadores & Paneles Solares', query: 'generador' },
-      { name: 'Ponchadoras & Probadores de Red', query: 'tester probador' }
+    sections: [
+      {
+        title: 'Respaldo UPS / No-Break',
+        items: ['UPS Interactivos', 'UPS Online Doble Conversión', 'Sistemas de Baterías Externas', 'Supresores de Picos', 'Reguladores de Voltaje']
+      },
+      {
+        title: 'Fuentes y Baterías',
+        items: ['Fuentes de Poder Centralizadas', 'Fuentes Industriales Riel DIN', 'Baterías de Ciclo Profundo', 'Baterías AGM / Gel 12V', 'Inversores de Corriente']
+      },
+      {
+        title: 'Generadores y Solar',
+        items: ['Generadores Eléctricos a Gasolina', 'Paneles Solares Fotovoltaicos', 'Controladores de Carga Solar', 'Estructuras de Montaje Solar', 'Plantas de Emergencia']
+      },
+      {
+        title: 'Climatización y Gabinetes',
+        items: ['Aires Acondicionados para Rack', 'Termostatos Industriales', 'Extractores y Ventiladores', 'Gabinetes NEMA para Intemperie']
+      }
     ]
   },
   {
     id: 'automatizacion',
     name: 'Automatización e Intrusión',
-    icon: '🛡️',
-    subcategories: [
-      { name: 'Paneles de Alarma Inalámbricos', query: 'panel alarma' },
-      { name: 'Sensores Magnéticos de Puerta', query: 'sensor magnetico' },
-      { name: 'Detectores de Movimiento PIR', query: 'detector pir' },
-      { name: 'Sirenas, Estrobos & Domótica', query: 'sirena estrobo' },
-      { name: 'Módulos Relay & Controles', query: 'control remoto' }
+    icon: '🔔',
+    sections: [
+      {
+        title: 'Paneles de Alarma',
+        items: ['Paneles de Alarma Inalámbricos', 'Paneles Híbridos y Cableados', 'Teclados Táctiles y LCD', 'Módulos Comunicadores 4G / IP', 'Baterías de Respaldo']
+      },
+      {
+        title: 'Sensores y Detección',
+        items: ['Sensores de Movimiento PIR', 'Contactos Magnéticos para Puerta/Ventana', 'Detectores de Ruptura de Cristal', 'Barreras Fotoeléctricas Infrarrojas', 'Sensores de Impacto']
+      },
+      {
+        title: 'Sirenas y Disuasión',
+        items: ['Sirenas para Exterior con Estrobo', 'Sirenas de Alta Potencia', 'Luces Estroboscópicas', 'Estrobos Ocultos', 'Sirenas para Interior']
+      },
+      {
+        title: 'Domótica y Control',
+        items: ['Módulos Relevador Wi-Fi / Zigbee', 'Interruptores Inteligentes', 'Sensores de Inundación', 'Enchufes Inteligentes', 'Controladores de Escenas']
+      }
     ]
   },
   {
     id: 'iot-gps',
-    name: 'IoT / GPS / Telemetría',
-    icon: '📡',
-    subcategories: [
-      { name: 'Rastreadores Vehiculares GPS', query: 'gps rastreador' },
-      { name: 'Módulos SIM & Conectividad M2M', query: 'sim m2m' },
-      { name: 'Sensores de Combustible & Nivel', query: 'sensor combustible' },
-      { name: 'Sensores Inteligentes LoRaWAN', query: 'lorawan' },
-      { name: 'Telemetría & Monitoreo Remoto', query: 'telemetria' }
+    name: 'GPS, Telemática y Equipamiento Vehicular',
+    icon: '🚛',
+    sections: [
+      {
+        title: 'Rastreo y Telemática',
+        items: ['Trackers GPS Vehiculares 4G', 'Localizadores GPS OBD-II Plug & Play', 'Sensores de Nivel de Combustible', 'Módulos SIM M2M Multicarrier', 'Antenas GPS y GSM']
+      },
+      {
+        title: 'Torretas y Barras de Luz',
+        items: ['Barras de Luces / Torretas', 'Barras de Luz Interiores', 'Barras Directoras de Tráfico', 'Mini Barras Vehiculares', 'Estrobos y Burbujas']
+      },
+      {
+        title: 'Luces Auxiliares y Sirenas',
+        items: ['Luces Auxiliares para Ambulancias', 'Luces para Vehículos Todo Terreno', 'Luces para Montacargas y Grúas', 'Sirenas y Bocinas Vehiculares', 'Alarmas de Reversa']
+      },
+      {
+        title: 'LoRaWAN y Sensores',
+        items: ['Gateways LoRaWAN para Exterior', 'Sensores Inteligentes LoRaWAN', 'Equipos de Medición y Telemetría', 'Video Móvil y Cámaras para Autos', 'Body Cams']
+      }
+    ]
+  },
+  {
+    id: 'redes-it',
+    name: 'Cableado Estructurado',
+    icon: '🔌',
+    sections: [
+      {
+        title: 'Cables y Bobinas',
+        items: ['Bobinas UTP Cat6 100% Cobre', 'Bobinas UTP Cat6A Blindadas', 'Bobinas para Exterior con Mensajero', 'Cables Patch Cord Cat6', 'Bobinas de Fibra Óptica']
+      },
+      {
+        title: 'Conectividad y Jacks',
+        items: ['Jacks RJ45 Cat6 / Cat6A', 'Placas de Pared Faceplates', 'Conectores RJ45 Blindados', 'Patch Panels de 24 y 48 Puertos', 'Copres y Adaptadores']
+      },
+      {
+        title: 'Canalización y Soporte',
+        items: ['Charolas Tipo Malla', 'Canaletas de Superficie', 'Tubería Conduit y Coples', 'Abrazaderas y Velcros', 'Escalerillas Portacables']
+      },
+      {
+        title: 'Herramientas y Medición',
+        items: ['Ponchadoras de Impacto 110', 'Crimpeadoras RJ45', 'Peladores de Cable UTP / Fibra', 'Probadores y Certificadores de Red', 'Generadores de Tono y Pollos']
+      }
+    ]
+  },
+  {
+    id: 'redes-it',
+    name: 'Audio y Video Profesional (Yamaha)',
+    icon: '🔊',
+    sections: [
+      {
+        title: 'Altavoces y Bafles (Yamaha)',
+        items: ['Altavoces de Plafón para Voceo', 'Bafles Ambientales para Superficie', 'Altavoces para Intemperie IP35/IP65', 'Columnas de Audio y Arrays', 'Subwoofers Comerciales']
+      },
+      {
+        title: 'Amplificadores y Mezcladoras',
+        items: ['Amplificadores Clase D 70V/100V', 'Amplificadores Mezcladores con DSP', 'Mezcladoras de Audio Comercial', 'Sistemas de Perifoneo y Voceo', 'Sintonizadores con Bluetooth y USB']
+      },
+      {
+        title: 'Microfonía y Comunicación',
+        items: ['Micrófonos de Cuello de Ganso', 'Micrófonos Inalámbricos UHF', 'Estaciones de Voceo Multizona', 'Intercomunicadores y Voceo IP', 'Sistemas de Conferencia']
+      },
+      {
+        title: 'Accesorios y Cables de Audio',
+        items: ['Transformadores de Línea 70V', 'Atenuadores y Controles de Volumen', 'Cables de Audio Blindados', 'Conectores XLR y Plug 6.3mm', 'Soportes para Bocinas']
+      }
+    ]
+  },
+  {
+    id: 'energia-herramientas',
+    name: 'Herramientas, Ferretería y Material Eléctrico',
+    icon: '🛠️',
+    sections: [
+      {
+        title: 'Herramientas de Precisión',
+        items: ['Kits de Herramientas para Telecom', 'Pinzas de Corte y Pelacables', 'Desarmadores de Precisión', 'Ponchadoras para Terminales', 'Cautines y Soldadura']
+      },
+      {
+        title: 'Equipos de Medición',
+        items: ['Multímetros Digitales', 'Amperímetros de Gancho', 'Medidores de Distancia Láser', 'Probadores de Cables y Redes', 'Termómetros Infrarrojos']
+      },
+      {
+        title: 'Ferretería y Montaje',
+        items: ['Tornillería y Taquetes Especiales', 'Cintas Aislantes y de Autofusión', 'Abrazaderas Tipo Uña y Omega', 'Gabinete y Cajas de Registro', 'Cincho de Plástico y Metálico']
+      },
+      {
+        title: 'Seguridad y Protección',
+        items: ['Guantes Dieléctricos', 'Lentes de Seguridad', 'Chalecos de Seguridad', 'Cinturones Portaherramientas', 'Tapetes Dieléctricos']
+      }
     ]
   }
 ];
@@ -96,6 +231,7 @@ function AppNavbar() {
     const [menuQuery, setMenuQuery] = useState('');
     const [megaMenuOpen, setMegaMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [activeTabCategoryIndex, setActiveTabCategoryIndex] = useState(0);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [brandFilter, setBrandFilter] = useState(searchParams.get('brand') || '');
     const [suggestions, setSuggestions] = useState([]);
@@ -113,9 +249,14 @@ function AppNavbar() {
         if (!normalized) return CATEGORY_TREE;
         return CATEGORY_TREE.filter(cat => 
             cat.name.toLowerCase().includes(normalized) ||
-            cat.subcategories.some(sub => sub.name.toLowerCase().includes(normalized))
+            cat.sections.some(sec => 
+              sec.title.toLowerCase().includes(normalized) ||
+              sec.items.some(item => item.toLowerCase().includes(normalized))
+            )
         );
     }, [menuQuery]);
+
+    const activeCat = filteredCategoryTree[activeTabCategoryIndex] || filteredCategoryTree[0] || CATEGORY_TREE[0];
 
     const [availableBrands, setAvailableBrands] = useState([]);
 
@@ -379,51 +520,82 @@ function AppNavbar() {
                                     className="navbar-mega-menu"
                                     onMouseLeave={() => setMegaMenuOpen(false)}
                                 >
-                                    {/* Buscador interno */}
-                                    <div className="mega-search-wrap">
-                                        <BsSearch className="mega-search-icon" />
-                                        <input
-                                            type="text"
-                                            value={menuQuery}
-                                            onChange={(e) => setMenuQuery(e.target.value)}
-                                            placeholder="Buscar categoría..."
-                                            className="mega-search-input"
-                                            autoFocus
-                                        />
+                                    {/* Barra superior con buscador y acción rápida */}
+                                    <div className="mega-top-toolbar">
+                                        <div className="mega-search-wrap">
+                                            <BsSearch className="mega-search-icon" />
+                                            <input
+                                                type="text"
+                                                value={menuQuery}
+                                                onChange={(e) => setMenuQuery(e.target.value)}
+                                                placeholder="Buscar en el menú de categorías..."
+                                                className="mega-search-input"
+                                                autoFocus
+                                            />
+                                        </div>
+                                        {activeCat && (
+                                            <button
+                                                className="mega-category-action-link"
+                                                onClick={() => {
+                                                    handleCategoryClick(activeCat.id);
+                                                    setMegaMenuOpen(false);
+                                                }}
+                                            >
+                                                Ver catálogo completo de {activeCat.name} →
+                                            </button>
+                                        )}
                                     </div>
 
-                                    {/* Grid 3 columnas de Categorías con Subdivisiones */}
-                                    <div className="mega-categories-tree-grid">
-                                        {filteredCategoryTree.map((cat) => (
-                                            <div key={cat.id} className="mega-category-card">
-                                                <div 
-                                                    className={`mega-category-card-header ${currentCategory === cat.id ? 'active' : ''}`}
-                                                    onClick={() => handleCategoryClick(cat.id)}
+                                    {/* Contenido dividido en 2 paneles: Sidebar de Categorías + Grid de Secciones */}
+                                    <div className="mega-content-container">
+                                        {/* Sidebar Izquierda: Categorías principales */}
+                                        <div className="mega-sidebar-tabs">
+                                            {filteredCategoryTree.map((cat, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    className={`mega-tab-btn ${activeTabCategoryIndex === idx ? 'active' : ''}`}
+                                                    onMouseEnter={() => setActiveTabCategoryIndex(idx)}
+                                                    onClick={() => {
+                                                        setActiveTabCategoryIndex(idx);
+                                                        handleCategoryClick(cat.id);
+                                                        setMegaMenuOpen(false);
+                                                    }}
                                                 >
-                                                    <span className="mega-cat-icon">{cat.icon}</span>
-                                                    <span className="mega-cat-title">{cat.name}</span>
-                                                    <span className="mega-cat-arrow">→</span>
-                                                </div>
-                                                <div className="mega-subcategories-list">
-                                                    {cat.subcategories.map((sub, idx) => (
-                                                        <button
-                                                            key={idx}
-                                                            className="mega-sub-link"
-                                                            onClick={() => {
-                                                                navigate(`/tienda?syscomCategory=${cat.id}&search=${encodeURIComponent(sub.name)}`);
-                                                                setMegaMenuOpen(false);
-                                                                setMobileMenuOpen(false);
-                                                            }}
-                                                        >
-                                                            {sub.name}
-                                                        </button>
+                                                    <span className="mega-tab-icon">{cat.icon}</span>
+                                                    <span className="mega-tab-text">{cat.name}</span>
+                                                    <span className="mega-tab-arrow">›</span>
+                                                </button>
+                                            ))}
+                                            {filteredCategoryTree.length === 0 && (
+                                                <div className="p-3 text-muted" style={{ fontSize: '0.8rem' }}>Sin categorías</div>
+                                            )}
+                                        </div>
+
+                                        {/* Panel Derecho: Subsecciones y Familias de Productos */}
+                                        <div className="mega-main-panel">
+                                            {activeCat && (
+                                                <div className="mega-subsections-grid">
+                                                    {activeCat.sections.map((sec, sIdx) => (
+                                                        <div key={sIdx} className="mega-subsection-group">
+                                                            <div className="mega-subsection-title">{sec.title}</div>
+                                                            {sec.items.map((item, iIdx) => (
+                                                                <button
+                                                                    key={iIdx}
+                                                                    className="mega-sub-item-link"
+                                                                    onClick={() => {
+                                                                        navigate(`/tienda?syscomCategory=${activeCat.id}&search=${encodeURIComponent(item)}`);
+                                                                        setMegaMenuOpen(false);
+                                                                        setMobileMenuOpen(false);
+                                                                    }}
+                                                                >
+                                                                    {item}
+                                                                </button>
+                                                            ))}
+                                                        </div>
                                                     ))}
                                                 </div>
-                                            </div>
-                                        ))}
-                                        {filteredCategoryTree.length === 0 && (
-                                            <div className="mega-empty">No se encontraron categorías o subdivisiones.</div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
