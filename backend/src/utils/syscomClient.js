@@ -7,7 +7,7 @@ class SyscomClient {
     constructor() {
         this.baseURL = process.env.SYSCOM_API_URL || 'https://developers.syscom.mx/api/v1';
         this.clientId = process.env.SYSCOM_CLIENT_ID;
-        this.clientSecret = process.env.SYSCOM_API_KEY;
+        this.clientSecret = process.env.SYSCOM_CLIENT_SECRET || process.env.SYSCOM_API_KEY;
         this.timeoutMs = Number(process.env.SYSCOM_TIMEOUT_MS || 4000); // 4000ms = 4 segundos timeout estricto
         this.maxRetries = Number(process.env.SYSCOM_MAX_RETRIES || 2);
         this.accessToken = null;
