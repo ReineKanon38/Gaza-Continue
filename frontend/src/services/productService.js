@@ -183,20 +183,19 @@ const flattenSyscomCategories = (rawCategories) => {
   });
 };
 
+export const OFFICIAL_PLATFORM_CATEGORIES = [
+  { id: 'videovigilancia', name: 'Videovigilancia' },
+  { id: 'redes-it', name: 'Redes e IT' },
+  { id: 'control-acceso', name: 'Control de Acceso' },
+  { id: 'energia-herramientas', name: 'Energía y Herramientas' },
+  { id: 'automatizacion', name: 'Automatización' },
+  { id: 'iot-gps', name: 'IoT / GPS' }
+];
+
 export const getSyscomCategories = async () => {
-  const data = await cachedRequestJson('/api/syscom/categories');
-  const raw =
-    data?.data ??
-    data?.categorias ??
-    data?.result ??
-    [];
-  const blockedCategoryRegex = /(radio|walkie|handy|radiocom|fuego|humo|incendio)/i;
-  const categories = flattenSyscomCategories(raw).filter(
-    (item) => !blockedCategoryRegex.test(String(item?.name || ''))
-  );
   return {
-    categories,
-    raw
+    categories: OFFICIAL_PLATFORM_CATEGORIES,
+    raw: OFFICIAL_PLATFORM_CATEGORIES
   };
 };
 

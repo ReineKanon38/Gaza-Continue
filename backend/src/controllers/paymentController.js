@@ -138,6 +138,7 @@ export const createPaymentSession = async (req, res) => {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Stripe expects cents
         currency: currency.toLowerCase(),
+        payment_method_types: ['card'],
         metadata: {
           orderId: orderId || 'N/A',
           userId: req.user?.sub || 'guest'

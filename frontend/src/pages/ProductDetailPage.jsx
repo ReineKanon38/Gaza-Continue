@@ -62,8 +62,23 @@ function ProductDetailPage() {
     }
   }, [product]);
 
-  const productName = product?.titulo || product?.nombre || product?.name || product?.title || 'Producto';
-  const productDescription = product?.descripcion || product?.description || product?.detalle || '';
+  const stripHtml = (html) => {
+    if (!html) return '';
+    return String(html)
+      .replace(/<[^>]*>?/gm, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const rawDescription = product?.descripcion || product?.description || product?.detalle || '';
+  const rawAdditionalDescription = product?.descripcion_larga || product?.longDescription || product?.details || '';
+  const productDescription = stripHtml(rawDescription);
+  const additionalDescription = stripHtml(rawAdditionalDescription);
   const productImage = product?.imagen || product?.image || product?.img_portada || product?.picture || product?.foto || '';
 
   const safePrice = Number(product?.precio_mxn || product?.precio_descuento_mxn || product?.price || product?.precio || product?.precio_lista || 0);
@@ -72,15 +87,14 @@ function ProductDetailPage() {
   const brand = product?.marca || product?.brand || product?.fabricante || '';
   const model = product?.modelo || product?.model || product?.modelos || '';
   const code = product?.codigo || product?.code || product?._id || product?.syscomId || '';
-  const additionalDescription = product?.descripcion_larga || product?.longDescription || product?.details || '';
   const productBenefits = generateProductBenefits(product);
   const technicalBenefits = extractTechnicalBenefits(productDescription + ' ' + additionalDescription);
   const generalDescriptionSource = productDescription || additionalDescription;
   const descriptionHighlights = generalDescriptionSource
     ? generalDescriptionSource
-        .split(/[\r\n.]+/)
+        .split(/(?<=[.!?])\s+/)
         .map((item) => item.trim())
-        .filter(Boolean)
+        .filter((item) => item.length > 15 && !item.includes('<') && !item.includes('>'))
         .slice(0, 5)
     : [];
 
