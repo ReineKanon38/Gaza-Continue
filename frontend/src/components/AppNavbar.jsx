@@ -32,19 +32,90 @@ function AppNavbar() {
     /* ── Logo destination ── */
     const logoTo = !user ? '/' : isAdmin() ? '/admin' : '/catalog';
 
-    /* ── Categories ── */
-    const visibleCategories = useMemo(() => {
-        const normalized = String(menuQuery || '').trim().toLowerCase();
-        const sorted = [...categories].sort((a, b) =>
-            String(a?.name || '').localeCompare(String(b?.name || ''), 'es', { sensitivity: 'base' })
-        );
-        if (!normalized) return sorted;
-        return sorted.filter((cat) => String(cat?.name || '').toLowerCase().includes(normalized));
-    }, [categories, menuQuery]);
+export const CATEGORY_TREE = [
+  {
+    id: 'videovigilancia',
+    name: 'Videovigilancia',
+    icon: '📹',
+    subcategories: [
+      { name: 'Cámaras IP & Wi-Fi', query: 'camara ip' },
+      { name: 'Domos & Cámaras Bala', query: 'domo bala' },
+      { name: 'Cámaras PTZ & TurboHD', query: 'ptz' },
+      { name: 'Grabadores DVR / NVR', query: 'dvr nvr' },
+      { name: 'Baluns & Transceptores', query: 'transceptor' }
+    ]
+  },
+  {
+    id: 'redes-it',
+    name: 'Redes e IT',
+    icon: '🌐',
+    subcategories: [
+      { name: 'Switches PoE & Gestionables', query: 'switch poe' },
+      { name: 'Routers & Gateways', query: 'router' },
+      { name: 'Access Points Wi-Fi 6', query: 'access point' },
+      { name: 'Racks, Gabinetes & Patch Panels', query: 'rack gabinete' },
+      { name: 'Fibra Óptica & Bobinas UTP', query: 'fibra bobina' }
+    ]
+  },
+  {
+    id: 'control-acceso',
+    name: 'Control de Acceso',
+    icon: '🔐',
+    subcategories: [
+      { name: 'Chapas & Cerraduras Magnéticas', query: 'chapa magnetica' },
+      { name: 'Contrachapas Eléctricas', query: 'contrachapa' },
+      { name: 'Biométricos & Reconocimiento Facial', query: 'biometrico' },
+      { name: 'Torniquetes & Barreras', query: 'torniquete' },
+      { name: 'Tarjetas RFID & Botones de Salida', query: 'tarjeta rfid' }
+    ]
+  },
+  {
+    id: 'energia-herramientas',
+    name: 'Energía y Herramientas',
+    icon: '⚡',
+    subcategories: [
+      { name: 'UPS & Sistemas No-Break', query: 'ups no break' },
+      { name: 'Fuentes de Poder & Baterías', query: 'fuente poder' },
+      { name: 'Reguladores & Inversores', query: 'regulador' },
+      { name: 'Generadores & Paneles Solares', query: 'generador' },
+      { name: 'Ponchadoras & Probadores de Red', query: 'tester probador' }
+    ]
+  },
+  {
+    id: 'automatizacion',
+    name: 'Automatización e Intrusión',
+    icon: '🛡️',
+    subcategories: [
+      { name: 'Paneles de Alarma Inalámbricos', query: 'panel alarma' },
+      { name: 'Sensores Magnéticos de Puerta', query: 'sensor magnetico' },
+      { name: 'Detectores de Movimiento PIR', query: 'detector pir' },
+      { name: 'Sirenas, Estrobos & Domótica', query: 'sirena estrobo' },
+      { name: 'Módulos Relay & Controles', query: 'control remoto' }
+    ]
+  },
+  {
+    id: 'iot-gps',
+    name: 'IoT / GPS / Telemetría',
+    icon: '📡',
+    subcategories: [
+      { name: 'Rastreadores Vehiculares GPS', query: 'gps rastreador' },
+      { name: 'Módulos SIM & Conectividad M2M', query: 'sim m2m' },
+      { name: 'Sensores de Combustible & Nivel', query: 'sensor combustible' },
+      { name: 'Sensores Inteligentes LoRaWAN', query: 'lorawan' },
+      { name: 'Telemetría & Monitoreo Remoto', query: 'telemetria' }
+    ]
+  }
+];
 
-    const halfLen = Math.ceil(visibleCategories.length / 2);
-    const leftCats = visibleCategories.slice(0, halfLen);
-    const rightCats = visibleCategories.slice(halfLen);
+    /* ── Filtered Categories with Subdivisions ── */
+    const filteredCategoryTree = useMemo(() => {
+        const normalized = String(menuQuery || '').trim().toLowerCase();
+        if (!normalized) return CATEGORY_TREE;
+        return CATEGORY_TREE.filter(cat => 
+            cat.name.toLowerCase().includes(normalized) ||
+            cat.subcategories.some(sub => sub.name.toLowerCase().includes(normalized))
+        );
+    }, [menuQuery]);
 
     const [availableBrands, setAvailableBrands] = useState([]);
 
@@ -321,32 +392,37 @@ function AppNavbar() {
                                         />
                                     </div>
 
-                                    {/* Grid 2 columnas */}
-                                    <div className="mega-grid">
-                                        <div className="mega-col">
-                                            {leftCats.map((cat) => (
-                                                <button
-                                                    key={cat.id}
-                                                    className={`mega-item ${currentCategory === cat.id ? 'active' : ''}`}
+                                    {/* Grid 3 columnas de Categorías con Subdivisiones */}
+                                    <div className="mega-categories-tree-grid">
+                                        {filteredCategoryTree.map((cat) => (
+                                            <div key={cat.id} className="mega-category-card">
+                                                <div 
+                                                    className={`mega-category-card-header ${currentCategory === cat.id ? 'active' : ''}`}
                                                     onClick={() => handleCategoryClick(cat.id)}
                                                 >
-                                                    {cat.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <div className="mega-col">
-                                            {rightCats.map((cat) => (
-                                                <button
-                                                    key={cat.id}
-                                                    className={`mega-item ${currentCategory === cat.id ? 'active' : ''}`}
-                                                    onClick={() => handleCategoryClick(cat.id)}
-                                                >
-                                                    {cat.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        {visibleCategories.length === 0 && (
-                                            <div className="mega-empty">Sin resultados.</div>
+                                                    <span className="mega-cat-icon">{cat.icon}</span>
+                                                    <span className="mega-cat-title">{cat.name}</span>
+                                                    <span className="mega-cat-arrow">→</span>
+                                                </div>
+                                                <div className="mega-subcategories-list">
+                                                    {cat.subcategories.map((sub, idx) => (
+                                                        <button
+                                                            key={idx}
+                                                            className="mega-sub-link"
+                                                            onClick={() => {
+                                                                navigate(`/tienda?syscomCategory=${cat.id}&search=${encodeURIComponent(sub.name)}`);
+                                                                setMegaMenuOpen(false);
+                                                                setMobileMenuOpen(false);
+                                                            }}
+                                                        >
+                                                            {sub.name}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {filteredCategoryTree.length === 0 && (
+                                            <div className="mega-empty">No se encontraron categorías o subdivisiones.</div>
                                         )}
                                     </div>
                                 </div>
@@ -427,16 +503,16 @@ function AppNavbar() {
                                     />
                                 </div>
                                 <div className="mobile-cats-list">
-                                    {visibleCategories.map((cat) => (
+                                    {filteredCategoryTree.map((cat) => (
                                         <button
                                             key={cat.id}
                                             className={`mobile-cat-item ${currentCategory === cat.id ? 'active' : ''}`}
                                             onClick={() => handleCategoryClick(cat.id)}
                                         >
-                                            {cat.name}
+                                            <span className="me-2">{cat.icon}</span> {cat.name}
                                         </button>
                                     ))}
-                                    {visibleCategories.length === 0 && (
+                                    {filteredCategoryTree.length === 0 && (
                                         <div className="mobile-cats-empty">Sin resultados.</div>
                                     )}
                                 </div>
