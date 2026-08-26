@@ -303,6 +303,24 @@ export const stripeWebhook = async (req, res) => {
       }
       break;
     }
+    case 'checkout.session.completed': {
+      const session = event.data.object;
+      logger.info(`Stripe checkout session ${session.id} completed for order ${session.metadata?.orderId}`);
+      
+      const orderId = session.metadata?.orderId;
+      if (orderId && orderId !== 'N/A') {
+        const order = await Order.findById(orderId);
+        if (order && order.paymentStatus !== 'approved') {
+          order.paymentStatus = 'approved';
+          if (order.status === 'pending') {
+            order.status = 'processing';
+          }
+          await order.save();
+          logger.info(`Orden ${orderId} aprobada desde checkout.session.completed`);
+        }
+      }
+      break;
+    }
     case 'payment_intent.payment_failed': {
       const paymentIntent = event.data.object;
       logger.warn(`Stripe payment failed: ${paymentIntent.id}`);
