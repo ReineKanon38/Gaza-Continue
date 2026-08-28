@@ -125,7 +125,7 @@ function Cart() {
                 <Button
                   variant="link"
                   className="text-decoration-none text-secondary p-0 small d-flex align-items-center gap-2"
-                  onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/catalog'))}
+                  onClick={() => navigate('/catalog')}
                 >
                   <BsArrowLeft /> Seguir comprando
                 </Button>
