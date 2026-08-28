@@ -150,9 +150,16 @@ export const getProductById = async (req, res) => {
       product = await Product.findById(id);
     }
 
-    // 2. Si no se encontró por _id, buscar por syscomId
+    // 2. Si no se encontró por _id, buscar por syscomId o modelo
     if (!product) {
-      product = await Product.findOne({ syscomId: id });
+      product = await Product.findOne({
+        $or: [
+          { syscomId: id },
+          { syscomId: new RegExp(`^${id}$`, 'i') },
+          { model: id },
+          { model: new RegExp(`^${id}$`, 'i') }
+        ]
+      });
     }
 
     // 3. Si sigue sin encontrarse, intentar obtenerlo directamente desde SYSCOM API y sincronizar

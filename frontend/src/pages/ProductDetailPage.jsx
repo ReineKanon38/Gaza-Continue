@@ -75,6 +75,7 @@ function ProductDetailPage() {
       .trim();
   };
 
+  const productName = product?.titulo || product?.nombre || product?.name || product?.title || 'Producto SYSCOM';
   const rawDescription = product?.descripcion || product?.description || product?.detalle || '';
   const rawAdditionalDescription = product?.descripcion_larga || product?.longDescription || product?.details || '';
   const productDescription = stripHtml(rawDescription);
