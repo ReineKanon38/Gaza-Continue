@@ -16,14 +16,30 @@ function ProductDetailPage() {
   const { addToCart, isInCart, getItemQuantity } = useCartHelpers();
 
   const [product, setProduct] = useState(location.state?.product || null);
-  const [loading, setLoading] = useState(!location.state?.product);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [complementaryProducts, setComplementaryProducts] = useState([]);
   const [loadingComplementary, setLoadingComplementary] = useState(false);
   const [activeTab, setActiveTab] = useState('complementary');
 
   useEffect(() => {
-    if (!product && productId) {
+    // Desplazar automáticamente al inicio de la página
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Si viene en location.state y coincide con el ID/modelo actual, usarlo
+    const stateProd = location.state?.product;
+    if (stateProd && (
+      String(stateProd._id) === String(productId) ||
+      String(stateProd.syscomId).toLowerCase() === String(productId).toLowerCase() ||
+      String(stateProd.modelo || stateProd.model).toLowerCase() === String(productId).toLowerCase()
+    )) {
+      setProduct(stateProd);
+      setLoading(false);
+      return;
+    }
+
+    // Si no o si cambió de producto, consultar el nuevo producto por su ID/modelo
+    if (productId) {
       const fetchProduct = async () => {
         setLoading(true);
         setError('');
@@ -39,7 +55,7 @@ function ProductDetailPage() {
 
       fetchProduct();
     }
-  }, [product, productId]);
+  }, [productId, location.state]);
 
   // Cargar productos complementarios cuando el producto principal esté disponible
   useEffect(() => {
