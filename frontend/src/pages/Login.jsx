@@ -66,7 +66,7 @@ function Login() {
         if (authUser.role === 'admin') {
           navigate('/admin');
         } else {
-          navigate('/catalog');
+          navigate('/tienda');
         }
     } catch (err) {
       setError(err.message);

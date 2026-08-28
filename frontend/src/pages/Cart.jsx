@@ -23,10 +23,10 @@ function Cart() {
             <h2 className="fw-bold mb-3 text-dark">Tu carrito está vacío</h2>
             <p className="text-secondary mb-4">Añade productos de TI o ciberseguridad para iniciar tu cotización.</p>
             <div className="d-flex flex-column flex-sm-row justify-content-center gap-3">
-              <Button className="btn-custom-primary py-2.5 px-4" onClick={() => navigate('/catalog')}>
+              <Button className="btn-custom-primary py-2.5 px-4" onClick={() => navigate('/tienda')}>
                 Explorar Catálogo
               </Button>
-              <Button variant="outline-secondary" className="py-2.5 px-4" onClick={() => navigate('/super-precio')}>
+              <Button variant="outline-secondary" className="py-2.5 px-4" onClick={() => navigate('/ofertas')}>
                 <BsStars className="me-2 text-warning" /> Ver Super Precio
               </Button>
             </div>
@@ -125,7 +125,7 @@ function Cart() {
                 <Button
                   variant="link"
                   className="text-decoration-none text-secondary p-0 small d-flex align-items-center gap-2"
-                  onClick={() => navigate('/catalog')}
+                  onClick={() => navigate('/tienda')}
                 >
                   <BsArrowLeft /> Seguir comprando
                 </Button>

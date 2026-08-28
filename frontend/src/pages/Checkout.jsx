@@ -287,7 +287,16 @@ function Checkout() {
               )}
             </div>
 
-            <Button as={Link} to="/catalog" className="btn-primary-gaza py-2.5 px-4 mt-2">Volver al Catálogo</Button>
+            <div className="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-3">
+              {createdOrderId && (
+                <Button as={Link} to={`/mis-pedidos/${createdOrderId}`} variant="outline-primary" className="py-2.5 px-4">
+                  Rastrear mi Pedido
+                </Button>
+              )}
+              <Button as={Link} to="/tienda" className="btn-primary-gaza py-2.5 px-4">
+                Seguir Comprando
+              </Button>
+            </div>
           </div>
         </Container>
       </div>

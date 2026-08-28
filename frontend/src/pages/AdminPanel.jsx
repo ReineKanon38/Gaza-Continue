@@ -156,7 +156,7 @@ export default function AdminPanel() {
 
     // Verificar que el usuario sea admin
     if (!user || user.role !== 'admin') {
-      navigate('/catalog');
+      navigate('/tienda');
       return;
     }
 
@@ -2292,7 +2292,7 @@ export default function AdminPanel() {
                     💰 Cupones
                   </Nav.Link>
                   <hr />
-                  <Nav.Link onClick={() => navigate('/catalog')}>
+                  <Nav.Link onClick={() => navigate('/tienda')}>
                     🛍️ Ver Catálogo
                   </Nav.Link>
                 </Nav>

@@ -501,7 +501,7 @@ function Profile() {
                                                         {order.orderId}
                                                     </Button>
                                                     <Link
-                                                        to={`/orders/${order._id}`}
+                                                        to={`/mis-pedidos/${order._id}`}
                                                         className="btn btn-sm btn-outline-primary"
                                                         title="Ver rastreo detallado"
                                                     >

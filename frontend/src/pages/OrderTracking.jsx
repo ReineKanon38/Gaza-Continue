@@ -106,7 +106,7 @@ function OrderTracking() {
       <AppNavbar />
       <Container className="py-4" style={{ maxWidth: 720 }}>
         <div className="d-flex align-items-center gap-2 mb-4">
-          <Link to="/profile" className="text-decoration-none text-muted">← Mis pedidos</Link>
+          <Link to="/mi-cuenta" className="text-decoration-none text-muted">← Mis pedidos</Link>
         </div>
 
         {loading && (

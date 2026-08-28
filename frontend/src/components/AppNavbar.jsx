@@ -452,7 +452,7 @@ function AppNavbar() {
                         {/* Perfil */}
                         <button
                             className="navbar-action-btn"
-                            onClick={() => navigate('/profile')}
+                            onClick={() => navigate('/mi-cuenta')}
                             aria-label="Mi cuenta"
                         >
                             <BsPersonCircle />
@@ -495,7 +495,7 @@ function AppNavbar() {
                 <Container fluid className="navbar-bottom-inner px-3 px-md-4">
                     <nav className="navbar-nav-links">
                         {/* Catálogo */}
-                        <Link to="/catalog" className={`navbar-nav-link ${!currentCategory ? 'active' : ''}`}>
+                        <Link to="/tienda" className={`navbar-nav-link ${!currentCategory ? 'active' : ''}`}>
                             <BsGrid3X3Gap className="me-1" /> Catálogo
                         </Link>
 
@@ -642,13 +642,13 @@ function AppNavbar() {
 
                             {/* Links principales */}
                             <nav className="mobile-nav">
-                                <Link to="/catalog" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                <Link to="/tienda" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
                                     <BsGrid3X3Gap /> Catálogo completo
                                 </Link>
-                                <Link to="/super-precio" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                <Link to="/ofertas" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
                                     <BsStars /> Súper Precio
                                 </Link>
-                                <Link to="/profile" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
+                                <Link to="/mi-cuenta" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
                                     <BsPersonCircle /> Mi cuenta ({user?.name || 'Usuario'})
                                 </Link>
                                 <Link to="/cart" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>
