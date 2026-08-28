@@ -127,7 +127,7 @@ function ProductDetailPage() {
     return (
       <Container className="py-5">
         <Alert variant="danger">{error}</Alert>
-        <Button variant="secondary" onClick={() => navigate(-1)}>Volver</Button>
+        <Button variant="secondary" onClick={() => navigate('/tienda')}>Volver al catálogo</Button>
       </Container>
     );
   }
@@ -136,7 +136,7 @@ function ProductDetailPage() {
     <div className="bg-page-content min-vh-100">
       <AppNavbar />
       <Container className="py-4 fade-in-up">
-        <Button variant="outline-secondary" onClick={() => navigate(-1)} className="mb-4">
+        <Button variant="outline-secondary" onClick={() => navigate('/tienda')} className="mb-4">
         <BsArrowLeft className="me-2" /> Volver al catálogo
       </Button>
 

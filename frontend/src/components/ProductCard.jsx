@@ -36,8 +36,7 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
   const stock = Number(product.stock || 0);
   const hasLowStock = stock > 0 && stock <= 5;
   const isOutOfStock = stock <= 0;
-  const productBenefits = generateProductBenefits(product);
-  const productCode = product.modelo || product.syscomId || product._id || product.id || product.code || product.codigo || '';
+  const productCode = product.syscomId || product._id || product.modelo || product.id || product.code || product.codigo || '';
   const productSlug = encodeURIComponent(productCode || product.name || `item-${Date.now()}`);
 
   return (
