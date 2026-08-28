@@ -230,7 +230,7 @@ const OFFICIAL_SYSCOM_BRANDS_CATALOG = [
         description: 'Generador para respaldo eléctrico en sitios remotos, comercios y emergencias.',
         price: 11800.00,
         model: 'GP3300',
-        image: 'https://ftp3.syscom.mx/usuarios/fotos/bancodefotos/GENERAC/GP3300/GP3300-p.jpg',
+        image: 'https://ftp3.syscom.mx/usuarios/fotos/bancodefotos/GENERAC/GP8000E/GP8000E-p.jpg',
         stock: 6
       }
     ]
@@ -245,7 +245,7 @@ const OFFICIAL_SYSCOM_BRANDS_CATALOG = [
         description: 'Sistema ininterrumpible de energía para protección de computadoras, servidores y grabadores.',
         price: 1890.00,
         model: 'EPU1000LCD',
-        image: 'https://ftp3.syscom.mx/usuarios/fotos/bancodefotos/EPCOM-POWER/EPU1000LCD/EPU1000LCD-p.jpg',
+        image: 'https://ftp3.syscom.mx/usuarios/fotos/bancodefotos/HIKVISION/DS-UPS2000-R-X/DS-UPS2000-R-X-p.jpg',
         stock: 25
       }
     ]

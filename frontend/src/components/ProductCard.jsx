@@ -28,6 +28,7 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
     overflow: 'hidden'
   };
 
+  const [imgError, setImgError] = React.useState(false);
   const imageUrl = product.image || product.img_portada || product.imagen || product.picture || product.foto || null;
   const safePrice = Number(product.price || 0);
   const safeListPrice = Number(product.listPrice || 0);
@@ -46,12 +47,13 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
       onClick={() => navigate(`/product/${productSlug}`, { state: { product } })}
     >
       <div className={`product-card-media ${isList ? 'border-end' : ''}`} style={isList ? { width: '250px', flexShrink: 0 } : {}}>
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
         <div style={{ height: isList ? '100%' : '200px', minHeight: isList ? '150px' : 'auto', overflow: 'hidden' }}>
           <img
             src={imageUrl}
             alt={product.name}
             loading="lazy"
+            onError={() => setImgError(true)}
             style={{
               width: '100%',
               height: '100%',
@@ -68,12 +70,19 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.1)',
+            background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)',
             display: 'flex',
+            flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            gap: '0.4rem',
+            padding: '1rem',
+            textAlign: 'center'
           }}>
-            📦
+            <span style={{ fontSize: '2rem' }}>📦</span>
+            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#38bdf8', letterSpacing: '0.05em' }}>
+              {product.brand || 'SYSCOM'}
+            </span>
           </div>
         </div>
       )}

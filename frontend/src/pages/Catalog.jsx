@@ -477,13 +477,26 @@ function Catalog() {
                                                 >
                                                     <div className="home-prod-img-wrap">
                                                         {product.image ? (
-                                                            <img src={product.image} alt={product.name} className="home-prod-img" />
+                                                            <>
+                                                                <img 
+                                                                    src={product.image} 
+                                                                    alt={product.name} 
+                                                                    className="home-prod-img" 
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none';
+                                                                        if (e.currentTarget.nextElementSibling) {
+                                                                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                                                                        }
+                                                                    }}
+                                                                />
+                                                                <div className="home-prod-img-placeholder" style={{ display: 'none' }}>📦</div>
+                                                            </>
                                                         ) : (
                                                             <div className="home-prod-img-placeholder">📦</div>
                                                         )}
                                                     </div>
                                                     <div className="home-prod-info">
-                                                        <span className="home-prod-brand">{product.distributor || 'SYSCOM'}</span>
+                                                        <span className="home-prod-brand">{product.distributor || product.brand || 'SYSCOM'}</span>
                                                         <p className="home-prod-name">{product.name}</p>
                                                         <span className="home-prod-price">
                                                             ${(product.price || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
@@ -524,7 +537,20 @@ function Catalog() {
                                             >
                                                 <div className="home-prod-img-wrap">
                                                     {product.image ? (
-                                                        <img src={product.image} alt={product.name} className="home-prod-img" />
+                                                        <>
+                                                            <img 
+                                                                src={product.image} 
+                                                                alt={product.name} 
+                                                                className="home-prod-img" 
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = 'none';
+                                                                    if (e.currentTarget.nextElementSibling) {
+                                                                        e.currentTarget.nextElementSibling.style.display = 'flex';
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <div className="home-prod-img-placeholder" style={{ display: 'none' }}>📦</div>
+                                                        </>
                                                     ) : (
                                                         <div className="home-prod-img-placeholder">📦</div>
                                                     )}
