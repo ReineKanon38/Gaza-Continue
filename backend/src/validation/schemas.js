@@ -61,16 +61,16 @@ export const createProductSchema = z.object({
 
 export const createOrderSchema = z.object({
   products: z.array(z.object({
-    productId: objectId,
+    productId: z.string().min(1, 'ID de producto requerido'),
     quantity: z.number().int().positive('Cantidad > 0')
   })).min(1, 'Debe incluir al menos un producto'),
   shippingAddress: z.object({
     street: z.string().min(1, 'Calle requerida'),
-    number: z.string().min(1, 'Número inválido').optional(),
-    neighborhood: z.string().min(1, 'Colonia inválida').optional(),
-    locality: z.string().min(1, 'Localidad requerida').optional(),
+    number: z.string().optional(),
+    neighborhood: z.string().optional(),
+    locality: z.string().optional(),
     city: z.string().min(1, 'Ciudad requerida'),
-    municipality: z.string().min(1, 'Municipio requerido').optional(),
+    municipality: z.string().optional(),
     state: z.string().min(1, 'Estado requerido'),
     zipCode: z.string().regex(/^\d{5}$/, 'Código postal inválido (5 dígitos)'),
     country: z.string().optional(),
@@ -80,10 +80,10 @@ export const createOrderSchema = z.object({
     method: z.enum(['credit_card', 'debit_card', 'paypal', 'bank_transfer', 'cash']),
     cardType: z.enum(['visa', 'mastercard', 'amex', 'discover', 'other']).optional(),
     cardLastFour: z.string().regex(/^\d{4}$/, 'Últimos 4 dígitos inválidos').optional(),
-    cardHolder: z.string().min(1, 'Nombre del titular requerido').optional()
+    cardHolder: z.string().optional()
   }).refine(data => {
     if (data.method === 'credit_card' || data.method === 'debit_card') {
-      return data.cardType && data.cardLastFour;
+      return !!(data.cardType && data.cardLastFour);
     }
     return true;
   }, { message: 'Datos de tarjeta requeridos para pagos con tarjeta' })
