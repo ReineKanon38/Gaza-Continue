@@ -238,43 +238,43 @@ function Checkout() {
       <div className="bg-page-content min-vh-100 pb-5">
         <AppNavbar />
         <Container className="py-5 mt-5">
-          <div className="checkout-success-card auth-card border-0 fade-in-up">
-            <BsCheckCircle className="status-icon-success" />
-            <h2 className="fw-bold text-dark mb-3">
+          <div className="checkout-success-card auth-card border-0 fade-in-up shadow-sm p-4 p-md-5">
+            <BsCheckCircle className="status-icon-success" style={{ color: '#16a34a' }} />
+            <h2 className="fw-bold text-dark mb-2">
               {isStripePayment ? '¡Pago Confirmado y Pedido Registrado!' : '¡Pedido Registrado Exitosamente!'}
             </h2>
-            <p className="text-secondary mb-4">
+            <p className="text-secondary mb-4" style={{ fontSize: '0.95rem' }}>
               {isStripePayment
-                ? 'Tu pago con tarjeta ha sido procesado correctamente. Hemos recibido tu pedido y comenzará a prepararse para su envío.'
-                : 'Tu pedido ha sido creado y el pago ha entrado en proceso de validación manual.'}
+                ? 'Tu pago con tarjeta ha sido procesado correctamente. Hemos recibido tu pedido y comenzará a prepararse para su despacho.'
+                : 'Tu orden fue creada. Realiza tu transferencia SPEI con los datos a continuación para comenzar el despacho.'}
             </p>
             
-            <div className="p-4 rounded-4 text-start bg-white bg-opacity-60 border border-white mb-4">
+            <div className="p-4 rounded-4 text-start bg-light border mb-4">
               {isStripePayment ? (
                 <div>
-                  <h5 className="fw-bold mb-3 text-primary">Resumen de la Transacción</h5>
+                  <h5 className="fw-bold mb-3" style={{ color: '#1e3a8a' }}>Resumen de la Transacción</h5>
                   <ul className="list-unstyled mb-0 d-grid gap-2 small text-dark">
-                    <li><strong>No. de Orden:</strong> <code className="bg-light px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
-                    <li><strong>Método de Pago:</strong> Tarjeta de Crédito / Débito (Procesado en Línea)</li>
+                    <li><strong>No. de Orden:</strong> <code className="bg-white border px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
+                    <li><strong>Método de Pago:</strong> Tarjeta de Crédito / Débito (Stripe Seguro)</li>
                     <li><strong>Monto Total Pagado:</strong> ${totalPrice.toLocaleString('es-MX')} MXN</li>
                     <li><strong>Estado de la Orden:</strong> <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">En Proceso / Preparación</span></li>
                   </ul>
                 </div>
               ) : (
                 <div>
-                  <h5 className="fw-bold mb-3 text-primary">Instrucciones de Transferencia Bancaria</h5>
+                  <h5 className="fw-bold mb-3" style={{ color: '#1e3a8a' }}>Instrucciones de Transferencia Bancaria (SPEI)</h5>
                   <p className="small text-secondary mb-3">
-                    Para confirmar tu compra, realiza la transferencia electrónica SPEI utilizando la siguiente información bancaria:
+                    Transfiere desde la banca móvil de tu banco (BBVA, Banamex, Santander, etc.) usando los siguientes datos:
                   </p>
-                  <ul className="list-unstyled mb-0 d-grid gap-2 small text-dark">
-                    <li><strong>Banco Destino:</strong> {selectedBankName}</li>
-                    <li><strong>Titular de la Cuenta:</strong> GAZA TI E-COMMERCE S.A. DE C.V.</li>
-                    <li><strong>CLABE Interbancaria:</strong> 0121 8000 1234 5678 90</li>
-                    <li><strong>Monto a Transferir:</strong> ${totalPrice.toLocaleString('es-MX')} MXN</li>
-                    <li><strong>Concepto / Referencia de Pago:</strong> <code className="bg-light px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
+                  <ul className="list-unstyled mb-0 d-grid gap-2.5 small text-dark">
+                    <li><strong>Banco Destino:</strong> <span className="fw-bold text-primary">{selectedProvider === 'banamex' ? 'Citibanamex (Banamex)' : 'Santander México'}</span></li>
+                    <li><strong>Beneficiario / Titular:</strong> <strong>GAZA INFRAESTRUCTURA TI</strong></li>
+                    <li><strong>CLABE Interbancaria:</strong> <code className="bg-white border px-2 py-1 rounded fw-bold text-dark fs-6">0121 8000 1234 5678 90</code></li>
+                    <li><strong>Monto Exacto a Transferir:</strong> <span className="fs-6 fw-bold text-success">${totalPrice.toLocaleString('es-MX')} MXN</span></li>
+                    <li><strong>Concepto / Referencia:</strong> <code className="bg-white border px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
                   </ul>
-                  <div className="mt-3 p-3 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 text-warning small">
-                    <strong>Importante:</strong> Envía tu comprobante de pago con el número de orden a <strong>ventas@gaza.com</strong> o súbelo en la sección de tus pedidos en tu perfil para agilizar la entrega.
+                  <div className="mt-3 p-3 rounded-3 border small" style={{ background: '#fffbeb', borderColor: '#fde68a', color: '#92400e' }}>
+                    <strong>📌 Confirmación de Pago:</strong> Envía tu comprobante con el número de orden a <strong>syscom.gaza.ma9@gmail.com</strong> para validar y despachar de inmediato.
                   </div>
                 </div>
               )}
@@ -282,11 +282,11 @@ function Checkout() {
 
             <div className="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-3">
               {createdOrderId && (
-                <Button as={Link} to={`/mis-pedidos/${createdOrderId}`} variant="outline-primary" className="py-2.5 px-4">
+                <Button as={Link} to={`/mis-pedidos/${createdOrderId}`} variant="outline-primary" className="py-2.5 px-4 rounded-3 fw-bold">
                   Rastrear mi Pedido
                 </Button>
               )}
-              <Button as={Link} to="/tienda" className="btn-primary-gaza py-2.5 px-4">
+              <Button as={Link} to="/tienda" className="btn-primary-gaza py-2.5 px-4 rounded-3">
                 Seguir Comprando
               </Button>
             </div>

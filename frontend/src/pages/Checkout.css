@@ -251,7 +251,7 @@
 
 /* Botones Personalizados */
 .btn-primary-gaza {
-  background: linear-gradient(135deg, #1565c0 0%, #00bcd4 100%) !important;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
   border: none !important;
   color: #ffffff !important;
   font-weight: 700 !important;
@@ -260,12 +260,12 @@
   border-radius: 0.75rem !important;
   padding: 0.85rem 2rem !important;
   transition: all 0.25s ease !important;
-  box-shadow: 0 4px 15px rgba(21, 101, 192, 0.25) !important;
+  box-shadow: 0 4px 15px rgba(30, 58, 138, 0.25) !important;
 }
 
 .btn-primary-gaza:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(21, 101, 192, 0.35) !important;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35) !important;
   filter: brightness(1.08);
 }
 
