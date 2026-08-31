@@ -1,163 +1,127 @@
-# Guía de Despliegue en Producción - Sistema Gaza
+# 🚀 Guía de Despliegue en Producción - Sistema GAZA (`syscomgaza.com`)
 
-Esta guía detalla los pasos requeridos para configurar, compilar y desplegar el **Sistema Gaza E-Commerce** en un entorno de producción (servidor VPS Linux, hosting de aplicaciones o nube corporativa), garantizando estabilidad y seguridad.
-
----
-
-## 1. Requisitos Previos del Servidor
-- **Sistema Operativo:** Ubuntu Server 22.04 LTS o superior (recomendado) o Windows Server.
-- **Entorno de Ejecución:** Node.js v20.x o superior.
-- **Gestor de Paquetes:** npm v10.x o superior.
-- **Base de Datos:** Instancia de MongoDB Atlas (Cloud) o servidor local de MongoDB configurado.
-- **Servidor Web:** Nginx (como proxy inverso y servidor estático).
-- **Gestor de Procesos:** PM2 (para mantener la API de Node.js corriendo continuamente en segundo plano).
+Esta guía detalla los pasos para configurar, compilar y desplegar el **Sistema GAZA Infraestructura TI** en servidores **AWS EC2 / Lightsail** con Ubuntu 22.04 LTS, Nginx, Certificados SSL de Let's Encrypt y PM2.
 
 ---
 
-## 2. Configuración y Despliegue de la API Backend
+## 1. Requisitos Previos e Infraestructura
+- **Servidor:** AWS EC2 / Lightsail (Ubuntu 22.04 LTS, 1-2 vCPU, 1-2 GB RAM).
+- **Memoria Swap (Recomendado 2GB):** Previene saturación de RAM durante el build de Vite.
+  ```bash
+  sudo fallocate -l 2G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+  ```
+- **Node.js & Gestor:** Node.js v20.x / v22.x y npm v10+.
+- **Servidor Web & Proxy:** Nginx con proxy inverso HTTP/2 y SSL.
+- **Gestor de Procesos:** PM2.
 
-### Paso 1: Clonar y Preparar el Backend
-Navega a la carpeta del backend e instala las dependencias de producción únicamente:
-```bash
-cd backend
-npm install --omit=dev
-```
+---
 
-### Paso 2: Crear el Archivo de Entorno (`.env`)
-Crea un archivo `.env` en la raíz de la carpeta `backend/` y configura las variables reales para producción:
+## 2. Variables de Entorno de Producción
+
+### 2.1 Backend (`backend/.env`)
 ```env
-# Servidor y Entorno
 PORT=5000
 NODE_ENV=production
-CORS_ORIGIN=https://tu-dominio-ecommerce.com
+CORS_ORIGIN=https://syscomgaza.com
 
-# Base de Datos (MongoDB Atlas)
-MONGO_URI=mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/gaza-prod?retryWrites=true&w=majority
+# Base de Datos MongoDB Atlas
+MONGODB_URI=mongodb+srv://<usuario>:<password>@syscom-gaza.mongodb.net/syscom-gaza?retryWrites=true&w=majority
 
-# Seguridad JWT
-JWT_SECRET=un_secreto_muy_largo_y_complejo_generado_con_crypto
-JWT_REFRESH_SECRET=otro_secreto_muy_largo_y_diferente
+# Autenticación JWT & Seguridad
+JWT_SECRET=tu_clave_secreta_jwt_muy_segura
+JWT_REFRESH_SECRET=tu_clave_secreta_refresh_jwt_muy_segura
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=30d
-JWT_MAX_REFRESH_SESSIONS=20
 
-# Credenciales de SYSCOM API
+# SYSCOM API Oficial
 SYSCOM_API_URL=https://developers.syscom.mx/api/v1
-SYSCOM_CLIENT_ID=client_id_real_de_produccion
-SYSCOM_API_KEY=api_key_real_de_produccion
+SYSCOM_CLIENT_ID=tu_client_id_syscom
+SYSCOM_CLIENT_SECRET=tu_client_secret_syscom
+
+# Estrategia de Precios
+PROFIT_MARGIN_PERCENT=15
+IVA_PERCENT=16
+FREE_SHIPPING_THRESHOLD_MXN=2499
+STANDARD_SHIPPING_COST_MXN=185
+
+# Pasarela Stripe (Producción Live)
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Notificaciones Instantáneas (Telegram Bot & Email)
+TELEGRAM_BOT_TOKEN=8887009732:AAEivSGboAm5kaPLSTpHkSHrqTk7OXC3hxE
+TELEGRAM_CHAT_ID=-5326017751
+ADMIN_EMAIL=syscom.gaza.ma9@gmail.com
 ```
-> [!CAUTION]
-> Asegúrate de que este archivo `.env` tenga permisos restrictivos en el servidor (`chmod 600 .env`) y nunca se suba al sistema de control de versiones.
 
-### Paso 3: Arrancar el Backend con PM2
-PM2 monitoriza la aplicación y la reinicia automáticamente si se cae:
-```bash
-# Instalar PM2 de forma global si no está instalado
-npm install -g pm2
-
-# Arrancar la API
-pm2 start index.js --name "gaza-backend"
-
-# Configurar PM2 para que se inicie con el arranque del sistema
-pm2 startup
-pm2 save
+### 2.2 Frontend (`frontend/.env`)
+```env
+VITE_API_URL=https://syscomgaza.com
+VITE_STRIPE_PUBLIC_KEY=pk_live_...
 ```
 
 ---
 
-## 3. Configuración y Despliegue del Frontend (Vite/React)
+## 3. Despliegue Automatizado con `deploy.sh`
 
-### Paso 1: Configurar Variables de Entorno del Frontend
-En la raíz de la carpeta `frontend/`, crea un archivo `.env` apuntando a la URL pública de la API de producción:
-```env
-VITE_API_URL=https://api.tu-dominio-ecommerce.com
-```
+El repositorio incluye el script automatizado [deploy.sh](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/deploy.sh). Para actualizar el servidor con los últimos cambios de la rama `Jerzain`:
 
-### Paso 2: Generar el Build de Producción
-Ejecuta el script de compilación para que Vite empaquete, minifique y optimice todos los recursos estáticos (HTML, JS, CSS):
 ```bash
-cd frontend
-npm install
-npm run build
+# Conectarse por SSH a la terminal de AWS y ejecutar:
+bash deploy.sh Jerzain
 ```
-Esto creará una carpeta llamada `dist/` en la raíz de `frontend/` que contiene todos los archivos estáticos listos para producción.
 
-### Paso 3: Configurar Nginx para Servir el Frontend
-Configura Nginx para que sirva el frontend estático y actúe como proxy inverso para la API del backend.
+### ¿Qué hace `deploy.sh` automáticamente?
+1. Realiza `git fetch` y `git checkout Jerzain` trayendo los últimos commits.
+2. Instala dependencias y compila el frontend optimizado con `npm run build`.
+3. Copia los archivos estáticos de `frontend/dist/` a la raíz servida por Nginx (`/var/www/html` o `/var/www/syscomgaza`).
+4. Reinicia la API del backend en PM2 con cero tiempo de inactividad (`pm2 restart gaza-backend`).
 
-Crea un archivo de configuración en `/etc/nginx/sites-available/gaza-ecommerce`:
+---
+
+## 4. Configuración de Nginx y Certificados SSL
+
+### Archivo de Configuración Nginx (`/etc/nginx/sites-available/syscomgaza.com`):
 ```nginx
 server {
     listen 80;
-    server_name tu-dominio-ecommerce.com www.tu-dominio-ecommerce.com;
+    server_name syscomgaza.com www.syscomgaza.com;
 
-    # Directorio de los archivos estáticos del frontend
-    root /var/www/gaza-ecommerce/frontend/dist;
+    root /var/www/syscomgaza/frontend/dist;
     index index.html;
 
-    # Soporte para React Router (redirección a index.html)
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # Redirección de las llamadas de la API al Backend corriendo en PM2 (puerto 5000)
     location /api/ {
-        proxy_pass http://localhost:5000/api/;
+        proxy_pass http://127.0.0.1:5000/api/;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
-Habilita el sitio y reinicia Nginx:
+### Certificados SSL con Let's Encrypt:
 ```bash
-sudo ln -s /etc/nginx/sites-available/gaza-ecommerce /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
+sudo certbot --nginx -d syscomgaza.com -d www.syscomgaza.com
 ```
 
 ---
 
-## 4. Certificados SSL (HTTPS)
-Para producción es indispensable asegurar la comunicación con HTTPS. Usa Let's Encrypt (Certbot) para generar certificados SSL gratuitos:
-```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d tu-dominio-ecommerce.com -d www.tu-dominio-ecommerce.com
-```
-Certbot actualizará automáticamente la configuración de Nginx para redirigir todo el tráfico HTTP a HTTPS de manera segura.
+## 5. Monitoreo y Mantenimiento
 
----
-
-## 5. Playbook de Monitoreo y Rollback
-
-### Monitoreo en Tiempo Real
-- **Ver logs del Backend:** `pm2 logs gaza-backend`
-- **Monitorear recursos (CPU/RAM):** `pm2 monit`
-- **Logs de Nginx (Errores de conexión):** `tail -f /var/log/nginx/error.log`
-
-### Estrategia de Rollback (Retorno a versión anterior)
-Si una actualización en producción falla y necesitas volver a la versión estable anterior inmediatamente, ejecuta los siguientes comandos en el servidor:
-
-```bash
-# 1. Volver al commit estable anterior en Git
-git checkout <hash_commit_estable_anterior>
-
-# 2. Re-construir el frontend
-cd frontend
-npm install
-npm run build
-
-# 3. Reiniciar el backend en PM2
-cd ../backend
-npm install --omit=dev
-pm2 restart gaza-backend
-
-# 4. Limpiar caché del proxy inverso
-sudo systemctl restart nginx
-```
-Esto restaurará la aplicación al último estado funcional documentado en menos de 2 minutos.
+- **Ver logs en tiempo real:** `pm2 logs gaza-backend`
+- **Ver estado del cluster:** `pm2 status`
+- **Monitorear CPU / RAM:** `pm2 monit`
+- **Ver logs de acceso Nginx:** `tail -f /var/log/nginx/access.log`
+- **Ver logs de error Nginx:** `tail -f /var/log/nginx/error.log`
