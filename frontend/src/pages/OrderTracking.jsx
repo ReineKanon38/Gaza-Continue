@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Container, Card, Badge, Spinner, Alert, Row, Col } from 'react-bootstrap';
+import { Container, Card, Badge, Spinner, Alert, Row, Col, Button } from 'react-bootstrap';
 import { BsCheckCircleFill, BsCircle, BsTruck, BsBoxSeam, BsShopWindow, BsPerson } from 'react-icons/bs';
 import AppNavbar from '../components/AppNavbar';
 import orderService from '../services/orderService';
@@ -138,10 +138,37 @@ function OrderTracking() {
                 </Row>
 
                 {order.trackingNumber && (
-                  <div className="mt-3 p-2 rounded bg-light d-flex align-items-center gap-2">
-                    <BsTruck className="text-primary" />
-                    <span className="fw-semibold">Número de guía:</span>
-                    <span>{order.trackingNumber}</span>
+                  <div className="mt-3 p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div className="d-flex align-items-center gap-2">
+                      <BsTruck className="text-primary fs-4" />
+                      <div>
+                        <div className="small text-muted fw-semibold">Número de guía de envío:</div>
+                        <span className="fw-bold fs-6 text-dark font-monospace">{order.trackingNumber}</span>
+                      </div>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="rounded-pill px-3 fw-semibold"
+                        onClick={() => {
+                          navigator.clipboard.writeText(order.trackingNumber);
+                          alert('¡Número de guía copiado al portapapeles!');
+                        }}
+                      >
+                        📋 Copiar Guía
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        className="rounded-pill px-3 fw-semibold btn-primary-gaza"
+                        onClick={() => {
+                          window.open(`https://www.google.com/search?q=rastreo+paquete+${encodeURIComponent(order.trackingNumber)}`, '_blank');
+                        }}
+                      >
+                        🔍 Rastrear en Paquetería
+                      </Button>
+                    </div>
                   </div>
                 )}
               </Card.Body>

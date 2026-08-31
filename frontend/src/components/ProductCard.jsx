@@ -111,24 +111,6 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
             }}>
                 {product.name}
             </Card.Title>
-            <div className="product-title-hover-overlay">
-              <div className="product-hover-info">
-                <div className="d-flex justify-content-between align-items-start mb-3">
-                  <span className={`badge ${isOutOfStock ? 'bg-secondary' : hasLowStock ? 'bg-warning text-dark' : 'bg-primary text-white'}`}>
-                    {isOutOfStock ? 'Sin stock' : 'Disponible'}
-                  </span>
-                </div>
-                <h6 className="product-hover-title" style={{ color: 'var(--primary-light)' }}>{product.name}</h6>
-                {productCode && <p className="product-hover-meta" style={{ color: 'var(--primary-light)' }}>Código: {productCode}</p>}
-                {productBenefits.length > 0 ? (
-                  <ul className="product-hover-features mb-0">
-                    {productBenefits.map((benefit, index) => (
-                      <li key={index}>{benefit}</li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            </div>
           </div>
           
           <Card.Text className="text-muted small mb-3">
@@ -146,6 +128,16 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
               }}>
                   {product.description}
               </Card.Text>
+          )}
+
+          {isList && productBenefits && productBenefits.length > 0 && (
+            <div className="d-flex flex-wrap gap-1 mb-3">
+              {productBenefits.slice(0, 3).map((benefit, bIdx) => (
+                <span key={bIdx} className="badge bg-light text-dark border px-2 py-1 small fw-normal">
+                  ✓ {benefit}
+                </span>
+              ))}
+            </div>
           )}
 
           <div className={`mt-auto ${isList ? 'd-flex align-items-end justify-content-between w-100' : ''}`}>

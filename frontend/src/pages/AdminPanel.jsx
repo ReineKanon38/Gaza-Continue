@@ -599,6 +599,117 @@ export default function AdminPanel() {
     }
   };
 
+  const handleCopyShippingData = (order) => {
+    if (!order) return;
+    const text = [
+      `DESTINATARIO: ${order.customerName || ''}`,
+      `EMAIL: ${order.customerEmail || ''}`,
+      `TELÉFONO: ${order.customerPhone || 'No especificado'}`,
+      `DIRECCIÓN: ${order.shippingAddress?.street || ''} ${order.shippingAddress?.number || ''}`,
+      `COLONIA: ${order.shippingAddress?.neighborhood || ''}`,
+      `CIUDAD / ESTADO: ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''}`,
+      `CÓDIGO POSTAL: ${order.shippingAddress?.zipCode || ''}`,
+      `PAÍS: México`,
+      `ORDEN DE COMPRA: ${order.orderId || ''}`
+    ].join('\n');
+
+    navigator.clipboard.writeText(text);
+    alert('📋 ¡Datos de envío copiados al portapapeles! Listos para pegar en SYSCOM o paquetería.');
+  };
+
+  const handlePrintShippingLabel = (order) => {
+    if (!order) return;
+    const printWindow = window.open('', '_blank', 'width=700,height=800');
+    if (!printWindow) return;
+
+    const productsHtml = (order.products || []).map(item => `
+      <tr>
+        <td style="padding: 6px; border-bottom: 1px solid #ddd;">${item.product?.name || 'Producto'}</td>
+        <td style="padding: 6px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Etiqueta de Envío GAZA - ${order.orderId}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; color: #111; }
+          .label-container { border: 2px solid #000; padding: 25px; max-width: 600px; margin: 0 auto; border-radius: 8px; }
+          .header { border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
+          .section-title { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 4px; }
+          .destinatario-box { background: #f8fafc; padding: 14px; border-radius: 6px; margin-bottom: 18px; border-left: 5px solid #2563eb; }
+          .remitente-box { padding: 10px; margin-bottom: 15px; border-left: 3px solid #64748b; font-size: 13px; }
+          .table-products { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+          .barcode-box { text-align: center; font-family: monospace; font-size: 20px; letter-spacing: 4px; margin-top: 20px; border: 1px dashed #666; padding: 10px; background: #fafafa; }
+          @media print {
+            button { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="label-container">
+          <div class="header">
+            <div>
+              <h2 style="margin: 0; color: #1e3a8a;">GAZA - INFRAESTRUCTURA TI</h2>
+              <div style="font-size: 12px; color: #64748b;">Etiqueta Oficial de Paquete / Intermediario</div>
+            </div>
+            <div style="text-align: right;">
+              <strong>${order.orderId}</strong><br/>
+              <span style="font-size: 11px; color: #64748b;">${new Date(order.createdAt).toLocaleDateString('es-MX')}</span>
+            </div>
+          </div>
+
+          <div class="remitente-box">
+            <div class="section-title">Remitente:</div>
+            <strong>GAZA INFRAESTRUCTURA TI</strong><br/>
+            Centro de Distribución y Envíos<br/>
+            contacto@syscomgaza.com
+          </div>
+
+          <div class="destinatario-box">
+            <div class="section-title">Destinatario / Entregar A:</div>
+            <h3 style="margin: 0 0 6px 0; color: #0f172a;">${order.customerName || 'Cliente'}</h3>
+            <div style="font-size: 15px; line-height: 1.4;">
+              ${order.shippingAddress?.street || ''} ${order.shippingAddress?.number || ''}<br/>
+              Col. ${order.shippingAddress?.neighborhood || ''}<br/>
+              <strong>${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''}</strong><br/>
+              <strong>C.P. ${order.shippingAddress?.zipCode || ''}</strong>
+            </div>
+            <div style="margin-top: 8px; font-size: 13px; color: #334155;">
+              <strong>Teléfono:</strong> ${order.customerPhone || 'N/A'} | <strong>Email:</strong> ${order.customerEmail || ''}
+            </div>
+          </div>
+
+          <div style="margin-top: 15px;">
+            <div class="section-title">Contenido del Paquete:</div>
+            <table class="table-products">
+              <thead>
+                <tr style="background: #f1f5f9; text-align: left;">
+                  <th style="padding: 6px;">Producto</th>
+                  <th style="padding: 6px; text-align: center;">Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${productsHtml}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="barcode-box">
+            *${order.orderId}*
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+          <button onclick="window.print()" style="padding: 10px 20px; font-size: 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer;">🖨️ Imprimir Etiqueta</button>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   // Funciones para usuarios
   const handleViewUser = (user) => {
     setSelectedUser(user);
@@ -1218,6 +1329,16 @@ export default function AdminPanel() {
             <Button variant="success" onClick={() => handleCompleteOrder(selectedOrder._id)}>
               <FiCheck /> Marcar como Completada
             </Button>
+          )}
+          {selectedOrder && (
+            <>
+              <Button variant="outline-primary" onClick={() => handleCopyShippingData(selectedOrder)}>
+                📋 Copiar Dirección
+              </Button>
+              <Button variant="outline-secondary" onClick={() => handlePrintShippingLabel(selectedOrder)}>
+                🖨️ Imprimir Etiqueta GAZA
+              </Button>
+            </>
           )}
           <Button variant="secondary" onClick={() => setShowOrderModal(false)}>
             Cerrar

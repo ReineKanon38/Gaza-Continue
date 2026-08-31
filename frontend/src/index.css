@@ -186,122 +186,92 @@
   transform: scale(1.03);
 }
 
+html, body {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar moderna y elegante */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-0, #f1f5f9);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 .product-title-wrapper {
   position: relative;
-  display: inline-block;
+  display: block;
   width: 100%;
-  overflow: visible;
-  z-index: 5;
-}
-
-.product-title-hover-overlay {
-  position: absolute;
-  bottom: calc(100% + 0.75rem);
-  left: 0;
-  right: 0;
-  width: 100%;
-  max-width: 320px;
-  margin: 0 auto;
-  background: #d1d5db;
-  border: 1px solid rgba(15, 23, 42, 0.18);
-  border-radius: 1rem;
-  color: #0f172a;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: translateY(6px);
-  z-index: 20;
-  box-shadow: 0 24px 45px rgba(15, 23, 42, 0.18);
-  padding: 1rem;
-}
-
-.product-title-hover-overlay::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 1.5rem;
-  border-width: 10px;
-  border-style: solid;
-  border-color: #e2e8f0 transparent transparent transparent;
-}
-
-.product-title-wrapper:hover .product-title-hover-overlay {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.product-hover-info {
-  width: 100%;
-}
-
-.product-hover-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin-bottom: 0.4rem;
-  line-height: 1.35;
-  color: #0f172a;
-}
-
-.product-hover-meta {
-  font-size: 0.78rem;
-  color: rgba(15, 23, 42, 0.85);
-  margin-bottom: 0.75rem;
-}
-
-.product-hover-features {
-  list-style: disc inside;
-  margin: 0;
-  padding-left: 1rem;
-}
-
-.product-hover-features li {
-  font-size: 0.88rem;
-  margin-bottom: 0.45rem;
-  color: rgba(15, 23, 42, 0.95);
-}
-
-.product-title-wrapper:hover .product-title {
-  color: var(--text-primary);
 }
 
 .product-title {
   color: var(--text-primary);
+  transition: color 0.2s ease;
 }
 
-.product-hover-info {
-  width: 100%;
+.product-card:hover .product-title {
+  color: var(--primary-color, #2563eb);
 }
 
-.product-hover-title {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
-  color: #1d4ed8;
+/* Adaptación Responsiva para Tarjetas en Móvil */
+@media (max-width: 767.98px) {
+  .product-card.d-flex.flex-row {
+    flex-direction: column !important;
+  }
+
+  .product-card .product-card-media {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+  }
+
+  .product-card-media div {
+    height: 180px !important;
+  }
 }
 
-.product-hover-meta {
-  font-size: 0.8rem;
-  color: #1d4ed8;
-  margin-bottom: 0.75rem;
+/* Notificaciones y Alertas Premium */
+.alert {
+  border-radius: 1rem !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
 }
 
-.product-hover-features {
-  list-style: disc inside;
-  margin: 0;
-  padding-left: 1rem;
+.alert-success {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #065f46 !important;
+  border-left: 4px solid #10b981 !important;
 }
 
-.product-hover-features li {
-  font-size: 0.9rem;
-  margin-bottom: 0.45rem;
-  color: #1d4ed8;
+.alert-danger {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #991b1b !important;
+  border-left: 4px solid #ef4444 !important;
 }
 
-.product-hover-overlay .badge {
-  font-size: 0.75rem;
-  padding: 0.45rem 0.65rem;
+.alert-warning {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #92400e !important;
+  border-left: 4px solid #f59e0b !important;
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #1e40af !important;
+  border-left: 4px solid #3b82f6 !important;
 }
 
 /* ============================================
