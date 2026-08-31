@@ -39,11 +39,6 @@ function Checkout() {
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState('');
 
-  useEffect(() => {
-    if (address.zipCode && address.zipCode.length === 5) {
-      setShippingCost(totalPrice >= 2500 ? 0 : 185);
-    }
-  }, [address.zipCode, totalPrice]);
 
   useEffect(() => {
     const hydrateAddress = async () => {
@@ -261,7 +256,7 @@ function Checkout() {
                   <ul className="list-unstyled mb-0 d-grid gap-2 small text-dark">
                     <li><strong>No. de Orden:</strong> <code className="bg-light px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
                     <li><strong>Método de Pago:</strong> Tarjeta de Crédito / Débito (Procesado en Línea)</li>
-                    <li><strong>Monto Total Pagado:</strong> ${(totalPrice + shippingCost).toLocaleString('es-MX')} MXN</li>
+                    <li><strong>Monto Total Pagado:</strong> ${totalPrice.toLocaleString('es-MX')} MXN</li>
                     <li><strong>Estado de la Orden:</strong> <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">En Proceso / Preparación</span></li>
                   </ul>
                 </div>
@@ -275,7 +270,7 @@ function Checkout() {
                     <li><strong>Banco Destino:</strong> {selectedBankName}</li>
                     <li><strong>Titular de la Cuenta:</strong> GAZA TI E-COMMERCE S.A. DE C.V.</li>
                     <li><strong>CLABE Interbancaria:</strong> 0121 8000 1234 5678 90</li>
-                    <li><strong>Monto a Transferir:</strong> ${(totalPrice + shippingCost).toLocaleString('es-MX')} MXN</li>
+                    <li><strong>Monto a Transferir:</strong> ${totalPrice.toLocaleString('es-MX')} MXN</li>
                     <li><strong>Concepto / Referencia de Pago:</strong> <code className="bg-light px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
                   </ul>
                   <div className="mt-3 p-3 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25 text-warning small">
