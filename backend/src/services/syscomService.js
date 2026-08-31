@@ -343,28 +343,32 @@ class SyscomService {
    * Transformar producto de SYSCOM a nuestro schema
    */
   transformSyscomProduct(syscomProduct = {}) {
-    // Si ya viene de MongoDB con precio en MXN (> 0)
-    const existingPrice = Number(syscomProduct.price ?? syscomProduct.precio_mxn ?? syscomProduct.listPrice ?? 0);
-    const existingListPrice = Number(syscomProduct.listPrice ?? syscomProduct.precio_lista_mxn ?? existingPrice);
+    const rawPriceUSD = this.extractPriceUSD(syscomProduct);
+    const rawListUSD = this.extractListPriceUSD(syscomProduct);
+    const marginPercent = Number(process.env.PROFIT_MARGIN_PERCENT || 15);
+    const marginMultiplier = 1 + (marginPercent / 100);
 
-    let priceMXN = existingPrice;
-    let listPriceMXN = existingListPrice;
+    let priceMXN = 0;
+    let listPriceMXN = 0;
 
-    if (priceMXN <= 0) {
-      // Mapeo inteligente de precios (en USD de SYSCOM)
-      const priceUSD = this.extractPriceUSD(syscomProduct);
-      const baseCostMXN = convertUSDtoMXN(priceUSD);
-      const marginPercent = Number(process.env.PROFIT_MARGIN_PERCENT || 15);
-      const marginMultiplier = 1 + (marginPercent / 100);
-
-      // Precio base de venta al público en GAZA
+    if (rawPriceUSD > 0) {
+      const baseCostMXN = convertUSDtoMXN(rawPriceUSD);
       priceMXN = Math.round(baseCostMXN * marginMultiplier * 100) / 100;
+    } else {
+      const existingPrice = Number(syscomProduct.price ?? syscomProduct.precio_mxn ?? 0);
+      priceMXN = existingPrice > 0 ? Math.round(existingPrice * marginMultiplier * 100) / 100 : 100;
+    }
 
-      // Precio de lista oficial de referencia
-      const rawListUSD = this.extractListPriceUSD(syscomProduct);
-      listPriceMXN = rawListUSD > 0
-        ? convertUSDtoMXN(rawListUSD)
-        : Math.round(priceMXN * 1.25 * 100) / 100;
+    if (rawListUSD > 0) {
+      listPriceMXN = convertUSDtoMXN(rawListUSD);
+    } else {
+      const existingList = Number(syscomProduct.listPrice ?? syscomProduct.precio_lista_mxn ?? 0);
+      listPriceMXN = existingList > 0 ? existingList : Math.round(priceMXN * 1.25 * 100) / 100;
+    }
+
+    // Asegurar que el precio de lista sea mayor o igual al precio de venta para calcular descuentos
+    if (listPriceMXN < priceMXN) {
+      listPriceMXN = Math.round(priceMXN * 1.25 * 100) / 100;
     }
 
     // Obtener categoría(s) de SYSCOM
