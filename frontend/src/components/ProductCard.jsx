@@ -8,6 +8,7 @@ import { generateProductBenefits } from '../utils/productBenefits';
 function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
   const navigate = useNavigate();
   const { addToCart, isInCart, getItemQuantity } = useCartHelpers();
+  const [imgError, setImgError] = React.useState(false);
 
   if (!product) {
     return null;
@@ -27,8 +28,6 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
     position: 'relative',
     overflow: 'hidden'
   };
-
-  const [imgError, setImgError] = React.useState(false);
   const imageUrl = product.image || product.img_portada || product.imagen || product.picture || product.foto || null;
   const safePrice = Number(product.price || 0);
   const safeListPrice = Number(product.listPrice || 0);

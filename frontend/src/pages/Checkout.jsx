@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Spinner, Form } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { BsArrowLeft, BsCheckCircle, BsShieldCheck, BsTruck } from 'react-icons/bs';
 import AppNavbar from '../components/AppNavbar';
 import AddressForm from '../components/AddressForm';
@@ -19,7 +19,6 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_t
 const CHECKOUT_ADDRESS_STORAGE_KEY = 'gaza-checkout-address';
 
 function Checkout() {
-  const navigate = useNavigate();
   const { cart, totalItems, totalPrice, clearCart } = useCartHelpers();
 
   const [address, setAddress] = useState({

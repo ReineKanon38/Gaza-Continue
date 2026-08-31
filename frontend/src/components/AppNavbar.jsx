@@ -227,7 +227,6 @@ function AppNavbar() {
     const { totalItems } = useCartHelpers();
     const { user, logout, isAdmin } = useAuth();
     const [searchParams] = useSearchParams();
-    const [categories, setCategories] = useState([]);
     const [menuQuery, setMenuQuery] = useState('');
     const [megaMenuOpen, setMegaMenuOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -263,16 +262,12 @@ function AppNavbar() {
     useEffect(() => {
         const load = async () => {
             try {
-                const [catRes, brandList] = await Promise.all([
-                    productService.getSyscomCategories(),
-                    productService.getBrands()
-                ]);
-                setCategories(catRes.categories || []);
+                const brandList = await productService.getBrands();
                 if (Array.isArray(brandList) && brandList.length > 0) {
                     setAvailableBrands(brandList);
                 }
             } catch {
-                setCategories([]);
+                // Ignore brand loading error in navbar
             }
         };
         load();

@@ -64,6 +64,7 @@ const AddressForm = ({
               <Form.Text className="text-muted">
                 {zipLookupLoading ? 'Consultando CP...' : 'Ingresa tu CP para autocompletar tu dirección'}
               </Form.Text>
+              {zipLookupSuccess && !zipLookupLoading && <Form.Text className="text-success d-block">✓ Ubicación encontrada automáticamente</Form.Text>}
               {zipLookupError && <Form.Text className="text-danger d-block">{zipLookupError}</Form.Text>}
             </Form.Group>
           </Col>

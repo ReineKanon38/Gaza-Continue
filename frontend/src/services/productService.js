@@ -126,7 +126,7 @@ export const getSuperPrecioProducts = async (params = {}) => {
   };
 };
 
-const flattenSyscomCategories = (rawCategories) => {
+export const flattenSyscomCategories = (rawCategories) => {
   const rootList = Array.isArray(rawCategories)
     ? rawCategories
     : (Array.isArray(rawCategories?.categorias)

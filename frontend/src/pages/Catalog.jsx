@@ -110,7 +110,6 @@ function Catalog() {
     const [totalProducts, setTotalProducts] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [categories, setCategories] = useState([]);
-    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
     const [dataSource, setDataSource] = useState('syscom');
     const hasLoadedOnceRef = useRef(false);
     const productsPerPage = 20;
@@ -188,15 +187,12 @@ function Catalog() {
 
     useEffect(() => {
         const loadCategories = async () => {
-            setIsLoadingCategories(true);
             try {
                 const response = await productService.getSyscomCategories();
                 setCategories(response.categories || []);
             } catch (error) {
                 console.error('Error cargando categorias SYSCOM:', error);
                 setCategories([]);
-            } finally {
-                setIsLoadingCategories(false);
             }
         };
 
