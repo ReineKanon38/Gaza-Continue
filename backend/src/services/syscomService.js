@@ -291,6 +291,21 @@ class SyscomService {
     return 0;
   }
 
+  extractListPriceUSD(syscomProduct = {}) {
+    const listCandidates = [
+      syscomProduct.precio_lista,
+      syscomProduct.precios?.precio_lista,
+      syscomProduct.listPrice
+    ];
+
+    for (const candidate of listCandidates) {
+      const value = this.toNumber(candidate);
+      if (value > 0) return value;
+    }
+
+    return 0;
+  }
+
   getPrimarySyscomCategoryName(syscomProduct = {}) {
     if (Array.isArray(syscomProduct.categorias) && syscomProduct.categorias.length > 0) {
       const specificCategory =
@@ -338,8 +353,18 @@ class SyscomService {
     if (priceMXN <= 0) {
       // Mapeo inteligente de precios (en USD de SYSCOM)
       const priceUSD = this.extractPriceUSD(syscomProduct);
-      priceMXN = convertUSDtoMXN(priceUSD);
-      listPriceMXN = priceMXN;
+      const baseCostMXN = convertUSDtoMXN(priceUSD);
+      const marginPercent = Number(process.env.PROFIT_MARGIN_PERCENT || 15);
+      const marginMultiplier = 1 + (marginPercent / 100);
+
+      // Precio base de venta al público en GAZA
+      priceMXN = Math.round(baseCostMXN * marginMultiplier * 100) / 100;
+
+      // Precio de lista oficial de referencia
+      const rawListUSD = this.extractListPriceUSD(syscomProduct);
+      listPriceMXN = rawListUSD > 0
+        ? convertUSDtoMXN(rawListUSD)
+        : Math.round(priceMXN * 1.25 * 100) / 100;
     }
 
     // Obtener categoría(s) de SYSCOM

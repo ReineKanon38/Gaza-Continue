@@ -19,7 +19,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_t
 const CHECKOUT_ADDRESS_STORAGE_KEY = 'gaza-checkout-address';
 
 function Checkout() {
-  const { cart, totalItems, totalPrice, clearCart } = useCartHelpers();
+  const { cart, totalItems, subtotal, tax, shippingCost, totalPrice, clearCart } = useCartHelpers();
 
   const [address, setAddress] = useState({
     street: '', number: '', neighborhood: '', city: '', state: '', zipCode: '', country: 'México'
@@ -33,7 +33,6 @@ function Checkout() {
   const [zipLookupError, setZipLookupError] = useState('');
   const [zipLookupSuccess, setZipLookupSuccess] = useState(false);
   const [autoCompleteOptions, setAutoCompleteOptions] = useState({ neighborhoods: [] });
-  const [shippingCost, setShippingCost] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState('');
   const [isLoadingPayment, setIsLoadingPayment] = useState(true);
@@ -400,7 +399,7 @@ function Checkout() {
                         {selectedProvider === 'stripe' && stripeClientSecret ? (
                           <Elements stripe={stripePromise} options={{ clientSecret: stripeClientSecret }}>
                             <StripePaymentForm 
-                              amount={totalPrice + shippingCost} 
+                              amount={totalPrice} 
                               onPaymentSuccess={handleStripeSuccess} 
                               isProcessingParent={isSubmittingOrder}
                               isSandbox={isSandboxSession}
@@ -441,13 +440,18 @@ function Checkout() {
                 
                 <div className="summary-row">
                   <span>Subtotal ({totalItems} productos)</span>
-                  <span className="text-dark fw-bold">${totalPrice.toLocaleString()}</span>
+                  <span className="text-dark fw-bold">${subtotal.toLocaleString('es-MX')}</span>
+                </div>
+
+                <div className="summary-row">
+                  <span>IVA (16% México)</span>
+                  <span className="text-dark fw-bold">${tax.toLocaleString('es-MX')}</span>
                 </div>
                 
                 <div className="summary-row">
-                  <span><BsTruck className="me-2" /> Envío</span>
+                  <span><BsTruck className="me-2" /> Envío a Domicilio</span>
                   <span className={shippingCost === 0 ? "free-shipping" : "text-dark fw-bold"}>
-                    {shippingCost === 0 ? 'Gratis' : `$${shippingCost}`}
+                    {shippingCost === 0 ? '¡Gratis!' : `$${shippingCost.toLocaleString('es-MX')}`}
                   </span>
                 </div>
 
@@ -455,12 +459,12 @@ function Checkout() {
 
                 <div className="total-row">
                   <span className="total-label">TOTAL A PAGAR</span>
-                  <span className="total-amount">${(totalPrice + shippingCost).toLocaleString()}</span>
+                  <span className="total-amount">${totalPrice.toLocaleString('es-MX')}</span>
                 </div>
 
                 <div className="security-note mt-3">
                   <BsShieldCheck className="text-success" size={18} />
-                  <span>Flujo bancario con validación manual de seguridad</span>
+                  <span>Flujo cifrado y protegido por GAZA Infraestructura TI</span>
                 </div>
               </Card>
             </div>

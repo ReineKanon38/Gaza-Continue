@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Button, Card, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Button, Card, Badge, ProgressBar } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
 import { BsTrash, BsArrowLeft, BsShieldLock, BsCreditCard, BsTruck, BsCheckCircle, BsDashLg, BsPlusLg, BsStars } from 'react-icons/bs';
 import { useCartHelpers } from '../hooks/useCartHooks'; 
@@ -7,7 +7,20 @@ import './Checkout.css';
 
 function Cart() {
   const navigate = useNavigate();
-  const { cart, isCartEmpty, removeFromCart, clearCart, subtotal, totalPrice, updateQuantity } = useCartHelpers(); 
+  const { 
+    cart, 
+    isCartEmpty, 
+    removeFromCart, 
+    clearCart, 
+    subtotal, 
+    tax, 
+    shippingCost, 
+    isFreeShipping, 
+    freeShippingRemaining, 
+    freeShippingProgress, 
+    totalPrice, 
+    updateQuantity 
+  } = useCartHelpers(); 
 
   const handleCheckout = () => {
     // Redirigir a checkout para registrar dirección y realizar validación bancaria.
@@ -55,6 +68,31 @@ function Cart() {
       </div>
 
       <Container className="fade-in-up">
+        {/* BARRA DINÁMICA DE ENVÍO GRATIS */}
+        <Card className="border-0 mb-4 p-3 shadow-sm" style={{ background: isFreeShipping ? '#ecfdf5' : '#f8fafc', borderLeft: isFreeShipping ? '5px solid #10b981' : '5px solid #2563eb' }}>
+          <div className="d-flex align-items-center justify-content-between mb-2">
+            <div className="d-flex align-items-center gap-2">
+              <BsTruck className={isFreeShipping ? 'text-success fs-5' : 'text-primary fs-5'} />
+              <span className="fw-bold text-dark" style={{ fontSize: '0.95rem' }}>
+                {isFreeShipping ? (
+                  '🎉 ¡Felicidades! Tu orden califica para ENVÍO GRATIS a todo México'
+                ) : (
+                  <>🚚 ¡Agrega <span className="text-primary">${freeShippingRemaining.toLocaleString('es-MX')} MXN</span> más para obtener <strong>ENVÍO GRATIS</strong>!</>
+                )}
+              </span>
+            </div>
+            <Badge bg={isFreeShipping ? 'success' : 'primary'} className="px-2.5 py-1.5">
+              {isFreeShipping ? 'Envío Gratis Activo' : `Meta: $2,499 MXN`}
+            </Badge>
+          </div>
+          <ProgressBar 
+            now={freeShippingProgress} 
+            variant={isFreeShipping ? 'success' : 'primary'} 
+            style={{ height: '8px', borderRadius: '4px' }} 
+            animated={!isFreeShipping}
+          />
+        </Card>
+
         <Row className="g-5"> 
           <Col lg={8}>
             {/* LISTA DE PRODUCTOS */}
@@ -77,7 +115,7 @@ function Cart() {
                           <Badge bg={item.product.stock > 5 ? 'success' : 'warning'} className="bg-opacity-10 text-dark border border-opacity-25 px-2 py-1 fw-normal small">
                             <BsCheckCircle className="me-1 text-success" /> {item.product.stock > 0 ? `Stock: ${item.product.stock}` : 'Sin stock'}
                           </Badge>
-                          <span className="text-secondary small"><BsTruck className="me-1" /> Envío Directo</span>
+                          <span className="text-secondary small"><BsTruck className="me-1" /> Envío Directo GAZA</span>
                         </div>
                         <div className="d-flex align-items-center gap-2">
                           <Button
@@ -103,18 +141,20 @@ function Cart() {
                         </div>
                       </Col>
                       <Col md={3} className="text-md-end mt-3 mt-md-0">
-                        <div className="small text-secondary mb-1">
-                          ${Number(item.product.price || 0).toLocaleString('es-MX')} c/u
+                        <div className="fw-bold text-dark fs-5">
+                          ${(item.product.price * item.quantity).toLocaleString('es-MX')}
                         </div>
-                        <div className="fs-4 fw-bold text-primary mb-3">
-                          ${(Number(item.product.price || 0) * item.quantity).toLocaleString('es-MX')}
+                        <div className="text-secondary small mb-3">
+                          ${Number(item.product.price || 0).toLocaleString('es-MX')} c/u (neto)
                         </div>
                         <Button 
                           variant="outline-danger" 
-                          className="rounded-pill px-3 btn-sm border-0 bg-danger bg-opacity-10 text-danger"
+                          size="sm" 
+                          className="border-0 p-2 text-danger bg-danger bg-opacity-10 rounded-circle"
                           onClick={() => removeFromCart(item.product._id)}
+                          title="Eliminar producto"
                         >
-                          <BsTrash className="me-1" /> Quitar
+                          <BsTrash />
                         </Button>
                       </Col>
                     </Row>
@@ -142,23 +182,33 @@ function Cart() {
               <Card className="auth-card border-0 p-4">
                 <h3 className="fw-bold mb-4 h5 text-dark">Resumen de Orden</h3>
                 
-                <div className="d-flex justify-content-between mb-3 text-secondary small">
-                  <span>Subtotal ({cart.items.reduce((acc, i) => acc + i.quantity, 0)} items)</span>
+                <div className="d-flex justify-content-between mb-2 text-secondary small">
+                  <span>Subtotal ({cart.items.reduce((acc, i) => acc + i.quantity, 0)} items):</span>
                   <span className="text-dark fw-bold">${subtotal.toLocaleString('es-MX')}</span>
                 </div>
+                <div className="d-flex justify-content-between mb-2 text-secondary small">
+                  <span>IVA (16% México):</span>
+                  <span className="text-dark fw-bold">${tax.toLocaleString('es-MX')}</span>
+                </div>
                 <div className="d-flex justify-content-between mb-3 text-secondary small">
-                  <span>Envío estimado</span>
-                  <span className="text-muted italic">Calculado en checkout</span>
+                  <span>Envío a Domicilio:</span>
+                  {isFreeShipping ? (
+                    <Badge bg="success" className="bg-opacity-10 text-success fw-bold px-2 py-1">
+                      ¡GRATIS!
+                    </Badge>
+                  ) : (
+                    <span className="text-dark fw-bold">${shippingCost.toLocaleString('es-MX')}</span>
+                  )}
                 </div>
 
-                <hr className="my-4 opacity-50" />
+                <hr className="my-3 opacity-50" />
 
                 <div className="text-center py-2 mb-4">
-                  <div className="text-uppercase small text-secondary fw-bold mb-1">Total Estimado</div>
+                  <div className="text-uppercase small text-secondary fw-bold mb-1">Total a Pagar</div>
                   <div className="text-primary display-6 fw-bold">
                     ${totalPrice.toLocaleString('es-MX')}
                   </div>
-                  <p className="text-secondary small mt-1">IVA incluido</p>
+                  <p className="text-secondary small mt-1">Impuestos y envío incluidos</p>
                 </div>
 
                 <Button 
@@ -173,10 +223,10 @@ function Cart() {
                 <div className="p-3 rounded-3 border bg-white bg-opacity-40">
                   <div className="d-flex align-items-center mb-2">
                     <BsShieldLock className="text-success me-2" size={18} />
-                    <span className="small fw-bold text-dark">Compra de Seguridad Protegida</span>
+                    <span className="small fw-bold text-dark">Compra Protegida por GAZA</span>
                   </div>
                   <p className="text-secondary mb-0" style={{ fontSize: '0.75rem', lineHeight: '1.4' }}>
-                    Tus datos de pedido se transmiten de forma encriptada bajo protocolos de seguridad TLS.
+                    Tus pagos y datos de envío están cifrados y asegurados bajo protocolos de seguridad TLS / Stripe.
                   </p>
                 </div>
               </Card>

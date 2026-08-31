@@ -161,6 +161,7 @@ function ProductCard({ product, matchMeta = null, viewMode = 'grid' }) {
                   ${safePrice.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               )}
+              <span className="text-secondary" style={{ fontSize: '0.75rem' }}>+ 16% IVA al pagar</span>
               
               <div className="mt-2 text-muted small d-flex align-items-center">
                 <span className={`d-inline-block rounded-circle me-2 ${stock > 0 ? 'bg-success' : 'bg-secondary'}`} style={{ width: '8px', height: '8px' }}></span>

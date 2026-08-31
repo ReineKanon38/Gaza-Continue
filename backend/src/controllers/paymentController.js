@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import WebhookLog from '../models/WebhookLog.js';
 import Order from '../models/Order.js';
 import syscomService from '../services/syscomService.js';
+import notificationService from '../services/notificationService.js';
 
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
@@ -90,10 +91,11 @@ export const createPaymentSession = async (req, res) => {
         }
       }
       
-      // Aplicar misma regla de envío del frontend
+      // Aplicar IVA (16%) y regla de envío (Gratis si >= $2,499)
       if (secureAmount > 0) {
-        const shippingCost = secureAmount >= 2500 ? 0 : 185;
-        secureAmount += shippingCost;
+        const taxAmount = Math.round(secureAmount * 0.16 * 100) / 100;
+        const shippingCost = (secureAmount + taxAmount) >= 2499 ? 0 : 185;
+        secureAmount = Math.round((secureAmount + taxAmount + shippingCost) * 100) / 100;
       }
     } else if (clientAmount && clientAmount > 0) {
       // Fallback estricto solo para tests o compatibilidad, idealmente debe removerse en producción pura.
@@ -300,6 +302,7 @@ export const stripeWebhook = async (req, res) => {
           }
           await order.save();
           logger.info(`Orden ${orderId} actualizada a aprobada desde webhook Stripe`);
+          notificationService.notifyNewPaidOrder(order).catch(() => {});
         }
       }
       break;

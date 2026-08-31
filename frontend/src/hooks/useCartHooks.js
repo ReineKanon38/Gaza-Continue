@@ -144,12 +144,22 @@ export const useCartHelpers = () => {
         const price = typeof item.product.price === 'number' ? item.product.price : 0;
         return total + (price * item.quantity);
     }, 0);
+
+    // IVA 16% México
+    const tax = Math.round(subtotal * 0.16 * 100) / 100;
     
     const discountAmount = cart.discount.percentage > 0 
         ? (subtotal * cart.discount.percentage / 100) 
         : cart.discount.amount;
+
+    // Regla de Envío Gratis: compras a partir de $2,499 MXN
+    const FREE_SHIPPING_THRESHOLD = 2499;
+    const isFreeShipping = (subtotal + tax) >= FREE_SHIPPING_THRESHOLD;
+    const shippingCost = isFreeShipping ? 0 : 185;
+    const freeShippingRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - (subtotal + tax));
+    const freeShippingProgress = Math.min(100, Math.round(((subtotal + tax) / FREE_SHIPPING_THRESHOLD) * 100));
         
-    const totalPrice = subtotal - discountAmount + cart.shipping.cost;
+    const totalPrice = subtotal + tax + shippingCost - discountAmount;
   
     const isInCart = (productId) => {
         return cart.items.some(item => item.product._id === productId);
@@ -169,8 +179,12 @@ export const useCartHelpers = () => {
     const getCartSummary = () => ({
         itemsCount: totalItems,
         subtotal,
+        tax,
         discount: discountAmount,
-        shipping: cart.shipping.cost,
+        shipping: shippingCost,
+        isFreeShipping,
+        freeShippingRemaining,
+        freeShippingProgress,
         total: totalPrice
     });
     
@@ -200,6 +214,11 @@ export const useCartHelpers = () => {
         // Cálculos
         totalItems,
         subtotal,
+        tax,
+        shippingCost,
+        isFreeShipping,
+        freeShippingRemaining,
+        freeShippingProgress,
         discountAmount,
         totalPrice,
         

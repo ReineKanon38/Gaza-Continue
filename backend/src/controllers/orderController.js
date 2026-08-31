@@ -116,7 +116,7 @@ export const createOrder = async (req, res) => {
       return sendError(res, { status: 404, message: 'Usuario no encontrado' });
     }
 
-    let total = 0;
+    let subtotal = 0;
     const orderItems = [];
 
     for (const item of products) {
@@ -182,8 +182,12 @@ export const createOrder = async (req, res) => {
         price: product.price
       });
 
-      total += product.price * quantity;
+      subtotal += product.price * quantity;
     }
+
+    const tax = Math.round(subtotal * 0.16 * 100) / 100;
+    const shippingCost = (subtotal + tax) >= 2499 ? 0 : 185;
+    const total = Math.round((subtotal + tax + shippingCost) * 100) / 100;
 
     const requiresManualPaymentValidation = paymentInfo.method === 'bank_transfer';
 
@@ -196,8 +200,10 @@ export const createOrder = async (req, res) => {
       supplierName: 'SYSCOM',
       intermediaryName: 'GAZA',
       products: orderItems,
+      subtotal,
+      tax,
+      shippingCost,
       total,
-      subtotal: total,
       shippingAddress: normalizedShippingAddress,
       paymentInfo: {
         ...paymentInfo,

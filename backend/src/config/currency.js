@@ -4,6 +4,17 @@
 
 import { logger } from '../utils/logger.js';
 
+export const PRICING_CONFIG = {
+  // Margen de ganancia comercial de GAZA (15% por defecto)
+  PROFIT_MARGIN_PERCENT: Number(process.env.PROFIT_MARGIN_PERCENT || 15),
+  // Impuesto al Valor Agregado en México (16%)
+  IVA_PERCENT: Number(process.env.IVA_PERCENT || 16),
+  // Umbral de envío gratis en MXN ($2,499 MXN)
+  FREE_SHIPPING_THRESHOLD_MXN: Number(process.env.FREE_SHIPPING_THRESHOLD_MXN || 2499),
+  // Costo estándar de envío en MXN ($185 MXN)
+  STANDARD_SHIPPING_COST_MXN: Number(process.env.STANDARD_SHIPPING_COST_MXN || 185)
+};
+
 export const CURRENCY_CONFIG = {
   // Tipo de cambio USD a MXN
   // Actualizar este valor según el tipo de cambio actual
