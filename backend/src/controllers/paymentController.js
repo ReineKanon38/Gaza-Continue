@@ -15,16 +15,16 @@ const PAYMENT_METHODS = [
     id: 'stripe_card',
     provider: 'stripe',
     name: 'Tarjeta de Crédito / Débito',
-    description: 'Pago seguro en línea vía Stripe',
+    description: 'Pago seguro en línea vía Stripe (Visa, Mastercard, AMEX)',
     enabled: true,
     settlementWindowHours: 0,
     disputeRisk: 'medium'
   },
   {
-    id: 'banamex_transfer',
-    provider: 'banamex',
-    name: 'Transferencia Banamex',
-    description: 'Transferencia SPEI o interbancaria a cuenta empresarial Banamex',
+    id: 'hsbc_transfer',
+    provider: 'hsbc',
+    name: 'Transferencia HSBC / Depósito OXXO',
+    description: 'Transferencia SPEI o depósito en efectivo en OXXO / Farmacias del Ahorro (HSBC)',
     enabled: true,
     settlementWindowHours: 24,
     disputeRisk: 'low'
@@ -32,15 +32,15 @@ const PAYMENT_METHODS = [
   {
     id: 'santander_transfer',
     provider: 'santander',
-    name: 'Transferencia Santander',
-    description: 'Transferencia SPEI o interbancaria a cuenta empresarial Santander',
+    name: 'Transferencia Santander / Depósito OXXO',
+    description: 'Transferencia SPEI o depósito en efectivo en OXXO (Santander)',
     enabled: true,
     settlementWindowHours: 24,
     disputeRisk: 'low'
   }
 ];
 
-const getAllowedProviders = () => PAYMENT_METHODS.map((method) => method.provider);
+const getAllowedProviders = () => ['stripe', 'hsbc', 'santander', 'banamex'];
 
 const buildPaymentReference = () => `PAY-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 

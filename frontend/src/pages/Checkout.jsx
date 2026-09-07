@@ -262,17 +262,29 @@ function Checkout() {
                 </div>
               ) : (
                 <div>
-                  <h5 className="fw-bold mb-3" style={{ color: '#1e3a8a' }}>Instrucciones de Transferencia Bancaria (SPEI)</h5>
+                  <h5 className="fw-bold mb-3" style={{ color: '#1e3a8a' }}>Instrucciones de Pago / Transferencia</h5>
                   <p className="small text-secondary mb-3">
-                    Transfiere desde la banca móvil de tu banco (BBVA, Banamex, Santander, etc.) usando los siguientes datos:
+                    Realiza tu pago vía transferencia electrónica SPEI o depósito directo en efectivo (OXXO / Farmacias) usando los siguientes datos:
                   </p>
-                  <ul className="list-unstyled mb-0 d-grid gap-2.5 small text-dark">
-                    <li><strong>Banco Destino:</strong> <span className="fw-bold text-primary">{selectedProvider === 'banamex' ? 'Citibanamex (Banamex)' : 'Santander México'}</span></li>
-                    <li><strong>Beneficiario / Titular:</strong> <strong>GAZA INFRAESTRUCTURA TI</strong></li>
-                    <li><strong>CLABE Interbancaria:</strong> <code className="bg-white border px-2 py-1 rounded fw-bold text-dark fs-6">0121 8000 1234 5678 90</code></li>
-                    <li><strong>Monto Exacto a Transferir:</strong> <span className="fs-6 fw-bold text-success">${totalPrice.toLocaleString('es-MX')} MXN</span></li>
-                    <li><strong>Concepto / Referencia:</strong> <code className="bg-white border px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
-                  </ul>
+                  {selectedProvider === 'santander' ? (
+                    <ul className="list-unstyled mb-0 d-grid gap-2.5 small text-dark">
+                      <li><strong>Banco Destino:</strong> <span className="fw-bold text-primary">Santander México</span></li>
+                      <li><strong>Beneficiario / Titular:</strong> <strong>F Irene Galán Sanchez</strong></li>
+                      <li><strong>CLABE Interbancaria (SPEI):</strong> <code className="bg-white border px-2 py-1 rounded fw-bold text-dark fs-6">014180606242660987</code></li>
+                      <li><strong>No. de Tarjeta (Depósito OXXO):</strong> <code className="bg-white border px-2 py-1 rounded text-secondary fw-bold">5579 0701 6216 2195</code></li>
+                      <li><strong>Monto Exacto a Transferir:</strong> <span className="fs-6 fw-bold text-success">${totalPrice.toLocaleString('es-MX')} MXN</span></li>
+                      <li><strong>Concepto / Referencia:</strong> <code className="bg-white border px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
+                    </ul>
+                  ) : (
+                    <ul className="list-unstyled mb-0 d-grid gap-2.5 small text-dark">
+                      <li><strong>Banco Destino:</strong> <span className="fw-bold text-primary">HSBC México</span></li>
+                      <li><strong>Beneficiario / Titular:</strong> <strong>MARIO ANCIRA GALAN</strong></li>
+                      <li><strong>CLABE Interbancaria (SPEI):</strong> <code className="bg-white border px-2 py-1 rounded fw-bold text-dark fs-6">021180066305780900</code></li>
+                      <li><strong>No. de Tarjeta (OXXO / Farmacias del Ahorro):</strong> <code className="bg-white border px-2 py-1 rounded text-secondary fw-bold">4213 1660 3619 3831</code></li>
+                      <li><strong>Monto Exacto a Transferir:</strong> <span className="fs-6 fw-bold text-success">${totalPrice.toLocaleString('es-MX')} MXN</span></li>
+                      <li><strong>Concepto / Referencia:</strong> <code className="bg-white border px-2 py-1 rounded text-primary fw-bold">{createdOrderId}</code></li>
+                    </ul>
+                  )}
                   <div className="mt-3 p-3 rounded-3 border small" style={{ background: '#fffbeb', borderColor: '#fde68a', color: '#92400e' }}>
                     <strong>📌 Confirmación de Pago:</strong> Envía tu comprobante con el número de orden a <strong>syscom.gaza.ma9@gmail.com</strong> para validar y despachar de inmediato.
                   </div>

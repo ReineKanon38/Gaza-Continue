@@ -49,15 +49,26 @@ El método de **Transferencia Bancaria Directa (SPEI)** permite a los clientes r
 
 ---
 
-## 3. 🖥️ Lo que ve el Cliente en su Pantalla al Comprar
+## 3. 🖥️ Cuentas Oficiales y lo que ve el Cliente en su Pantalla
 
-Una vez que el cliente hace clic en **"Confirmar Pedido con Pago Bancario"**, el sistema genera su orden con estado `Pendiente de Validación` y le muestra una ficha formal con:
+Una vez que el cliente hace clic en **"Confirmar Pedido con Pago Bancario"**, el sistema genera su orden con estado `Pendiente de Validación` y le muestra los datos oficiales correspondientes al banco elegido:
 
-* **Banco Destino:** Citibanamex / Santander (según el banco elegido).
-* **Nombre del Beneficiario:** GAZA INFRAESTRUCTURA TI.
-* **CLABE Interbancaria:** 18 dígitos bancarios oficiales.
-* **Monto Exacto a Transferir:** Desglose con Subtotal + 16% IVA + Envío.
+### 💳 Opción 1: Cuenta HSBC México
+* **Banco Destino:** **HSBC México**
+* **Nombre del Beneficiario:** **MARIO ANCIRA GALAN**
+* **CLABE Interbancaria (SPEI):** `021180066305780900`
+* **Número de Tarjeta (Depósito OXXO / Farmacias del Ahorro / Ventanilla):** `4213 1660 3619 3831`
 * **Concepto / Referencia de Pago:** Su número de orden único (ej. `ORD-1772412891`).
+
+---
+
+### 💳 Opción 2: Cuenta Santander México
+* **Banco Destino:** **Santander México**
+* **Nombre del Beneficiario:** **F Irene Galán Sanchez**
+* **CLABE Interbancaria (SPEI):** `014180606242660987`
+* **Número de Tarjeta (Depósito OXXO / Ventanilla):** `5579 0701 6216 2195`
+* **Concepto / Referencia de Pago:** Su número de orden único (ej. `ORD-1772412891`).
+
 * **Medio de Envío de Comprobante:** Correo electrónico (`syscom.gaza.ma9@gmail.com`) o WhatsApp de atención.
 
 ---
