@@ -186,7 +186,7 @@ export const createOrder = async (req, res) => {
     }
 
     const tax = Math.round(subtotal * 0.16 * 100) / 100;
-    const shippingCost = (subtotal + tax) >= 2499 ? 0 : 185;
+    const shippingCost = subtotal >= 2499 ? 0 : 185;
     const total = Math.round((subtotal + tax + shippingCost) * 100) / 100;
 
     const requiresManualPaymentValidation = paymentInfo.method === 'bank_transfer';

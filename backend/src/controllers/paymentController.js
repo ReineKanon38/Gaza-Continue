@@ -91,10 +91,10 @@ export const createPaymentSession = async (req, res) => {
         }
       }
       
-      // Aplicar IVA (16%) y regla de envío (Gratis si >= $2,499)
+      // Aplicar IVA (16%) y regla de envío (Gratis si subtotal de productos >= $2,499)
       if (secureAmount > 0) {
         const taxAmount = Math.round(secureAmount * 0.16 * 100) / 100;
-        const shippingCost = (secureAmount + taxAmount) >= 2499 ? 0 : 185;
+        const shippingCost = secureAmount >= 2499 ? 0 : 185;
         secureAmount = Math.round((secureAmount + taxAmount + shippingCost) * 100) / 100;
       }
     } else if (clientAmount && clientAmount > 0) {

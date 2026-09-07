@@ -152,12 +152,12 @@ export const useCartHelpers = () => {
         ? (subtotal * cart.discount.percentage / 100) 
         : cart.discount.amount;
 
-    // Regla de Envío Gratis: compras a partir de $2,499 MXN
+    // Regla de Envío Gratis: compras a partir de $2,499 MXN en productos (subtotal neto)
     const FREE_SHIPPING_THRESHOLD = 2499;
-    const isFreeShipping = (subtotal + tax) >= FREE_SHIPPING_THRESHOLD;
+    const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
     const shippingCost = isFreeShipping ? 0 : 185;
-    const freeShippingRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - (subtotal + tax));
-    const freeShippingProgress = Math.min(100, Math.round(((subtotal + tax) / FREE_SHIPPING_THRESHOLD) * 100));
+    const freeShippingRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+    const freeShippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
         
     const totalPrice = subtotal + tax + shippingCost - discountAmount;
   
