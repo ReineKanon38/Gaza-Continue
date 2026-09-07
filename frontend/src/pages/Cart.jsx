@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Card, Badge, ProgressBar } from 'react-bootstrap';
 import AppNavbar from '../components/AppNavbar';
 import { BsTrash, BsArrowLeft, BsShieldLock, BsCreditCard, BsTruck, BsCheckCircle, BsDashLg, BsPlusLg, BsStars } from 'react-icons/bs';
@@ -98,48 +98,77 @@ function Cart() {
             {/* LISTA DE PRODUCTOS */}
             <Card className="auth-card border-0 mb-4">
               <div className="p-0">
-                {cart.items.map((item) => (
-                  <div key={item.product._id} className="p-4 border-bottom item-cart-row">
-                    <Row className="align-items-center">
-                      <Col md={3} className="text-center py-2">
-                        <img 
-                          src={item.product.image || 'https://via.placeholder.com/150'} 
-                          alt={item.product.name}
-                          className="img-fluid rounded-3 shadow-sm"
-                          style={{ maxHeight: '120px', width: 'auto' }}
-                        />
-                      </Col>
-                      <Col md={6} className="ps-md-4">
-                        <h4 className="fw-bold text-dark mb-2 h5">{item.product.name}</h4>
-                        <div className="d-flex align-items-center gap-3 mb-3">
-                          <Badge bg={item.product.stock > 5 ? 'success' : 'warning'} className="bg-opacity-10 text-dark border border-opacity-25 px-2 py-1 fw-normal small">
-                            <BsCheckCircle className="me-1 text-success" /> {item.product.stock > 0 ? `Stock: ${item.product.stock}` : 'Sin stock'}
-                          </Badge>
-                          <span className="text-secondary small"><BsTruck className="me-1" /> Envío Directo GAZA</span>
-                        </div>
-                        <div className="d-flex align-items-center gap-2">
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            className="p-1 d-flex align-items-center justify-content-center"
-                            style={{ width: '28px', height: '28px', borderRadius: '50%' }}
-                            onClick={() => updateQuantity(item.product._id, item.quantity - 1)}
-                          >
-                            <BsDashLg />
-                          </Button>
-                          <span className="text-secondary mb-0 mx-2 small">Cantidad: <strong className="text-dark">{item.quantity}</strong></span>
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            className="p-1 d-flex align-items-center justify-content-center"
-                            style={{ width: '28px', height: '28px', borderRadius: '50%' }}
-                            onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
-                            disabled={item.quantity >= Number(item.product.stock || 0)}
-                          >
-                            <BsPlusLg />
-                          </Button>
-                        </div>
-                      </Col>
+                {cart.items.map((item) => {
+                  const targetId = item.product?._id || item.product?.syscomId || item._id;
+                  return (
+                    <div key={item.product?._id || item._id} className="p-4 border-bottom item-cart-row">
+                      <Row className="align-items-center">
+                        <Col md={3} className="text-center py-2">
+                          <Link to={`/producto/${targetId}`} state={{ product: item.product }} className="d-inline-block">
+                            <img 
+                              src={item.product?.image || 'https://via.placeholder.com/150'} 
+                              alt={item.product?.name}
+                              className="img-fluid rounded-3 shadow-sm"
+                              style={{ maxHeight: '120px', width: 'auto', cursor: 'pointer', transition: 'transform 0.2s ease' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                            />
+                          </Link>
+                        </Col>
+                        <Col md={6} className="ps-md-4">
+                          <Link to={`/producto/${targetId}`} state={{ product: item.product }} className="text-decoration-none">
+                            <h4 className="fw-bold text-dark mb-2 h5 hover-primary" style={{ cursor: 'pointer' }}>
+                              {item.product?.name}
+                            </h4>
+                          </Link>
+                          <div className="d-flex align-items-center gap-3 mb-3">
+                            <Badge bg={item.product?.stock > 5 ? 'success' : 'warning'} className="bg-opacity-10 text-dark border border-opacity-25 px-2 py-1 fw-normal small">
+                              <BsCheckCircle className="me-1 text-success" /> {item.product?.stock > 0 ? `Stock: ${item.product.stock}` : 'Sin stock'}
+                            </Badge>
+                            <span className="text-secondary small"><BsTruck className="me-1" /> Envío Directo GAZA</span>
+                          </div>
+                          <div className="d-flex align-items-center gap-2">
+                            <button
+                              type="button"
+                              className="btn btn-sm d-inline-flex align-items-center justify-content-center shadow-none"
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px',
+                                backgroundColor: '#f1f5f9',
+                                border: '1px solid #cbd5e1',
+                                color: '#1e3a8a',
+                                padding: 0,
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => updateQuantity(item.product?._id || item._id, item.quantity - 1)}
+                              aria-label="Disminuir cantidad"
+                            >
+                              <BsDashLg size={13} style={{ color: '#1e3a8a', strokeWidth: 1 }} />
+                            </button>
+                            <span className="text-secondary mb-0 mx-2 small">Cantidad: <strong className="text-dark fs-6">{item.quantity}</strong></span>
+                            <button
+                              type="button"
+                              className="btn btn-sm d-inline-flex align-items-center justify-content-center shadow-none"
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px',
+                                backgroundColor: '#f1f5f9',
+                                border: '1px solid #cbd5e1',
+                                color: '#1e3a8a',
+                                padding: 0,
+                                cursor: item.quantity >= Number(item.product?.stock || 0) ? 'not-allowed' : 'pointer',
+                                opacity: item.quantity >= Number(item.product?.stock || 0) ? 0.5 : 1
+                              }}
+                              onClick={() => updateQuantity(item.product?._id || item._id, item.quantity + 1)}
+                              disabled={item.quantity >= Number(item.product?.stock || 0)}
+                              aria-label="Aumentar cantidad"
+                            >
+                              <BsPlusLg size={13} style={{ color: '#1e3a8a', strokeWidth: 1 }} />
+                            </button>
+                          </div>
+                        </Col>
                       <Col md={3} className="text-md-end mt-3 mt-md-0">
                         <div className="fw-bold text-dark fs-5">
                           ${(item.product.price * item.quantity).toLocaleString('es-MX')}
@@ -159,7 +188,8 @@ function Cart() {
                       </Col>
                     </Row>
                   </div>
-                ))}
+                );
+              })}
               </div>
               <div className="p-4 bg-white bg-opacity-10 d-flex justify-content-between">
                 <Button

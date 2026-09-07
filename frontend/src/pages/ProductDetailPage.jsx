@@ -63,9 +63,20 @@ function ProductDetailPage() {
       const loadComplementary = async () => {
         setLoadingComplementary(true);
         try {
-          const result = await productService.getAllProducts({ limit: 50 });
-          const allProducts = result.products || result.data || [];
-          const related = getRelatedProducts(product, allProducts, 3);
+          const categoryToQuery = product.category || product.categoria;
+          const result = await productService.getAllProducts({
+            category: categoryToQuery,
+            limit: 40
+          });
+          let allProducts = result.products || result.data || [];
+          
+          if (allProducts.length < 4) {
+            const fallbackResult = await productService.getAllProducts({ limit: 40 });
+            const extraProducts = fallbackResult.products || fallbackResult.data || [];
+            allProducts = [...allProducts, ...extraProducts];
+          }
+
+          const related = getRelatedProducts(product, allProducts, 4);
           setComplementaryProducts(related);
         } catch (err) {
           console.error('Error loading complementary products:', err);
