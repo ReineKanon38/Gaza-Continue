@@ -16,10 +16,10 @@ Este documento resume la auditoría final de seguridad, calidad de código, pago
 ## 2. 💳 Pasarela de Pagos y Finanzas
 - [x] **Stripe Live Checkout:** Claves `pk_live_...` y `sk_live_...` configuradas y verificadas con 3D Secure.
 - [x] **Webhooks con Idempotencia:** Modelo `WebhookLog` registrando `eventId` para evitar cobros o alertas duplicadas.
-- [x] **Transferencias Bancarias SPEI:** Flujo manual para Banamex y Santander con validación en `/admin`.
-- [x] **Margen Comercial (15%):** Sincronizado automáticamente sobre el costo mayorista de SYSCOM.
+- [x] **Transferencias Bancarias SPEI:** Cuentas reales para HSBC México y Santander México con flujo de validación en `/admin`.
+- [x] **Margen Comercial Dinámico (10% - 12%):** 10% en redes/IT y 12% en videovigilancia y demás categorías.
 - [x] **Desglose de IVA (16% México):** Integrado en catálogo, carrito, checkout y facturación de órdenes.
-- [x] **Envío Gratis:** Activado para compras $\ge \$2,499.00$ MXN con flete estándar de $\$185.00$ MXN en órdenes menores.
+- [x] **Envío Gratis Evaluado en Subtotal Neto:** Activado para compras con subtotal neto $\ge \$2,499.00$ MXN antes de IVA.
 
 ---
 
@@ -38,10 +38,12 @@ Este documento resume la auditoría final de seguridad, calidad de código, pago
 - [x] **Servidor Web Nginx + SSL (Certbot):** Dominio `syscomgaza.com` con HTTPS y redirección forzada.
 - [x] **Gestor de Procesos PM2:** Backend ejecutándose en modo cluster / fork con reinicio automático ante fallos.
 - [x] **Script de Despliegue Automatizado:** `bash deploy.sh Jerzain` funcional en AWS EC2.
+- [x] **Política de 3 Ramas:** Pushes distribuidos en `Jerzain`, `Rotsen` y `continuacion-ElAmoDeLasWaifus` (manteniendo `main` limpio).
 
 ---
 
 ## 5. 📚 Documentación y Manuales
+- [x] Manual Maestro Integral del Sistema GAZA (`MANUAL_MAESTRO_INTEGRAL_SISTEMA_GAZA.md`).
 - [x] Manual Técnico de Arquitectura (`MANUAL_TECNICO.md`).
 - [x] Manual Operativo de Ventas y Fulfillment (`MANUAL_OPERATIVO_VENTAS_Y_FULFILLMENT.md`).
 - [x] Manual de Pasarela Stripe y Finanzas (`MANUAL_PASARELA_STRIPE_Y_FINANZAS.md`).

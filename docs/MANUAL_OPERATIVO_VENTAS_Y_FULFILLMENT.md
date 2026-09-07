@@ -14,8 +14,8 @@ La plataforma **GAZA Infraestructura TI** opera como el **intermediario comercia
 └───────────────────────────┘      └───────────────────────────┘      └───────────────────────────┘
 ```
 
-1. **Cliente Compra en GAZA:** El cliente adquiere productos en el catálogo web a Precio de Venta al Público (PVP) y paga con tarjeta (Stripe) o transferencia bancaria.
-2. **Margen de Ganancia de GAZA:** El dinero entra a tu cuenta con tu utilidad comercial asegurada.
+1. **Cliente Compra en GAZA:** El cliente adquiere productos en el catálogo web a Precio de Venta al Público (PVP) y paga con tarjeta (Stripe) o transferencia bancaria (HSBC / Santander).
+2. **Margen de Ganancia de GAZA:** El dinero entra a tu cuenta con una utilidad comercial del **10% en redes/IT** y **12% en videovigilancia y demás categorías**.
 3. **GAZA tramita con SYSCOM:** Se solicita el producto con precio preferencial mayorista.
 4. **Etiquetado e Identidad GAZA:** Se genera la etiqueta oficial de **GAZA Infraestructura TI** para que el cliente final identifique a GAZA como su proveedor de tecnología, garantía y soporte.
 
@@ -56,7 +56,7 @@ ORDEN DE COMPRA: ORD-1772412891
 ### B. Botón "🖨️ Imprimir Etiqueta GAZA"
 Abre una ventana de impresión lista con la etiqueta oficial en formato térmico/adhesivo:
 * **Encabezado:** Logotipo e Identidad de **GAZA INFRAESTRUCTURA TI**.
-* **Remitente:** GAZA Centro de Distribución y Envíos (`contacto@syscomgaza.com`).
+* **Remitente:** GAZA Centro de Distribución y Envíos (`syscom.gaza.ma9@gmail.com`).
 * **Destinatario Destacado:** Nombre completo, dirección desglosada, teléfono y CP del cliente en tipografía grande y legible.
 * **Ficha de Contenido:** Lista detallada de productos y cantidades incluidas en la caja.
 * **Código de Barras:** Identificador de orden para escaneo rápido.
@@ -69,13 +69,14 @@ A continuación se enlistan todos los documentos técnicos, operativos y de desp
 
 | Archivo | Ubicación | Público Objetivo | Propósito |
 | :--- | :--- | :--- | :--- |
+| **Manual Maestro Integral** | [`docs/MANUAL_MAESTRO_INTEGRAL_SISTEMA_GAZA.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/MANUAL_MAESTRO_INTEGRAL_SISTEMA_GAZA.md) | Todos los Roles | Documento maestro integral unificado con el 100% de la arquitectura, operaciones, finanzas y despliegue. |
 | **Manual Operativo y de Ventas** | [`docs/MANUAL_OPERATIVO_VENTAS_Y_FULFILLMENT.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/MANUAL_OPERATIVO_VENTAS_Y_FULFILLMENT.md) | Dirección / Administradores | Guía paso a paso de ventas, cobros, dropshipping y logística con SYSCOM. |
 | **Manual Pasarela Stripe & Finanzas** | [`docs/MANUAL_PASARELA_STRIPE_Y_FINANZAS.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/MANUAL_PASARELA_STRIPE_Y_FINANZAS.md) | Finanzas / Dirección | Comisiones oficiales en México, cálculo de rentabilidad neta y depósitos. |
-| **Manual Transferencias SPEI** | [`docs/MANUAL_TRANSFERENCIAS_BANCARIAS_SPEI.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/MANUAL_TRANSFERENCIAS_BANCARIAS_SPEI.md) | Ventas / Finanzas / Admin | Flujo de cobro SPEI a cuentas de banco, validación de saldos y aprobación. |
+| **Manual Transferencias SPEI** | [`docs/MANUAL_TRANSFERENCIAS_BANCARIAS_SPEI.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/MANUAL_TRANSFERENCIAS_BANCARIAS_SPEI.md) | Ventas / Finanzas / Admin | Flujo de cobro SPEI a cuentas de banco HSBC y Santander, validación y aprobación. |
 | **Manual Técnico de Arquitectura** | [`docs/MANUAL_TECNICO.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/MANUAL_TECNICO.md) | Desarrolladores / TI | Arquitectura Node.js/React, base de datos MongoDB, variables y seguridad. |
 | **Guía de Despliegue en AWS** | [`docs/GUIA_DESPLIEGUE.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/GUIA_DESPLIEGUE.md) | DevOps / TI | Instalación en servidores AWS EC2/Lightsail, PM2, certificados SSL y Nginx. |
 | **Checklist Cierre de Producción** | [`docs/CHECKLIST_CIERRE_PRODUCCION.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/CHECKLIST_CIERRE_PRODUCCION.md) | Operaciones / QA | Lista de verificación previa al lanzamiento comercial. |
-| **Validación de Pagos Bancarios** | [`docs/CHECKLIST_VALIDACION_PAGOS_BANCARIOS.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/CHECKLIST_VALIDACION_PAGOS_BANCARIOS.md) | Finanzas / Contabilidad | Protocolo de validación manual para transferencias SPEI Banamex/Santander. |
+| **Validación de Pagos Bancarios** | [`docs/CHECKLIST_VALIDACION_PAGOS_BANCARIOS.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/CHECKLIST_VALIDACION_PAGOS_BANCARIOS.md) | Finanzas / Contabilidad | Protocolo de validación manual para transferencias SPEI HSBC / Santander. |
 | **Plan de Producción a 30 Días** | [`docs/PLAN_PRODUCCION_30_DIAS.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/PLAN_PRODUCCION_30_DIAS.md) | Gerencia de Proyecto | Estrategia de adopción, métricas de ventas y escalabilidad. |
 | **Familiarización con la App** | [`docs/GUIA_FAMILIARIZACION_APLICACION.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/docs/GUIA_FAMILIARIZACION_APLICACION.md) | Nuevos Administradores | Recorrido guiado por el catálogo, carrito, perfil y panel de administración. |
 | **Integración con SYSCOM** | [`backend/SYSCOM_INTEGRATION.md`](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/backend/SYSCOM_INTEGRATION.md) | TI / Desarrolladores | Documentación técnica del consumo de la API de SYSCOM, tokens y resiliencia. |

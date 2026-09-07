@@ -39,7 +39,8 @@ A continuación se presentan ejemplos reales de transacciones comerciales en GAZ
 
 ## 4. 🏦 Ciclo de Transferencias Bancarias (Payouts)
 
-1. **Recaudación Diaria:** Cada venta aprobada se acumula en el balance disponible de tu cuenta de Stripe.
+1. **Recaudación Diaria:** Cada venta aprobada se acumula en el balance disponible de tu .
+.. de Stripe.
 2. **Programación Automática (Rolling 2 Días):** Stripe realiza transferencias bancarias automáticas vía **SPEI / CLABE** a la cuenta de cheques de GAZA cada 24 a 48 horas hábiles.
 3. **Conciliación:** Cada depósito bancario incluye una referencia que coincide con el reporte descargable en el [Dashboard de Stripe](https://dashboard.stripe.com/).
 

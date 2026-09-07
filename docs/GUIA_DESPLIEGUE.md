@@ -42,8 +42,7 @@ SYSCOM_API_URL=https://developers.syscom.mx/api/v1
 SYSCOM_CLIENT_ID=tu_client_id_syscom
 SYSCOM_CLIENT_SECRET=tu_client_secret_syscom
 
-# Estrategia de Precios
-PROFIT_MARGIN_PERCENT=15
+# Estrategia de Precios y Envíos
 IVA_PERCENT=16
 FREE_SHIPPING_THRESHOLD_MXN=2499
 STANDARD_SHIPPING_COST_MXN=185
@@ -66,10 +65,13 @@ VITE_STRIPE_PUBLIC_KEY=pk_live_...
 
 ---
 
-## 3. Despliegue Automatizado con `deploy.sh`
+## 3. Política de Ramas y Despliegue Automatizado con `deploy.sh`
 
-El repositorio incluye el script automatizado [deploy.sh](file:///c:/Users/Radic/OneDrive/Escritorio/SS/Gaza-Continue-clean/deploy.sh). Para actualizar el servidor con los últimos cambios de la rama `Jerzain`:
+### Política de Ramas Git:
+- **Ramas de Trabajo Activas:** `Jerzain`, `Rotsen`, y `continuacion-ElAmoDeLasWaifus`.
+- **Restricción Estricta:** No realizar push directo a `main`.
 
+### Ejecución en Servidor AWS:
 ```bash
 # Conectarse por SSH a la terminal de AWS y ejecutar:
 bash deploy.sh Jerzain
@@ -78,7 +80,7 @@ bash deploy.sh Jerzain
 ### ¿Qué hace `deploy.sh` automáticamente?
 1. Realiza `git fetch` y `git checkout Jerzain` trayendo los últimos commits.
 2. Instala dependencias y compila el frontend optimizado con `npm run build`.
-3. Copia los archivos estáticos de `frontend/dist/` a la raíz servida por Nginx (`/var/www/html` o `/var/www/syscomgaza`).
+3. Copia los archivos estáticos de `frontend/dist/` a la raíz servida por Nginx (`/var/www/syscomgaza/frontend/dist` o `/var/www/html`).
 4. Reinicia la API del backend en PM2 con cero tiempo de inactividad (`pm2 restart gaza-backend`).
 
 ---
@@ -104,6 +106,7 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
@@ -111,17 +114,7 @@ server {
 }
 ```
 
-### Certificados SSL con Let's Encrypt:
+### Certificados SSL Automáticos con Certbot:
 ```bash
 sudo certbot --nginx -d syscomgaza.com -d www.syscomgaza.com
 ```
-
----
-
-## 5. Monitoreo y Mantenimiento
-
-- **Ver logs en tiempo real:** `pm2 logs gaza-backend`
-- **Ver estado del cluster:** `pm2 status`
-- **Monitorear CPU / RAM:** `pm2 monit`
-- **Ver logs de acceso Nginx:** `tail -f /var/log/nginx/access.log`
-- **Ver logs de error Nginx:** `tail -f /var/log/nginx/error.log`

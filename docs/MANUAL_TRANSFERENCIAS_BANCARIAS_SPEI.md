@@ -5,11 +5,11 @@
 
 ## 1. 📋 Resumen del Método de Transferencia Bancaria (SPEI)
 
-El método de **Transferencia Bancaria Directa (SPEI)** permite a los clientes realizar compras corporativas o de alto valor sin pagar con tarjeta, transfiriendo directamente desde su banca móvil (BBVA, Banamex, Santander, Banorte, Nu, etc.) a las cuentas empresariales de GAZA.
+El método de **Transferencia Bancaria Directa (SPEI)** permite a los clientes realizar compras corporativas o de alto valor sin pagar con tarjeta, transfiriendo directamente desde su banca móvil (BBVA, Banamex, Santander, HSBC, Banorte, Nu, etc.) a las cuentas empresariales de GAZA.
 
 ### Ventajas Estratégicas para GAZA:
 * **0% de Comisión Financiera:** El 100% del dinero ingresa íntegro a la cuenta de GAZA sin retenciones de pasarelas.
-* **Margen de Ganancia Máximo:** Se conserva el **15% completo de utilidad neta**.
+* **Margen de Ganancia Máximo:** Se conserva el **10% al 12% completo de utilidad neta** según la categoría del producto.
 * **Cero Riesgo de Contracargo:** Una transferencia SPEI confirmada en la cuenta bancaria es irrevocable.
 
 ---
@@ -69,7 +69,7 @@ Una vez que el cliente hace clic en **"Confirmar Pedido con Pago Bancario"**, el
 * **Número de Tarjeta (Depósito OXXO / Ventanilla):** `5579 0701 6216 2195`
 * **Concepto / Referencia de Pago:** Su número de orden único (ej. `ORD-1772412891`).
 
-* **Medio de Envío de Comprobante:** Correo electrónico (`syscom.gaza.ma9@gmail.com`) o WhatsApp de atención.
+* **Medio Oficial de Envío de Comprobante:** Correo electrónico (`syscom.gaza.ma9@gmail.com`) o WhatsApp de atención.
 
 ---
 
@@ -80,7 +80,7 @@ Para garantizar la seguridad financiera de la empresa y evitar fraudes con compr
 1. **Recepción del Comprobante:**
    * El cliente envía la captura o PDF de la transferencia con la referencia `ORD-XXXXX`.
 2. **Cotejo en la Aplicación Bancaria:**
-   * El administrador abre la app de Banamex o Santander y verifica que el saldo real disponible haya incrementado por el monto exacto de la orden.
+   * El administrador abre la app de **HSBC** o **Santander** y verifica que el saldo real disponible haya incrementado por el monto exacto de la orden.
    * *(Opcional)* En compras mayores a $10,000 MXN, se puede validar el comprobante en el portal oficial de **Banxico CEP** ([banxico.org.mx/cep](https://www.banxico.org.mx/cep/)).
 3. **Aprobación en el Panel Web (`syscomgaza.com/admin`):**
    * Ir a la pestaña **Órdenes**.
@@ -97,4 +97,4 @@ Para garantizar la seguridad financiera de la empresa y evitar fraudes con compr
 
 1. **Regla de Oro:** **Nunca despachar ni comprar en SYSCOM un producto sin antes verificar los fondos reales en la cuenta bancaria de GAZA**.
 2. **Tiempos de Espera:** Las órdenes por transferencia bancaria se mantienen apartadas durante **24 horas hábiles**. Si el cliente no transfiere en ese lapso, el administrador puede presionar **`Rechazar Pago`** para liberar el inventario.
-3. **Atención Personalizada:** Si el cliente tiene dudas sobre cómo transferir, brindar asistencia vía WhatsApp compartiendo amablemente los datos bancarios y el número de su orden.
+3. **Atención Personalizada:** Si el cliente tiene dudas sobre cómo transferir, brindar asistencia vía WhatsApp o correo (`syscom.gaza.ma9@gmail.com`) compartiendo amablemente los datos bancarios y el número de su orden.
