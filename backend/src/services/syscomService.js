@@ -8,7 +8,7 @@ import {
   isBlockedPlatformCategory,
   isBlockedSyscomCategoryName
 } from '../config/categoryMapping.js';
-import { convertUSDtoMXN, CURRENCY_CONFIG, updateExchangeRate } from '../config/currency.js';
+import { convertUSDtoMXN, CURRENCY_CONFIG, updateExchangeRate, getMarginPercentForCategory } from '../config/currency.js';
 import { logger } from '../utils/logger.js';
 
 class SyscomService {
@@ -343,9 +343,15 @@ class SyscomService {
    * Transformar producto de SYSCOM a nuestro schema
    */
   transformSyscomProduct(syscomProduct = {}) {
+    // Obtener categoría(s) de SYSCOM primero para resolver el margen de nicho
+    const syscomCategoryName = this.getPrimarySyscomCategoryName(syscomProduct);
+    const platformCategory = (syscomProduct.category && !syscomCategoryName)
+      ? syscomProduct.category
+      : (mapSyscomCategoryToPlatform(syscomCategoryName) || syscomProduct.category || 'videovigilancia');
+
     const rawPriceUSD = this.extractPriceUSD(syscomProduct);
     const rawListUSD = this.extractListPriceUSD(syscomProduct);
-    const marginPercent = Number(process.env.PROFIT_MARGIN_PERCENT || 15);
+    const marginPercent = getMarginPercentForCategory(platformCategory);
     const marginMultiplier = 1 + (marginPercent / 100);
 
     let priceMXN = 0;
@@ -370,12 +376,6 @@ class SyscomService {
     if (listPriceMXN < priceMXN) {
       listPriceMXN = Math.round(priceMXN * 1.25 * 100) / 100;
     }
-
-    // Obtener categoría(s) de SYSCOM
-    const syscomCategoryName = this.getPrimarySyscomCategoryName(syscomProduct);
-    const platformCategory = (syscomProduct.category && !syscomCategoryName)
-      ? syscomProduct.category
-      : (mapSyscomCategoryToPlatform(syscomCategoryName) || syscomProduct.category || 'videovigilancia');
 
     const parsedStock = parseInt(syscomProduct.stock ?? syscomProduct.existencia?.nuevo ?? syscomProduct.existencia ?? 10) || 5;
     const productId = String(syscomProduct.syscomId || syscomProduct.producto_id || syscomProduct.id || '');

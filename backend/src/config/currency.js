@@ -4,9 +4,39 @@
 
 import { logger } from '../utils/logger.js';
 
+export const CATEGORY_MARGINS = {
+  'videovigilancia': 12,        // Cámaras IP, CCTV, Grabadores NVR/DVR (12%)
+  'redes-it': 10,               // Switches, Routers, Fibra, Racks, UTP (10% altamente competitivo para proyectos)
+  'control-acceso': 12,         // Biométricos, Chapas, Torniquetes (12%)
+  'energia-herramientas': 12,   // Fuentes, UPS, Baterías, Gabinetes (12%)
+  'automatizacion': 12,         // Alarmas, Sensores, Domótica (12%)
+  'iot-gps': 12                 // GPS, Rastreadores, Telemetría (12%)
+};
+
+/**
+ * Obtiene el margen de ganancia porcentual según el nicho / categoría
+ */
+export function getMarginPercentForCategory(categoryName = '') {
+  const globalMarginEnv = process.env.PROFIT_MARGIN_PERCENT;
+  if (globalMarginEnv !== undefined && !isNaN(Number(globalMarginEnv))) {
+    const parsed = Number(globalMarginEnv);
+    // Si se especificó explícitamente un margen global en .env diferente al default, respetarlo
+    if (parsed !== 15 && parsed !== 12) {
+      return parsed;
+    }
+  }
+
+  const cleanCat = String(categoryName || '').toLowerCase().trim();
+  if (CATEGORY_MARGINS[cleanCat] !== undefined) {
+    return CATEGORY_MARGINS[cleanCat];
+  }
+
+  return Number(process.env.PROFIT_MARGIN_PERCENT || 12);
+}
+
 export const PRICING_CONFIG = {
-  // Margen de ganancia comercial de GAZA (15% por defecto)
-  PROFIT_MARGIN_PERCENT: Number(process.env.PROFIT_MARGIN_PERCENT || 15),
+  // Margen de ganancia comercial de GAZA (12% por defecto)
+  PROFIT_MARGIN_PERCENT: Number(process.env.PROFIT_MARGIN_PERCENT || 12),
   // Impuesto al Valor Agregado en México (16%)
   IVA_PERCENT: Number(process.env.IVA_PERCENT || 16),
   // Umbral de envío gratis en MXN ($2,499 MXN)
