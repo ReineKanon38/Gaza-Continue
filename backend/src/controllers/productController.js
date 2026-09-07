@@ -145,19 +145,26 @@ export const getProductById = async (req, res) => {
     const { id } = req.params;
     let product = null;
 
+    const rawId = String(id || '').trim();
+    const cleanId = rawId.replace(/^syscom-/i, '');
+
     // 1. Si es un ObjectId válido de Mongo
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      product = await Product.findById(id);
+    if (mongoose.Types.ObjectId.isValid(rawId)) {
+      product = await Product.findById(rawId);
+    } else if (cleanId && mongoose.Types.ObjectId.isValid(cleanId)) {
+      product = await Product.findById(cleanId);
     }
 
-    // 2. Si no se encontró por _id, buscar por syscomId o modelo
+    // 2. Si no se encontró por _id, buscar por syscomId o modelo (flexible)
     if (!product) {
       product = await Product.findOne({
         $or: [
-          { syscomId: id },
-          { syscomId: new RegExp(`^${id}$`, 'i') },
-          { model: id },
-          { model: new RegExp(`^${id}$`, 'i') }
+          { syscomId: rawId },
+          { syscomId: cleanId },
+          { syscomId: new RegExp(`^${cleanId}$`, 'i') },
+          { model: rawId },
+          { model: cleanId },
+          { model: new RegExp(`^${cleanId}$`, 'i') }
         ]
       });
     }
@@ -165,7 +172,7 @@ export const getProductById = async (req, res) => {
     // 3. Si sigue sin encontrarse, intentar obtenerlo directamente desde SYSCOM API y sincronizar
     if (!product && syscomService) {
       try {
-        const syncRes = await syscomService.syncProduct(id);
+        const syncRes = await syscomService.syncProduct(cleanId || rawId);
         if (syncRes && syncRes.product) {
           product = syncRes.product;
         }

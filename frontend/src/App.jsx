@@ -47,6 +47,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/product/:productId" element={<ProductDetailPage />} />
+        <Route path="/producto/:productId" element={<ProductDetailPage />} />
         <Route path="/categorias" element={<Dashboard />} />
         {/* ── Redirecciones desde URLs antiguas (backwards compat) ── */}
         <Route path="/catalog" element={<Navigate replace to="/tienda" />} />
